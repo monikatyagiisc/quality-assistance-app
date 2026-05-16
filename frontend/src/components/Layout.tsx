@@ -1,9 +1,11 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { usePageTitle } from '../hooks/usePageTitle'
 import './Layout.css'
 
 export function Layout() {
   const { user, logout } = useAuth()
+  usePageTitle()
 
   return (
     <div className="layout">

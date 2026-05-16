@@ -1,0 +1,133 @@
+@startuml quality-assistance-auth-sequence
+title Quality Assistance — Authentication (Register / Login)
+
+actor User
+participant "React Frontend\n(:5173)" as FE
+participant "Backend API\nFastAPI (:8000)" as BE
+database "PostgreSQL" as DB
+
+== Register ==
+User -> FE : Fill register form
+FE -> BE : POST /api/auth/register\n{email, password, full_name}
+BE -> DB : INSERT user\n(bcrypt hash + Fernet-encrypted password)
+DB --> BE : user row
+BE -> BE : create_access_token(user_id)
+BE --> FE : 201 {access_token, user}
+FE -> FE : Store JWT in localStorage
+FE --> User : Redirect to dashboard
+
+== Login ==
+User -> FE : Fill login form
+FE -> BE : POST /api/auth/login\n{email, password}
+BE -> DB : SELECT user BY email
+DB --> BE : user row
+BE -> BE : verify_password + create_access_token
+BE --> FE : 200 {access_token, user}
+FE -> FE : Store JWT in localStorage
+FE --> User : Redirect to dashboard
+
+@enduml
+
+
+@startuml quality-assistance-assist-sequence
+title Quality Assistance — End-to-End Assistance Flow
+
+actor User
+participant "React Frontend\n(:5173)" as FE
+participant "Backend API\nFastAPI (:8000)" as BE
+database "PostgreSQL" as DB
+participant "Agent Service\nFastAPI (:8001)" as AG
+participant "ADK InMemoryRunner" as Runner
+participant "Root Agent\n(quality_assistance_agent)" as Root
+participant "STLC Sub-Agents\n(S01–S09)" as Sub
+participant "LLM Provider\n(Gemini / LiteLLM)" as LLM
+
+== Submit assistance request ==
+User -> FE : Enter requirements,\nuser stories, code diffs
+FE -> BE : POST /api/assist\nAuthorization: Bearer JWT\n{requirements, user_stories,\ncode_diffs, session_id?}
+
+BE -> BE : Validate JWT\n(get_current_user)
+BE -> DB : INSERT assistance_requests\nstatus = processing
+DB --> BE : request id
+
+BE -> BE : build_agent_message(payload)
+note right of BE
+  Combines requirements, stories,
+  diffs into a single prompt
+end note
+
+BE -> AG : POST /assist\n{message, user_id, session_id?}
+AG -> AG : validate_model_credentials()
+AG -> Runner : run_async(user_id, session_id, message)
+Runner -> Root : orchestrate STLC workflow
+
+alt New session
+  Root -> Root : session_id = uuid4()
+else Existing session
+  Root -> Root : reuse session_id
+end
+
+Root -> Root : build_root_instruction()\n+ route via router.py
+Root -> LLM : generate (orchestrator turn)
+
+opt Raw requirements provided
+  Root -> Root : summarize_requirements tool
+end
+
+loop Delegate to specialists (as needed)
+  Root -> Sub : transfer / invoke\n(test_case, test_data,\nexecution, reporting, etc.)
+  Sub -> LLM : generate (specialist turn)
+  LLM --> Sub : specialist output
+  Sub --> Root : result
+end
+
+LLM --> Root : synthesized response
+Root --> Runner : ADK events (text parts)
+Runner --> AG : session_id + response text
+AG --> BE : 200 {session_id, response}
+
+BE -> DB : UPDATE assistance_requests\nsession_id, agent_response,\nstatus = completed
+DB --> BE : ok
+BE --> FE : 200 AssistanceOutput\n{id, session_id, response, status}
+FE -> FE : Persist session_id\nfor follow-up turns
+FE --> User : Display quality assistance result
+
+== Follow-up in same session ==
+User -> FE : Refine / ask follow-up
+FE -> BE : POST /api/assist\n(session_id from prior turn)
+note over FE, Root
+  Same flow; session_id preserves
+  multi-turn context in ADK runner
+end note
+
+== Failure path ==
+BE -> AG : POST /assist
+AG --> BE : 5xx / timeout
+BE -> DB : UPDATE status = failed
+BE --> FE : 502 Agent service error
+FE --> User : Show error message
+
+@enduml
+
+
+@startuml quality-assistance-dev-runtime
+title Quality Assistance — Local Dev Runtime (scripts/dev.sh)
+
+actor Developer
+participant "dev.sh" as Dev
+participant "Docker / Local\nPostgreSQL" as PG
+participant "Agent (:8001)" as AG
+participant "Backend (:8000)" as BE
+participant "Frontend (:5173)" as FE
+
+Developer -> Dev : ./scripts/dev.sh
+Dev -> PG : Start or detect Postgres
+Dev -> Dev : alembic upgrade head
+par Parallel services
+  Dev -> AG : uv run quality-assistance-agent
+  Dev -> BE : uv run quality-assistance-backend
+  Dev -> FE : yarn dev
+end
+Developer -> FE : Open browser\nhttp://localhost:5173
+
+@enduml

@@ -6,7 +6,7 @@ Monorepo for an AI-powered quality engineering assistant across the software tes
 |--------|-------|---------|
 | `frontend/` | React + Vite + Yarn | Web UI for submitting requirements and viewing agent output |
 | `backend/` | Python + FastAPI + uv | REST API, PostgreSQL persistence, orchestration |
-| `agent/` | Python + Google ADK + uv | Gemini-powered quality assistance agent |
+| `agent/` | Python + Google ADK + uv | Multi-model quality assistance agent (Gemini / LiteLLM) |
 
 ## Architecture
 
@@ -15,108 +15,129 @@ flowchart LR
   UI[React Frontend] --> API[FastAPI Backend]
   API --> DB[(PostgreSQL)]
   API --> AGT[ADK Agent Service]
-  AGT --> GEMINI[Gemini API]
+  AGT --> LLM[Gemini / LiteLLM]
 ```
 
-## Prerequisites
+## Platform setup guides
 
-- Node.js 20+ and Yarn
-- Python 3.11+
-- [uv](https://docs.astral.sh/uv/) package manager
-- Docker (for PostgreSQL)
-- [Gemini API key](https://aistudio.google.com/app/apikey)
+Detailed install and troubleshooting:
+
+| Platform | Guide |
+|----------|--------|
+| **macOS** | [docs/SETUP-MAC.md](docs/SETUP-MAC.md) |
+| **Windows** | [docs/SETUP-WINDOWS.md](docs/SETUP-WINDOWS.md) |
+
+## Prerequisites (all platforms)
+
+| Tool | Purpose |
+|------|---------|
+| **Node.js** 20+ & **Yarn** | Frontend |
+| **Python** 3.11+ & **[uv](https://docs.astral.sh/uv/)** | Backend & agent |
+| **PostgreSQL** 16+ | Database (users, assistance history) |
+| **Docker Desktop** *or* local Postgres | Run Postgres on port **5432** |
+| **Gemini API key** | [Google AI Studio](https://aistudio.google.com/app/apikey) (or OpenAI for LiteLLM) |
+
+Full checklists: **[Windows](docs/SETUP-WINDOWS.md)** · **[macOS](docs/SETUP-MAC.md)**
 
 ## Quick start
 
-### Run everything (one command)
+### macOS / Linux
 
 ```bash
+chmod +x scripts/dev.sh
 ./scripts/dev.sh
 ```
 
-This starts the agent, backend, and frontend. If PostgreSQL is already running locally (port from `backend/.env`), Docker is skipped. Otherwise it starts PostgreSQL via Docker. Press `Ctrl+C` to stop app services (and Docker Postgres only if the script started it).
+### Windows (PowerShell)
 
-### Manual setup
-
-### 1. Open the workspace
-
-```bash
-code quality-assistance-app.code-workspace
+```powershell
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\scripts\dev.ps1
 ```
 
-### 2. Start PostgreSQL
+Both scripts:
+
+- Create `.env` files from examples if missing
+- Use existing local Postgres on `5432`, or start Docker Postgres
+- Install dependencies, run migrations, start all services
+
+Press **Ctrl+C** to stop. Logs: `.logs/agent.log`, `.logs/backend.log`, `.logs/frontend.log`
+
+### First-time configuration
+
+Copy env templates and set secrets (see platform guides for details):
+
+```bash
+# macOS / Linux / Git Bash
+cp backend/.env.example backend/.env
+cp agent/.env.example agent/.env
+cp frontend/.env.example frontend/.env
+```
+
+```powershell
+# Windows PowerShell
+Copy-Item backend\.env.example backend\.env
+Copy-Item agent\.env.example agent\.env
+Copy-Item frontend\.env.example frontend\.env
+```
+
+**Required:**
+
+- `agent/.env` → `GOOGLE_API_KEY` (when `AGENT_BACKEND=gemini`)
+- `backend/.env` → `JWT_SECRET`, `ENCRYPTION_KEY`
+
+Generate Fernet key:
+
+```bash
+python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+### Open the app
+
+| URL | Service |
+|-----|---------|
+| http://localhost:5173 | Web UI — register, sign in, submit requirements |
+| http://localhost:8000/docs | Backend API |
+| http://localhost:8001/docs | Agent API |
+
+## Services and ports
+
+| Port | Service |
+|------|---------|
+| 5173 | Frontend (Vite) |
+| 8000 | Backend (FastAPI) |
+| 8001 | Agent (ADK) |
+| 5432 | PostgreSQL |
+
+## Manual run (separate terminals)
+
+See [docs/SETUP-MAC.md](docs/SETUP-MAC.md) or [docs/SETUP-WINDOWS.md](docs/SETUP-WINDOWS.md).
+
+**Agent** (port 8001):
+
+```bash
+cd agent && uv sync && uv run quality-assistance-agent
+```
+
+**Backend** (port 8000):
+
+```bash
+cd backend && uv sync && uv run alembic upgrade head && uv run quality-assistance-backend
+```
+
+**Frontend** (port 5173):
+
+```bash
+cd frontend && yarn install && yarn dev
+```
+
+**PostgreSQL:**
 
 ```bash
 docker compose up -d
 ```
 
-### 3. Configure environment
-
-```bash
-cp .env.example backend/.env
-cp agent/.env.example agent/.env
-cp frontend/.env.example frontend/.env
-```
-
-Set `GOOGLE_API_KEY` in `agent/.env`.
-
-### 4. Run the agent service (port 8001)
-
-```bash
-cd agent
-uv sync
-uv run quality-assistance-agent
-```
-
-Optional: use the ADK web UI for debugging (from `agent/agents`):
-
-```bash
-cd agent/agents
-uv run adk web --port 8080
-```
-
-### 5. Run database migrations
-
-```bash
-cd backend
-uv sync
-uv run alembic upgrade head
-```
-
-Migrations run automatically when the backend starts. New migration files use date-based names, e.g. `20260517_021252_<rev>_initial_schema.py`.
-
-**Create a new migration** (after model changes):
-
-```bash
-cd backend
-uv run alembic revision --autogenerate -m "describe_change"
-uv run alembic upgrade head
-```
-
-If upgrading from the old `create_all` schema, drop legacy tables first:
-
-```sql
-DROP TABLE IF EXISTS assistance_requests;
-```
-
-### 6. Run the backend (port 8000)
-
-```bash
-cd backend
-uv run quality-assistance-backend
-```
-
-### 7. Run the frontend (port 5173)
-
-```bash
-cd frontend
-yarn install
-yarn dev
-```
-
-Open http://localhost:5173, **register** or **sign in**, then use the workspace to submit requirements.
-
-### Auth API
+## Auth API
 
 | Endpoint | Description |
 |----------|-------------|
@@ -133,19 +154,53 @@ Open http://localhost:5173, **register** or **sign in**, then use the workspace 
 | Backend | `GET /health` | Health check |
 | Backend | `POST /api/assist` | Run quality assistance (persists to PostgreSQL) |
 | Agent | `GET /health` | Health check |
-| Agent | `POST /assist` | Invoke Google ADK agent directly |
+| Agent | `POST /assist` | Invoke ADK agent directly |
+
+## Model configuration
+
+Default (Gemini) in `agent/.env`:
+
+```env
+AGENT_BACKEND=gemini
+AGENT_MODEL=gemini-2.0-flash
+GOOGLE_API_KEY=your-key
+```
+
+OpenAI via LiteLLM:
+
+```env
+AGENT_BACKEND=litellm
+AGENT_MODEL=openai/gpt-4o-mini
+OPENAI_API_KEY=your-key
+```
+
+## Database migrations
+
+Migrations run automatically when using `dev.sh` / `dev.ps1` and on backend startup.
+
+```bash
+cd backend
+uv run alembic revision --autogenerate -m "describe_change"
+uv run alembic upgrade head
+```
 
 ## Project layout
 
 ```
 quality-assistance-app/
-├── frontend/          # React app (yarn)
-├── backend/           # FastAPI API (uv)
-├── agent/             # Google ADK agent (uv)
+├── frontend/              # React app (yarn)
+├── backend/               # FastAPI API (uv)
+├── agent/                 # Google ADK agent (uv)
 │   └── agents/quality_assistance/   # ADK CLI entrypoint
+├── scripts/
+│   ├── dev.sh             # macOS / Linux / Git Bash
+│   └── dev.ps1            # Windows PowerShell
+├── docs/
+│   ├── SETUP-MAC.md
+│   ├── SETUP-WINDOWS.md
+│   └── quality-assistance-e2e-sequence.puml
 ├── docker-compose.yml
-├── quality-assistance-app.code-workspace
-└── README.md
+└── quality-assistance-app.code-workspace
 ```
 
 ## Related project

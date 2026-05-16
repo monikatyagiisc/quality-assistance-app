@@ -8,7 +8,7 @@ from quality_assistance_backend.schemas import LoginInput, RegisterInput, TokenR
 from quality_assistance_backend.security import (
     create_access_token,
     get_user_by_email,
-    hash_password,
+    store_password,
     verify_password,
 )
 
@@ -24,7 +24,7 @@ async def register(payload: RegisterInput, db: AsyncSession = Depends(get_db)) -
     user = User(
         email=payload.email.lower(),
         full_name=payload.full_name.strip(),
-        password_hash=hash_password(payload.password),
+        password_hash=store_password(payload.password),
     )
     db.add(user)
     await db.commit()

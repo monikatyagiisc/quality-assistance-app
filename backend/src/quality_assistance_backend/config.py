@@ -1,3 +1,5 @@
+import hashlib
+from base64 import urlsafe_b64encode
 from urllib.parse import quote_plus
 
 from pydantic import AliasChoices, Field, computed_field
@@ -34,6 +36,18 @@ class Settings(BaseSettings):
         default=60 * 24 * 7,
         validation_alias=AliasChoices("JWT_EXPIRE_MINUTES"),
     )
+    encryption_key: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("ENCRYPTION_KEY"),
+    )
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def resolved_encryption_key(self) -> str:
+        if self.encryption_key:
+            return self.encryption_key
+        digest = hashlib.sha256(self.jwt_secret.encode("utf-8")).digest()
+        return urlsafe_b64encode(digest).decode("utf-8")
 
     @computed_field  # type: ignore[prop-decorator]
     @property

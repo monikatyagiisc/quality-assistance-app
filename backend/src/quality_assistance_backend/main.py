@@ -1,8 +1,10 @@
+import logging
 from contextlib import asynccontextmanager
 
 from dotenv import load_dotenv
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from quality_assistance_backend.config import settings
@@ -15,6 +17,9 @@ from quality_assistance_backend.schemas import AssistanceInput, AssistanceOutput
 from quality_assistance_backend.services.agent_client import agent_client
 
 load_dotenv()
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -40,6 +45,14 @@ app.add_middleware(
 )
 
 app.include_router(auth.router)
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    if isinstance(exc, HTTPException):
+        raise exc
+    logger.exception("Unhandled error on %s %s", request.method, request.url.path)
+    return JSONResponse(status_code=500, content={"detail": "Internal server error"})
 
 
 def build_agent_message(payload: AssistanceInput) -> str:

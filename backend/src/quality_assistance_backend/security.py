@@ -3,22 +3,26 @@ from typing import Any
 from uuid import UUID
 
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from quality_assistance_backend.config import settings
+from quality_assistance_backend.crypto import password_manager
 from quality_assistance_backend.models import User
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+def store_password(password: str) -> str:
+    """Encrypt (at rest) and hash a password for database storage."""
+    return password_manager.store_password(password)
 
 
-def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+def verify_password(plain_password: str, stored_value: str) -> bool:
+    """Verify login password against the encrypted value from the database."""
+    return password_manager.verify_password(plain_password, stored_value)
 
 
-def verify_password(plain_password: str, hashed_password: str) -> bool:
-    return pwd_context.verify(plain_password, hashed_password)
+# Backwards-compatible aliases
+hash_password = store_password
 
 
 def create_access_token(subject: str, expires_delta: timedelta | None = None) -> str:

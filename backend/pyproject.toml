@@ -1,0 +1,31 @@
+[project]
+name = "quality-assistance-backend"
+version = "0.1.0"
+description = "FastAPI backend for the quality assistance web application"
+readme = "README.md"
+authors = [
+    { name = "Satyam Vats", email = "satyam.vats@nagarro.com" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "alembic>=1.18.4",
+    "asyncpg>=0.31.0",
+    "email-validator>=2.3.0",
+    "fastapi>=0.136.1",
+    "greenlet>=3.0.0",
+    "httpx>=0.28.1",
+    "passlib[bcrypt]>=1.7.4",
+    "pydantic-settings>=2.14.1",
+    "python-dotenv>=1.2.2",
+    "python-jose[cryptography]>=3.5.0",
+    "sqlalchemy>=2.0.49",
+    "uvicorn[standard]>=0.47.0",
+]
+
+[project.scripts]
+quality-assistance-backend = "quality_assistance_backend:main"
+db-migrate = "quality_assistance_backend.migrations:upgrade_head"
+
+[build-system]
+requires = ["uv_build>=0.11.14,<0.12.0"]
+build-backend = "uv_build"

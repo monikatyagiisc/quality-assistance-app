@@ -1,0 +1,36 @@
+# Database migrations
+
+Migrations use [Alembic](https://alembic.sqlalchemy.org/) with async PostgreSQL.
+
+## Filename format
+
+Configured in `alembic.ini`:
+
+```
+YYYYMMDD_HHMMSS_<revision>_<slug>.py
+```
+
+Example: `20260517_021252_c343d3e8e3b5_initial_schema.py`
+
+## Commands
+
+```bash
+cd backend
+
+# Apply all pending migrations
+uv run alembic upgrade head
+
+# Create a new migration (after editing models)
+uv run alembic revision --autogenerate -m "add_some_column"
+uv run alembic upgrade head
+
+# Roll back one revision
+uv run alembic downgrade -1
+
+# Show current revision
+uv run alembic current
+```
+
+Shortcut: `uv run db-migrate` (same as `alembic upgrade head`).
+
+Database URL is read from `backend/.env` (`DB_*` variables).

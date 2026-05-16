@@ -28,25 +28,3 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
     user: UserPublic
-
-
-class AssistanceInput(BaseModel):
-    requirements: str = Field(..., min_length=1)
-    user_stories: str | None = None
-    code_diffs: str | None = None
-    session_id: str | None = None
-
-
-class AssistanceOutput(BaseModel):
-    id: uuid.UUID
-    session_id: str
-    response: str
-    status: str
-    created_at: datetime
-
-    model_config = {"from_attributes": True}
-
-
-class HealthResponse(BaseModel):
-    status: str
-    service: str

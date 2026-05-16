@@ -6,6 +6,12 @@ from quality_assistance_backend.schemas.auth import (
     UserPublic,
 )
 from quality_assistance_backend.schemas.health import HealthResponse
+from quality_assistance_backend.schemas.settings import (
+    FetchDiffInput,
+    FetchDiffOutput,
+    RepositoryConnectionInput,
+    RepositoryConnectionPublic,
+)
 
 __all__ = [
     "AssistanceInput",
@@ -15,4 +21,8 @@ __all__ = [
     "RegisterInput",
     "TokenResponse",
     "UserPublic",
+    "RepositoryConnectionInput",
+    "RepositoryConnectionPublic",
+    "FetchDiffInput",
+    "FetchDiffOutput",
 ]

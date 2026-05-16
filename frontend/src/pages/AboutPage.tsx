@@ -1,5 +1,5 @@
-import { ARCHITECTURE_DIAGRAMS, AGENTS, ARCHITECTURE_FLOW, E2E_SEQUENCE_DIAGRAM } from '../data/aboutContent'
-import { ArchitectureDiagramCard } from '../components/ArchitectureDiagramCard'
+import { CollapsibleDiagram } from '../components/CollapsibleDiagram'
+import { AGENTS, ARCHITECTURE_DIAGRAM, ARCHITECTURE_FLOW, E2E_SEQUENCE_DIAGRAM } from '../data/aboutContent'
 import './AboutPage.css'
 
 export function AboutPage() {
@@ -46,28 +46,30 @@ export function AboutPage() {
       </section>
 
       <section className="about-section">
-        <h2>Architecture diagrams</h2>
-        <p className="section-desc">
-          Interactive views of the Draw.io source files from the repository. If a diagram does not
-          load (offline or blocked network), use <strong>Download .drawio</strong> or{' '}
-          <strong>Open in diagrams.net</strong>.
+        <h2>Architecture diagram</h2>
+        <p className="section-desc">{ARCHITECTURE_DIAGRAM.description}</p>
+        <CollapsibleDiagram
+          src={ARCHITECTURE_DIAGRAM.image}
+          alt="Quality Assistant agent architecture: user, orchestration, LLM provider, and STLC specialist agents"
+          previewHeight={160}
+        />
+        <p className="diagram-hint">
+          Source:{' '}
+          <a href={ARCHITECTURE_DIAGRAM.sourceDrawio} download>
+            QualityAssistantAgentArchitecture.drawio
+          </a>
         </p>
-        <div className="diagram-grid">
-          {ARCHITECTURE_DIAGRAMS.map((diagram) => (
-            <ArchitectureDiagramCard key={diagram.id} diagram={diagram} />
-          ))}
-        </div>
       </section>
 
       <section className="about-section">
         <h2>End-to-end sequence</h2>
         <p className="section-desc">{E2E_SEQUENCE_DIAGRAM.description}</p>
-        <div className="e2e-diagram-wrap">
-          <img
-            src={E2E_SEQUENCE_DIAGRAM.previewSvg}
-            alt="Sequence diagram: user, frontend, backend, agent, database, and LLM provider"
-          />
-        </div>
+        <CollapsibleDiagram
+          src={E2E_SEQUENCE_DIAGRAM.previewSvg}
+          alt="Sequence diagram: user, frontend, backend, agent, database, and LLM provider"
+          previewHeight={120}
+          theme="light"
+        />
         <p className="diagram-hint">
           Source: <code>docs/quality-assistance-e2e-sequence.puml</code> (PlantUML). Regenerate SVG
           after editing the sequence if needed.

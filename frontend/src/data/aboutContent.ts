@@ -50,28 +50,13 @@ export const ARCHITECTURE_FLOW = [
   },
 ] as const
 
-export type ArchitectureDiagram = {
-  id: string
-  title: string
-  description: string
-  drawioFile: string
-  previewSvg?: string
+export const ARCHITECTURE_DIAGRAM = {
+  title: 'Agent architecture',
+  description:
+    'User and test data flow through orchestration into specialist STLC agents backed by an LLM provider.',
+  image: '/docs/quality-assistant-agent-architecture.png',
+  sourceDrawio: '/docs/QualityAssistantAgentArchitecture.drawio',
 }
-
-export const ARCHITECTURE_DIAGRAMS: ArchitectureDiagram[] = [
-  {
-    id: 'architecture-overview',
-    title: 'Agent architecture (overview)',
-    description: 'High-level view of the orchestrator and STLC specialist agents.',
-    drawioFile: '/docs/QualityAssistantAgentArchitecture.drawio',
-  },
-  {
-    id: 'architecture-detailed',
-    title: 'Agent architecture (detailed)',
-    description: 'Detailed interactions between agents, tools, and the model layer.',
-    drawioFile: '/docs/QualityAssistantAgentArchitecture2.drawio',
-  },
-]
 
 export const E2E_SEQUENCE_DIAGRAM = {
   title: 'End-to-end request flow',

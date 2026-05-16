@@ -39,6 +39,129 @@
   }
 }
 
+.diff-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.diff-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+.diff-section-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.diff-fetch-setup {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.diff-fetch-setup p {
+  margin: 0;
+}
+
+.banner-warn {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fde68a;
+  padding: 0.75rem 1rem;
+  border-radius: 0.6rem;
+}
+
+.banner-warn a {
+  color: #fcd34d;
+}
+
+.diff-mode-toggle {
+  display: inline-flex;
+  border-radius: 0.5rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  overflow: hidden;
+}
+
+.diff-mode-toggle button {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.78rem;
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.diff-mode-toggle button.active {
+  background: rgba(99, 102, 241, 0.25);
+  color: #e0e7ff;
+}
+
+.diff-mode-toggle button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.diff-fetch-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.75rem;
+  border-radius: 0.6rem;
+  border: 1px dashed rgba(129, 140, 248, 0.35);
+  background: rgba(30, 41, 59, 0.35);
+}
+
+.diff-fetch-panel label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+.diff-fetch-panel input {
+  padding: 0.45rem 0.6rem;
+  border-radius: 0.45rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  background: rgba(15, 23, 42, 0.5);
+  color: #f1f5f9;
+}
+
+.diff-fetch-or {
+  margin: 0;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+.diff-import-note {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.diff-paste-label {
+  display: flex;
+  flex-direction: column;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .panel {
   padding: 1.25rem;
   border-radius: 1rem;

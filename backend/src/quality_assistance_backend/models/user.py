@@ -12,6 +12,7 @@ from quality_assistance_backend.db import Base
 
 if TYPE_CHECKING:
     from quality_assistance_backend.models.assistance_request import AssistanceRequest
+    from quality_assistance_backend.models.repository_connection import RepositoryConnection
 
 
 class User(Base):
@@ -25,4 +26,8 @@ class User(Base):
 
     assistance_requests: Mapped[list[AssistanceRequest]] = relationship(
         back_populates="owner",
+    )
+    repository_connection: Mapped[RepositoryConnection | None] = relationship(
+        back_populates="user",
+        uselist=False,
     )

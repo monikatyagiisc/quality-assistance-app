@@ -18,6 +18,21 @@
   border-bottom: 1px solid rgba(148, 163, 184, 0.15);
 }
 
+.topbar-start {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.nav-left {
+  flex-wrap: nowrap;
+}
+
+.nav-right {
+  flex-shrink: 0;
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -66,12 +81,6 @@
 .nav-link.active {
   color: #fff;
   background: rgba(99, 102, 241, 0.25);
-}
-
-.user-chip {
-  font-size: 0.85rem;
-  color: #94a3b8;
-  padding: 0 0.5rem;
 }
 
 .main {

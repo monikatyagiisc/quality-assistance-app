@@ -1,0 +1,69 @@
+.collapsible-diagram {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.collapsible-diagram-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.collapsible-diagram-hint {
+  font-size: 0.82rem;
+}
+
+.collapsible-diagram-body {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  transition: max-height 0.35s ease;
+}
+
+.collapsible-diagram.is-expanded .collapsible-diagram-body {
+  max-height: none !important;
+  overflow: visible;
+}
+
+.collapsible-diagram-wrap {
+  width: 100%;
+  overflow: auto;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  background: #0f172a;
+}
+
+.collapsible-diagram-wrap img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.collapsible-diagram-fade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 4.5rem;
+  pointer-events: none;
+  background: linear-gradient(to bottom, transparent, rgba(15, 23, 42, 0.95));
+  border-radius: 0 0 0.75rem 0.75rem;
+}
+
+.collapsible-diagram.is-expanded .collapsible-diagram-fade {
+  display: none;
+}
+
+.collapsible-diagram--light .collapsible-diagram-wrap {
+  background: #fff;
+}
+
+.collapsible-diagram--light .collapsible-diagram-fade {
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.97));
+}
+
+.collapsible-diagram--light .collapsible-diagram-wrap img {
+  min-width: 480px;
+}

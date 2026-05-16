@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { UserMenu } from './UserMenu'
 import './Layout.css'
 
 export function Layout() {
@@ -10,30 +11,29 @@ export function Layout() {
   return (
     <div className="layout">
       <header className="topbar">
-        <Link to={user ? '/dashboard' : '/'} className="brand">
-          <span className="brand-mark">QA</span>
-          <span className="brand-text">Quality Assistance</span>
-        </Link>
+        <div className="topbar-start">
+          <Link to={user ? '/dashboard' : '/'} className="brand">
+            <span className="brand-mark">QA</span>
+            <span className="brand-text">Quality Assistance</span>
+          </Link>
 
-        <nav className="nav">
-          {user ? (
-            <>
+          <nav className="nav nav-left" aria-label="Main">
+            {user && (
               <NavLink to="/dashboard" className="nav-link">
                 Workspace
               </NavLink>
-              <NavLink to="/about" className="nav-link">
-                About
-              </NavLink>
-              <span className="user-chip">{user.full_name}</span>
-              <button type="button" className="btn btn-ghost" onClick={logout}>
-                Sign out
-              </button>
-            </>
+            )}
+            <NavLink to="/about" className="nav-link">
+              About
+            </NavLink>
+          </nav>
+        </div>
+
+        <nav className="nav nav-right" aria-label="Account">
+          {user ? (
+            <UserMenu user={user} onLogout={logout} />
           ) : (
             <>
-              <NavLink to="/about" className="nav-link">
-                About
-              </NavLink>
               <NavLink to="/login" className="nav-link">
                 Sign in
               </NavLink>

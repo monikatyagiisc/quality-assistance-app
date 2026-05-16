@@ -1,4 +1,5 @@
-import { AGENTS, ARCHITECTURE_FLOW, DIAGRAM_FILES } from '../data/aboutContent'
+import { ARCHITECTURE_DIAGRAMS, AGENTS, ARCHITECTURE_FLOW, E2E_SEQUENCE_DIAGRAM } from '../data/aboutContent'
+import { ArchitectureDiagramCard } from '../components/ArchitectureDiagramCard'
 import './AboutPage.css'
 
 export function AboutPage() {
@@ -9,9 +10,8 @@ export function AboutPage() {
         <h1>Quality Assistance Platform</h1>
         <p className="about-lead">
           An AI-powered software test life cycle (STLC) assistant that orchestrates specialized agents
-          to help QA teams plan, execute, and report with confidence. Architecture and agent design are
-          documented in the project{' '}
-          <code>docs/</code> diagrams.
+          to help QA teams plan, execute, and report with confidence. The stack is model-agnostic:
+          swap Gemini, OpenAI, or other providers via agent configuration without changing the UI.
         </p>
       </section>
 
@@ -31,8 +31,9 @@ export function AboutPage() {
       <section className="about-section">
         <h2>Quality Assistant agents</h2>
         <p className="section-desc">
-          From <strong>QualityAssistantAgentArchitecture</strong> — each agent focuses on one STLC
-          capability and collaborates through the orchestrator.
+          Each specialist focuses on one STLC capability and collaborates through the root
+          orchestrator. Configure the active model in <code>agent/.env</code> (
+          <code>AGENT_BACKEND</code>, <code>AGENT_MODEL</code>).
         </p>
         <div className="agent-grid">
           {AGENTS.map((agent) => (
@@ -47,24 +48,29 @@ export function AboutPage() {
       <section className="about-section">
         <h2>Architecture diagrams</h2>
         <p className="section-desc">
-          Open these Draw.io files from the repository docs folder (also bundled under{' '}
-          <code>frontend/public/docs/</code>):
+          Interactive views of the Draw.io source files from the repository. If a diagram does not
+          load (offline or blocked network), use <strong>Download .drawio</strong> or{' '}
+          <strong>Open in diagrams.net</strong>.
         </p>
-        <ul className="diagram-list">
-          {DIAGRAM_FILES.map((diagram) => (
-            <li key={diagram.file}>
-              <a href={diagram.file} target="_blank" rel="noreferrer">
-                {diagram.title}
-              </a>
-            </li>
+        <div className="diagram-grid">
+          {ARCHITECTURE_DIAGRAMS.map((diagram) => (
+            <ArchitectureDiagramCard key={diagram.id} diagram={diagram} />
           ))}
-        </ul>
+        </div>
+      </section>
+
+      <section className="about-section">
+        <h2>End-to-end sequence</h2>
+        <p className="section-desc">{E2E_SEQUENCE_DIAGRAM.description}</p>
+        <div className="e2e-diagram-wrap">
+          <img
+            src={E2E_SEQUENCE_DIAGRAM.previewSvg}
+            alt="Sequence diagram: user, frontend, backend, agent, database, and LLM provider"
+          />
+        </div>
         <p className="diagram-hint">
-          View in{' '}
-          <a href="https://app.diagrams.net/" target="_blank" rel="noreferrer">
-            diagrams.net
-          </a>{' '}
-          via File → Open from → Device.
+          Source: <code>docs/quality-assistance-e2e-sequence.puml</code> (PlantUML). Regenerate SVG
+          after editing the sequence if needed.
         </p>
       </section>
 
@@ -81,7 +87,8 @@ export function AboutPage() {
           </div>
           <div>
             <h4>Agent</h4>
-            <p>Google ADK, Gemini</p>
+            <p>Google ADK orchestration</p>
+            <p className="stack-sub">LLM: Gemini, OpenAI (LiteLLM), or compatible providers</p>
           </div>
         </div>
       </section>

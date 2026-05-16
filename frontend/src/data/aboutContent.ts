@@ -43,16 +43,38 @@ export const ARCHITECTURE_FLOW = [
   { step: 'User', detail: 'Submits requirements, stories, and optional code diffs via the web app.' },
   { step: 'Orchestrator', detail: 'Routes work across the STLC pipeline based on context and inputs.' },
   { step: 'Quality Assistant', detail: 'Specialized agents collaborate on planning, execution, and reporting.' },
-  { step: 'Google Cloud', detail: 'Cloud Run hosts services; Vertex AI / Gemini powers reasoning (see project docs).' },
+  {
+    step: 'LLM provider',
+    detail:
+      'Configurable model backend (Gemini, OpenAI via LiteLLM, Anthropic, and others) powers agent reasoning.',
+  },
 ] as const
 
-export const DIAGRAM_FILES = [
+export type ArchitectureDiagram = {
+  id: string
+  title: string
+  description: string
+  drawioFile: string
+  previewSvg?: string
+}
+
+export const ARCHITECTURE_DIAGRAMS: ArchitectureDiagram[] = [
   {
+    id: 'architecture-overview',
     title: 'Agent architecture (overview)',
-    file: '/docs/QualityAssistantAgentArchitecture.drawio',
+    description: 'High-level view of the orchestrator and STLC specialist agents.',
+    drawioFile: '/docs/QualityAssistantAgentArchitecture.drawio',
   },
   {
+    id: 'architecture-detailed',
     title: 'Agent architecture (detailed)',
-    file: '/docs/QualityAssistantAgentArchitecture2.drawio',
+    description: 'Detailed interactions between agents, tools, and the model layer.',
+    drawioFile: '/docs/QualityAssistantAgentArchitecture2.drawio',
   },
-] as const
+]
+
+export const E2E_SEQUENCE_DIAGRAM = {
+  title: 'End-to-end request flow',
+  description: 'Register, assist, and agent orchestration across frontend, backend, and agent services.',
+  previewSvg: '/docs/quality-assistance-e2e-sequence.svg',
+}

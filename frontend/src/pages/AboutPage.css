@@ -153,3 +153,38 @@
   color: #94a3b8;
   font-size: 0.9rem;
 }
+
+.stack-sub {
+  margin-top: 0.35rem !important;
+  font-size: 0.82rem !important;
+  color: #64748b !important;
+}
+
+.diagram-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+.e2e-diagram-wrap {
+  width: 100%;
+  overflow: auto;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  background: #fff;
+}
+
+.e2e-diagram-wrap img {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-width: 480px;
+}
+
+.diagram-hint code {
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.3rem;
+  background: rgba(99, 102, 241, 0.15);
+  color: #c7d2fe;
+  font-size: 0.85em;
+}

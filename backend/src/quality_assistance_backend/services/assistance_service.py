@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from quality_assistance_backend.models import AssistanceRequest, User
 from quality_assistance_backend.schemas import AssistanceInput, AssistanceOutput
 from quality_assistance_backend.services.agent_client import agent_client
+from quality_assistance_backend.services.agent_errors import AgentServiceError
 
 
 def build_agent_message(payload: AssistanceInput) -> str:
@@ -46,11 +47,25 @@ async def run_assistance(
         record.session_id = agent_result["session_id"]
         record.agent_response = agent_result["response"]
         record.status = "completed"
+    except AgentServiceError as exc:
+        record.status = "failed"
+        record.agent_response = exc.message
+        await db.commit()
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail={"message": exc.message, "code": exc.code},
+        ) from exc
     except Exception as exc:
         record.status = "failed"
         record.agent_response = str(exc)
         await db.commit()
-        raise HTTPException(status_code=502, detail=f"Agent service error: {exc}") from exc
+        raise HTTPException(
+            status_code=502,
+            detail={
+                "message": "We could not generate quality assistance right now. Please try again shortly.",
+                "code": "assistance_failed",
+            },
+        ) from exc
 
     await db.commit()
     await db.refresh(record)

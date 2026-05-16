@@ -21,13 +21,43 @@ export type AssistanceResult = {
   created_at: string
 }
 
+type ErrorDetailObject = {
+  message?: string
+  code?: string
+  detail?: string
+}
+
 class ApiError extends Error {
   status: number
+  code?: string
 
-  constructor(status: number, message: string) {
+  constructor(status: number, message: string, code?: string) {
     super(message)
     this.status = status
+    this.code = code
   }
+}
+
+function parseErrorDetail(body: unknown): { message: string; code?: string } {
+  if (!body || typeof body !== 'object') {
+    return { message: 'Request failed' }
+  }
+
+  const record = body as { detail?: string | ErrorDetailObject }
+  const { detail } = record
+
+  if (typeof detail === 'string') {
+    return { message: detail }
+  }
+
+  if (detail && typeof detail === 'object') {
+    return {
+      message: detail.message || detail.detail || 'Request failed',
+      code: detail.code,
+    }
+  }
+
+  return { message: 'Request failed' }
 }
 
 async function request<T>(
@@ -51,8 +81,8 @@ async function request<T>(
 
   if (!response.ok) {
     const body = await response.json().catch(() => ({}))
-    const detail = typeof body.detail === 'string' ? body.detail : 'Request failed'
-    throw new ApiError(response.status, detail)
+    const { message, code } = parseErrorDetail(body)
+    throw new ApiError(response.status, message, code)
   }
 
   return response.json() as Promise<T>

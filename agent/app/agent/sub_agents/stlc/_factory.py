@@ -1,6 +1,7 @@
 from google.adk.agents import Agent
 
 from app.agent.capabilities import AgentCapabilities, attach_agent_metadata
+from app.callbacks.logger import AGENT_LOG_CALLBACKS
 from app.agent.prompts._helpers import build_instruction
 from app.utils.llm import resolve_model
 
@@ -18,6 +19,7 @@ def build_stlc_agent(
         name=name,
         description=description,
         instruction=build_instruction(instruction, examples),
+        **AGENT_LOG_CALLBACKS,
     )
     if metadata is not None:
         attach_agent_metadata(agent, metadata)

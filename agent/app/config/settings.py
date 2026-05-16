@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     agent_host: str = "0.0.0.0"
     agent_port: int = 8001
     app_name: str = "quality_assistance_agent"
+    log_level: str = Field(default="INFO", validation_alias="LOG_LEVEL")
 
     def validate_model_credentials(self) -> str | None:
         if self.agent_backend == "gemini":

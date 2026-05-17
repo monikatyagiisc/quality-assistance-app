@@ -118,10 +118,14 @@ Requires **Docker Desktop** running.
 
 ```powershell
 cd quality-assistance-app
-docker compose up -d
+docker compose up -d postgres
 ```
 
-This starts **PostgreSQL 16** with:
+This starts **PostgreSQL 16** only (for local `dev.ps1` / `dev.sh`):
+
+**Entire app in Docker** (Postgres + agent + backend + frontend): see [Run full stack with Docker Compose](#run-full-stack-with-docker-compose).
+
+Default Postgres container settings:
 
 | Setting | Value |
 |---------|--------|
@@ -168,9 +172,39 @@ yarn install
 
 ---
 
+## Run full stack with Docker Compose
+
+Runs **PostgreSQL**, **agent**, **backend**, and **frontend** in Docker. Requires **Docker Desktop** and a **Gemini API key** in root `.env` (not `agent\.env`).
+
+```powershell
+cd quality-assistance-app
+
+Copy-Item .env.docker.example .env
+# Edit .env — set GOOGLE_API_KEY=your-gemini-key
+
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\scripts\docker-up.ps1
+```
+
+Or: `docker compose up --build`
+
+| URL | Service |
+|-----|---------|
+| http://localhost:5173 | Web UI |
+| http://localhost:8000/docs | Backend |
+| http://localhost:8001/docs | Agent |
+
+Stop: `docker compose down` · Logs: `docker compose logs -f`
+
+---
+
 ## 6. Run the app
 
-### Option A — One command (PowerShell, recommended)
+### Option A — Full stack in Docker (simplest)
+
+Use the [Docker Compose](#run-full-stack-with-docker-compose) section above. For local development with hot reload, use **Option B** below.
+
+### Option B — Local dev (`dev.ps1`, recommended for coding)
 
 ```powershell
 cd quality-assistance-app
@@ -184,18 +218,18 @@ Logs: `.logs\agent.log`, `.logs\backend.log`, `.logs\frontend.log`
 
 Press **Ctrl+C** to stop.
 
-### Option B — Git Bash / WSL
+### Option C — Git Bash / WSL
 
 ```bash
 ./scripts/dev.sh
 ```
 
-### Option C — Manual (four terminals)
+### Option D — Manual (four terminals)
 
 **Terminal 1 — PostgreSQL (if not already running)**
 
 ```powershell
-docker compose up -d
+docker compose up -d postgres
 ```
 
 **Terminal 2 — Agent**
@@ -284,7 +318,9 @@ docker exec -it quality-assistance-postgres pg_isready -U quality_assistance -d 
 
 ## Minimal checklist
 
-Copy and tick off:
+**Docker full stack:** Docker Desktop + root `.env` with `GOOGLE_API_KEY` → `.\scripts\docker-up.ps1`
+
+**Local dev** — copy and tick off:
 
 - [ ] **Node.js** 20+ installed  
 - [ ] **Yarn** installed  
@@ -293,7 +329,7 @@ Copy and tick off:
 - [ ] **PostgreSQL** available — Docker Desktop **or** local Postgres 16+ on port **5432**  
 - [ ] `backend\.env`, `agent\.env`, `frontend\.env` created from examples  
 - [ ] `GOOGLE_API_KEY`, `JWT_SECRET`, `ENCRYPTION_KEY` set  
-- [ ] Postgres running (`docker compose up -d` or local service)  
+- [ ] Postgres running (`docker compose up -d postgres` or local service)  
 - [ ] `uv sync` in `agent\` and `backend\`  
 - [ ] `uv run alembic upgrade head` in `backend\`  
 - [ ] `yarn install` in `frontend\`  

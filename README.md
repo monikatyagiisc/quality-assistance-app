@@ -63,6 +63,83 @@ Both scripts:
 
 Press **Ctrl+C** to stop. Logs: `.logs/agent.log`, `.logs/backend.log`, `.logs/frontend.log`
 
+## Run with Docker (full stack)
+
+Runs **PostgreSQL**, **agent**, **backend**, and **frontend** in containers. You only need **Docker Desktop** and a **Gemini API key** (no local Node/Python/uv required for this mode).
+
+### Prerequisites
+
+| Tool | Purpose |
+|------|---------|
+| **Docker Desktop** | [macOS](https://docs.docker.com/desktop/setup/install/mac-install/) · [Windows](https://docs.docker.com/desktop/setup/install/windows-install/) |
+| **Gemini API key** | [Google AI Studio](https://aistudio.google.com/app/apikey) |
+
+Ensure Docker Desktop is **running** before you start.
+
+### macOS / Linux
+
+```bash
+cd quality-assistance-app
+
+cp .env.docker.example .env
+# Edit .env and set GOOGLE_API_KEY=your-real-key
+
+chmod +x scripts/docker-up.sh
+./scripts/docker-up.sh
+```
+
+Or without the helper script:
+
+```bash
+docker compose up --build
+```
+
+### Windows (PowerShell)
+
+```powershell
+cd quality-assistance-app
+
+Copy-Item .env.docker.example .env
+# Edit .env and set GOOGLE_API_KEY=your-real-key
+
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\scripts\docker-up.ps1
+```
+
+Or without the helper script:
+
+```powershell
+docker compose up --build
+```
+
+### After startup
+
+| URL | Service |
+|-----|---------|
+| http://localhost:5173 | Web UI |
+| http://localhost:8000/docs | Backend API |
+| http://localhost:8001/docs | Agent API |
+
+```bash
+# macOS / Linux — follow logs
+docker compose logs -f
+
+# Stop everything
+docker compose down
+```
+
+```powershell
+# Windows — follow logs
+docker compose logs -f
+
+# Stop everything
+docker compose down
+```
+
+**Note:** `dev.sh` / `dev.ps1` still use local Node/Python and only start **Postgres** via `docker compose up -d postgres` when needed. The full-stack Docker mode above runs all services in containers.
+
+Platform details: **[macOS](docs/SETUP-MAC.md#run-full-stack-with-docker-compose)** · **[Windows](docs/SETUP-WINDOWS.md#run-full-stack-with-docker-compose)**
+
 ### First-time configuration
 
 Copy env templates and set secrets (see platform guides for details):
@@ -131,10 +208,10 @@ cd backend && uv sync && uv run alembic upgrade head && uv run quality-assistanc
 cd frontend && yarn install && yarn dev
 ```
 
-**PostgreSQL:**
+**PostgreSQL only** (when not using the full Docker stack):
 
 ```bash
-docker compose up -d
+docker compose up -d postgres
 ```
 
 ## Auth API
@@ -193,8 +270,11 @@ quality-assistance-app/
 ├── agent/                 # Google ADK agent (uv)
 │   └── agents/quality_assistance/   # ADK CLI entrypoint
 ├── scripts/
-│   ├── dev.sh             # macOS / Linux / Git Bash
-│   └── dev.ps1            # Windows PowerShell
+│   ├── dev.sh             # macOS / Linux / Git Bash (local dev)
+│   ├── dev.ps1            # Windows PowerShell (local dev)
+│   ├── docker-up.sh       # macOS / Linux — full stack in Docker
+│   └── docker-up.ps1      # Windows — full stack in Docker
+├── .env.docker.example    # Root env for docker compose
 ├── docs/
 │   ├── SETUP-MAC.md
 │   ├── SETUP-WINDOWS.md

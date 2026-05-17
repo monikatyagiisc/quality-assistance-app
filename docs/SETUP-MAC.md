@@ -94,9 +94,13 @@ VITE_API_URL=http://localhost:8000
 
 ### Option A — Docker (recommended)
 
+**Postgres only** (used by `dev.sh` when local Postgres is not running):
+
 ```bash
-docker compose up -d
+docker compose up -d postgres
 ```
+
+**Entire app in Docker** (Postgres + agent + backend + frontend): see [Run full stack with Docker Compose](#run-full-stack-with-docker-compose).
 
 | Setting | Value |
 |---------|--------|
@@ -127,19 +131,51 @@ cd ../frontend && yarn install
 
 ---
 
+## Run full stack with Docker Compose
+
+Runs **PostgreSQL**, **agent**, **backend**, and **frontend** in Docker. Requires **Docker Desktop** and a **Gemini API key** in root `.env` (not `agent/.env`).
+
+```bash
+cd quality-assistance-app
+
+cp .env.docker.example .env
+# Edit .env — set GOOGLE_API_KEY=your-gemini-key
+
+chmod +x scripts/docker-up.sh
+./scripts/docker-up.sh
+```
+
+Or: `docker compose up --build`
+
+| URL | Service |
+|-----|---------|
+| http://localhost:5173 | Web UI |
+| http://localhost:8000/docs | Backend |
+| http://localhost:8001/docs | Agent |
+
+Stop: `docker compose down` · Logs: `docker compose logs -f`
+
+---
+
 ## 6. Run the app
 
-### One command
+### Option A — Full stack in Docker (simplest)
+
+Same steps as [Run full stack with Docker Compose](#run-full-stack-with-docker-compose) above.
+
+Use the [Docker Compose](#run-full-stack-with-docker-compose) section above. For local development with hot reload, use **Option B** below.
+
+### Option B — Local dev (`dev.sh`)
 
 ```bash
 ./scripts/dev.sh
 ```
 
-### Manual (four terminals)
+### Option C — Manual (four terminals)
 
 ```bash
-# 1. Postgres
-docker compose up -d
+# 1. Postgres only
+docker compose up -d postgres
 
 # 2. Agent
 cd agent && uv run quality-assistance-agent
@@ -198,6 +234,10 @@ docker compose ps
 ---
 
 ## Minimal checklist
+
+**Docker full stack:** Docker Desktop + root `.env` with `GOOGLE_API_KEY` → `./scripts/docker-up.sh`
+
+**Local dev:**
 
 - [ ] Node.js 20+, Yarn, Python 3.11+, uv  
 - [ ] PostgreSQL (Docker or local) on port **5432**  

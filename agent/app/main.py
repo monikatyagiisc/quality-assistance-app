@@ -22,6 +22,15 @@ if settings.google_api_key:
     os.environ.setdefault("GOOGLE_API_KEY", settings.google_api_key)
 if settings.openai_api_key:
     os.environ.setdefault("OPENAI_API_KEY", settings.openai_api_key)
+if settings.aws_access_key_id:
+    os.environ.setdefault("AWS_ACCESS_KEY_ID", settings.aws_access_key_id)
+if settings.aws_secret_access_key:
+    os.environ.setdefault("AWS_SECRET_ACCESS_KEY", settings.aws_secret_access_key)
+if settings.aws_session_token:
+    os.environ.setdefault("AWS_SESSION_TOKEN", settings.aws_session_token)
+if settings.aws_region:
+    os.environ.setdefault("AWS_REGION_NAME", settings.aws_region)
+    os.environ.setdefault("AWS_DEFAULT_REGION", settings.aws_region)
 
 app = FastAPI(
     title="Quality Assistance Agent",

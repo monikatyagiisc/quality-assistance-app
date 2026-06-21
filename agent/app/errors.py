@@ -105,6 +105,8 @@ def _matches_api_key_error(upper_text: str) -> bool:
 
 
 def _provider_label() -> str:
+    if settings.agent_backend == "bedrock":
+        return "Amazon Bedrock"
     if settings.agent_backend == "litellm":
         model = settings.agent_model.lower()
         if model.startswith("openai/"):
@@ -113,24 +115,42 @@ def _provider_label() -> str:
             return "Anthropic"
         if model.startswith("azure/"):
             return "Azure OpenAI"
+        if model.startswith("bedrock/"):
+            return "Amazon Bedrock"
         return "your model provider"
     return "Gemini"
 
 
 def _billing_hint() -> str:
     provider = _provider_label()
+    if settings.agent_backend == "bedrock":
+        return (
+            "If this keeps happening, check your Amazon Bedrock model access and "
+            "service quotas in the AWS console."
+        )
     if settings.agent_backend == "litellm":
         return f"If this keeps happening, check {provider} usage limits and billing."
     return "If this keeps happening, check your Gemini API plan and billing."
 
 
 def _invalid_api_key_message() -> str:
+    if settings.agent_backend == "bedrock":
+        return (
+            "AWS credentials are missing or invalid for Amazon Bedrock. "
+            "Check AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_REGION_NAME in agent/.env, "
+            "and confirm the model is enabled in Bedrock model access."
+        )
     if settings.agent_backend == "litellm":
         model = settings.agent_model.lower()
         if model.startswith("openai/"):
             return (
                 "The OpenAI API key is missing or invalid. "
                 "Check OPENAI_API_KEY in agent/.env."
+            )
+        if model.startswith("bedrock/"):
+            return (
+                "AWS credentials are missing or invalid for Amazon Bedrock. "
+                "Check AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_REGION_NAME in agent/.env."
             )
         return (
             "The AI API key is missing or invalid for the configured model. "

@@ -40,6 +40,7 @@ chmod +x scripts/dev.sh
 |------|--------|----------------|
 | **Gemini API key** | [Google AI Studio](https://aistudio.google.com/app/apikey) → `agent/.env` as `GOOGLE_API_KEY` | Default agent (`AGENT_BACKEND=gemini`) |
 | **OpenAI API key** | `agent/.env` as `OPENAI_API_KEY` | `AGENT_BACKEND=litellm` + OpenAI model |
+| **AWS credentials** | `agent/.env` as `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION_NAME` | `AGENT_BACKEND=bedrock` (Amazon Bedrock) |
 | **JWT secret** | `backend/.env` → `JWT_SECRET` | Login / API auth |
 | **Fernet key** | `backend/.env` → `ENCRYPTION_KEY` | Password storage at rest |
 

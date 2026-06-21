@@ -49,6 +49,7 @@ Restart the terminal after install. If `uv` is not found, add `%USERPROFILE%\.lo
 |------|--------|----------------|
 | **Gemini API key** | [Google AI Studio](https://aistudio.google.com/app/apikey) → `agent\.env` as `GOOGLE_API_KEY` | Default agent (`AGENT_BACKEND=gemini`) |
 | **OpenAI API key** | `agent\.env` as `OPENAI_API_KEY` | Only if `AGENT_BACKEND=litellm` + `openai/...` model |
+| **AWS credentials** | `agent\.env` as `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION_NAME` | Only if `AGENT_BACKEND=bedrock` (Amazon Bedrock) |
 | **JWT secret** | `backend\.env` → `JWT_SECRET` | Login / API auth |
 | **Fernet key** | `backend\.env` → `ENCRYPTION_KEY` | Encrypting password data at rest |
 

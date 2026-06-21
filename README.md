@@ -160,7 +160,7 @@ Copy-Item frontend\.env.example frontend\.env
 
 **Required:**
 
-- `agent/.env` → `GOOGLE_API_KEY` (when `AGENT_BACKEND=gemini`)
+- `agent/.env` → credentials for your backend: `GOOGLE_API_KEY` (gemini), `OPENAI_API_KEY` (litellm + OpenAI), or `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION_NAME` (bedrock)
 - `backend/.env` → `JWT_SECRET`, `ENCRYPTION_KEY`
 
 Generate Fernet key:
@@ -250,6 +250,19 @@ AGENT_BACKEND=litellm
 AGENT_MODEL=openai/gpt-4o-mini
 OPENAI_API_KEY=your-key
 ```
+
+Amazon Bedrock (the `bedrock/` prefix is added automatically):
+
+```env
+AGENT_BACKEND=bedrock
+AGENT_MODEL=anthropic.claude-3-5-sonnet-20240620-v1:0
+AWS_ACCESS_KEY_ID=your-aws-access-key-id
+AWS_SECRET_ACCESS_KEY=your-aws-secret-access-key
+AWS_REGION_NAME=us-east-1
+```
+
+> Make sure the chosen model is enabled under **Bedrock → Model access** in your AWS
+> region. For temporary credentials (assumed roles / SSO) also set `AWS_SESSION_TOKEN`.
 
 ## Database migrations
 

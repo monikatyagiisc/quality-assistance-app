@@ -4,7 +4,11 @@ from app.config.settings import settings
 
 
 def resolve_model():
-    """Return an ADK model: Gemini string or LiteLLM wrapper for other providers."""
-    if settings.agent_backend == "litellm":
-        return LiteLlm(model=settings.agent_model)
+    """Return an ADK model.
+
+    - gemini: native Gemini model string
+    - litellm / bedrock: LiteLLM wrapper (Bedrock model ids get a 'bedrock/' prefix)
+    """
+    if settings.agent_backend in ("litellm", "bedrock"):
+        return LiteLlm(model=settings.resolved_model)
     return settings.agent_model

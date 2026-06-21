@@ -3,7 +3,7 @@ from typing import Literal
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-AgentBackend = Literal["gemini", "litellm", "bedrock"]
+AgentBackend = Literal["gemini", "litellm", "bedrock", "ollama"]
 
 
 class Settings(BaseSettings):
@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     aws_session_token: str | None = Field(default=None, validation_alias="AWS_SESSION_TOKEN")
     aws_region: str = Field(default="us-east-1", validation_alias="AWS_REGION_NAME")
 
+    # Ollama (when AGENT_BACKEND=ollama) — local, no API key required
+    ollama_api_base: str = Field(
+        default="http://localhost:11434", validation_alias="OLLAMA_API_BASE"
+    )
+
     agent_host: str = "0.0.0.0"
     agent_port: int = 8001
     app_name: str = "quality_assistance_agent"
@@ -30,9 +35,11 @@ class Settings(BaseSettings):
 
     @property
     def resolved_model(self) -> str:
-        """LiteLLM-compatible model id. Bedrock models need a 'bedrock/' prefix."""
+        """LiteLLM-compatible model id with provider prefix when needed."""
         if self.agent_backend == "bedrock" and not self.agent_model.startswith("bedrock/"):
             return f"bedrock/{self.agent_model}"
+        if self.agent_backend == "ollama" and not self.agent_model.startswith("ollama/"):
+            return f"ollama/{self.agent_model}"
         return self.agent_model
 
     def validate_model_credentials(self) -> str | None:
@@ -47,7 +54,6 @@ class Settings(BaseSettings):
             return None
 
         if self.agent_backend == "bedrock":
-            # Allow IAM roles / instance profiles: only flag when nothing is configured.
             using_explicit_keys = bool(self.aws_access_key_id and self.aws_secret_access_key)
             if not using_explicit_keys and not self.aws_session_token:
                 return (
@@ -55,6 +61,9 @@ class Settings(BaseSettings):
                     "Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY (or use an IAM role) "
                     "in agent/.env."
                 )
+            return None
+
+        if self.agent_backend == "ollama":
             return None
 
         return f"Unsupported AGENT_BACKEND: {self.agent_backend}"

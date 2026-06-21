@@ -31,6 +31,8 @@ if settings.aws_session_token:
 if settings.aws_region:
     os.environ.setdefault("AWS_REGION_NAME", settings.aws_region)
     os.environ.setdefault("AWS_DEFAULT_REGION", settings.aws_region)
+if settings.ollama_api_base:
+    os.environ.setdefault("OLLAMA_API_BASE", settings.ollama_api_base)
 
 app = FastAPI(
     title="Quality Assistance Agent",

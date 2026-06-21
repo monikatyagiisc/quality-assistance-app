@@ -7,8 +7,8 @@ def resolve_model():
     """Return an ADK model.
 
     - gemini: native Gemini model string
-    - litellm / bedrock: LiteLLM wrapper (Bedrock model ids get a 'bedrock/' prefix)
+    - litellm / bedrock / ollama: LiteLLM wrapper
     """
-    if settings.agent_backend in ("litellm", "bedrock"):
+    if settings.agent_backend in ("litellm", "bedrock", "ollama"):
         return LiteLlm(model=settings.resolved_model)
     return settings.agent_model

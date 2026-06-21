@@ -75,12 +75,18 @@ function parseErrorDetail(body: unknown): { message: string; code?: string } {
   return { message: 'Request failed' }
 }
 
-const REQUEST_TIMEOUT_MS = 15_000
+const DEFAULT_REQUEST_TIMEOUT_MS = 15_000
+const ASSIST_REQUEST_TIMEOUT_MS = 180_000
+
+type RequestOptions = {
+  timeoutMs?: number
+}
 
 async function request<T>(
   path: string,
   options: RequestInit = {},
   token?: string | null,
+  requestOptions: RequestOptions = {},
 ): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -91,8 +97,9 @@ async function request<T>(
     headers.Authorization = `Bearer ${token}`
   }
 
+  const timeoutMs = requestOptions.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS
   const controller = new AbortController()
-  const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs)
 
   let response: Response
   try {
@@ -103,10 +110,13 @@ async function request<T>(
     })
   } catch (err) {
     if (err instanceof DOMException && err.name === 'AbortError') {
+      const isAssist = path === '/api/assist'
       throw new ApiError(
         0,
-        'Request timed out. Is the backend running on ' + API_URL + '?',
-        'timeout',
+        isAssist
+          ? 'Quality assistance is taking longer than expected. The agent may still be working — wait a moment and try again if no result appears.'
+          : 'Request timed out. Is the backend running on ' + API_URL + '?',
+        isAssist ? 'assist_timeout' : 'timeout',
       )
     }
     throw new ApiError(
@@ -149,7 +159,12 @@ export const api = {
       session_id?: string | null
     },
   ) =>
-    request<AssistanceResult>('/api/assist', { method: 'POST', body: JSON.stringify(data) }, token),
+    request<AssistanceResult>(
+      '/api/assist',
+      { method: 'POST', body: JSON.stringify(data) },
+      token,
+      { timeoutMs: ASSIST_REQUEST_TIMEOUT_MS },
+    ),
 
   getRepositorySettings: async (token: string) => {
     const result = await request<RepositoryConnection | null>('/api/settings/repository', {}, token)

@@ -5,6 +5,8 @@ import { getUserFriendlyError } from '../utils/errorMessages'
 import { ASSISTANCE_SAMPLES } from '../data/assistanceSamples'
 import { useAuth } from '../context/AuthContext'
 import { SettingsInfoLink } from '../components/SettingsInfoLink'
+import { ThinkingIndicator } from '../components/ThinkingIndicator'
+import { MarkdownContent } from '../components/MarkdownContent'
 import './DashboardPage.css'
 
 const DIFF_SETTINGS_REQUIRED_MSG =
@@ -28,6 +30,7 @@ export function DashboardPage() {
   const [selectedSampleId, setSelectedSampleId] = useState<string | null>(null)
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+  const [loadingStartedAt, setLoadingStartedAt] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<AssistanceResult | null>(null)
   const [repoConnection, setRepoConnection] = useState<RepositoryConnection | null>(null)
@@ -111,6 +114,7 @@ export function DashboardPage() {
     }
 
     setLoading(true)
+    setLoadingStartedAt(Date.now())
     setError(null)
     setResult(null)
 
@@ -127,6 +131,7 @@ export function DashboardPage() {
       setError(getUserFriendlyError(err))
     } finally {
       setLoading(false)
+      setLoadingStartedAt(null)
     }
   }
 
@@ -394,14 +399,16 @@ export function DashboardPage() {
           {!error && !result && !loading && (
             <p className="muted">Submit requirements or load a sample to generate QA guidance.</p>
           )}
-          {loading && <p className="muted pulse">Contacting agent service...</p>}
+          {loading && loadingStartedAt !== null && (
+            <ThinkingIndicator startedAt={loadingStartedAt} />
+          )}
           {result && (
             <article className="result">
               <div className="result-meta">
                 <span className={`badge badge-${result.status}`}>{result.status}</span>
                 <span>Session: {result.session_id}</span>
               </div>
-              <pre className="response">{result.response}</pre>
+              <MarkdownContent content={result.response} />
             </article>
           )}
         </section>

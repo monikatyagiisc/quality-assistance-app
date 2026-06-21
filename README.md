@@ -160,7 +160,7 @@ Copy-Item frontend\.env.example frontend\.env
 
 **Required:**
 
-- `agent/.env` → credentials for your backend: `GOOGLE_API_KEY` (gemini), `OPENAI_API_KEY` (litellm + OpenAI), or `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION_NAME` (bedrock)
+- `agent/.env` → credentials for your backend: `GOOGLE_API_KEY` (gemini), `OPENAI_API_KEY` (litellm + OpenAI), AWS vars (bedrock), or Ollama (`AGENT_BACKEND=ollama`, no key — see [ollama.com](https://ollama.com))
 - `backend/.env` → `JWT_SECRET`, `ENCRYPTION_KEY`
 
 Generate Fernet key:
@@ -263,6 +263,26 @@ AWS_REGION_NAME=us-east-1
 
 > Make sure the chosen model is enabled under **Bedrock → Model access** in your AWS
 > region. For temporary credentials (assumed roles / SSO) also set `AWS_SESSION_TOKEN`.
+
+Ollama (local, free — no API key):
+
+```env
+AGENT_BACKEND=ollama
+AGENT_MODEL=llama3.2
+OLLAMA_API_BASE=http://localhost:11434
+```
+
+Install [Ollama](https://ollama.com), then pull the model:
+
+```bash
+ollama pull llama3.2
+```
+
+When running the agent in Docker, point at the host Ollama server:
+
+```env
+OLLAMA_API_BASE=http://host.docker.internal:11434
+```
 
 ## Database migrations
 

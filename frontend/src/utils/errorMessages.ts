@@ -81,7 +81,10 @@ export function getUserFriendlyError(error: unknown): string {
       return 'The quality assistant service is offline. Start the agent service and try again.'
     }
 
-    if (error.code === 'timeout' || matchesAny(combined, TIMEOUT_PATTERNS)) {
+    if (error.code === 'assist_timeout' || error.code === 'timeout' || matchesAny(combined, TIMEOUT_PATTERNS)) {
+      if (error.code === 'assist_timeout') {
+        return 'Quality assistance is taking longer than expected. With Ollama or large prompts this can take 1–2 minutes — try again or use a shorter input.'
+      }
       return 'The request timed out. Try again with a shorter prompt.'
     }
 

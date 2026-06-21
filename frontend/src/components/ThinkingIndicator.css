@@ -1,0 +1,55 @@
+.thinking-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  padding: 1rem;
+  border-radius: 0.6rem;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(129, 140, 248, 0.2);
+}
+
+.thinking-dots {
+  display: inline-flex;
+  gap: 0.35rem;
+}
+
+.thinking-dots span {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #818cf8;
+  animation: thinking-bounce 1.2s ease-in-out infinite;
+}
+
+.thinking-dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.thinking-dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes thinking-bounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.45;
+  }
+  40% {
+    transform: translateY(-0.35rem);
+    opacity: 1;
+  }
+}
+
+.thinking-message {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #e2e8f0;
+}
+
+.thinking-elapsed {
+  margin: 0;
+  font-size: 0.82rem;
+}

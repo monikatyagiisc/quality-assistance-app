@@ -41,6 +41,7 @@ chmod +x scripts/dev.sh
 | **Gemini API key** | [Google AI Studio](https://aistudio.google.com/app/apikey) → `agent/.env` as `GOOGLE_API_KEY` | Default agent (`AGENT_BACKEND=gemini`) |
 | **OpenAI API key** | `agent/.env` as `OPENAI_API_KEY` | `AGENT_BACKEND=litellm` + OpenAI model |
 | **AWS credentials** | `agent/.env` as `AWS_ACCESS_KEY_ID` / `AWS_SECRET_ACCESS_KEY` / `AWS_REGION_NAME` | `AGENT_BACKEND=bedrock` (Amazon Bedrock) |
+| **Ollama** | Install from [ollama.com](https://ollama.com), then `ollama pull llama3.2` | `AGENT_BACKEND=ollama` (local, free) |
 | **JWT secret** | `backend/.env` → `JWT_SECRET` | Login / API auth |
 | **Fernet key** | `backend/.env` → `ENCRYPTION_KEY` | Password storage at rest |
 
@@ -76,11 +77,34 @@ ENCRYPTION_KEY=<fernet-key>
 
 ### `agent/.env`
 
+Default (Gemini):
+
 ```env
 AGENT_BACKEND=gemini
 AGENT_MODEL=gemini-2.0-flash
 GOOGLE_API_KEY=<your-gemini-key>
 LOG_LEVEL=INFO
+```
+
+Free local option (Ollama):
+
+```env
+AGENT_BACKEND=ollama
+AGENT_MODEL=llama3.2
+OLLAMA_API_BASE=http://localhost:11434
+LOG_LEVEL=INFO
+```
+
+Install Ollama from [ollama.com](https://ollama.com), open the app (or run `ollama serve`), then:
+
+```bash
+ollama pull llama3.2
+```
+
+If `ollama` is not on your PATH after install, use the app from **Applications → Ollama**, or:
+
+```bash
+/Applications/Ollama.app/Contents/Resources/ollama pull llama3.2
 ```
 
 ### `frontend/.env`

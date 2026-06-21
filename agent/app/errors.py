@@ -87,6 +87,18 @@ def classify_agent_error(exc: BaseException) -> UserFacingError:
             "session_not_found",
         )
 
+    if settings.agent_backend == "ollama" and (
+        "CONNECTION REFUSED" in upper
+        or "CONNECT ERROR" in upper
+        or "FAILED TO ESTABLISH" in upper
+        or "OLLAMA" in upper and "NOT FOUND" in upper
+    ):
+        return UserFacingError(
+            503,
+            _invalid_api_key_message(),
+            "ollama_unavailable",
+        )
+
     return UserFacingError(
         500,
         "We could not generate quality assistance right now. Please try again in a few minutes.",
@@ -107,6 +119,8 @@ def _matches_api_key_error(upper_text: str) -> bool:
 def _provider_label() -> str:
     if settings.agent_backend == "bedrock":
         return "Amazon Bedrock"
+    if settings.agent_backend == "ollama":
+        return "Ollama"
     if settings.agent_backend == "litellm":
         model = settings.agent_model.lower()
         if model.startswith("openai/"):
@@ -117,6 +131,8 @@ def _provider_label() -> str:
             return "Azure OpenAI"
         if model.startswith("bedrock/"):
             return "Amazon Bedrock"
+        if model.startswith("ollama/"):
+            return "Ollama"
         return "your model provider"
     return "Gemini"
 
@@ -127,6 +143,12 @@ def _billing_hint() -> str:
         return (
             "If this keeps happening, check your Amazon Bedrock model access and "
             "service quotas in the AWS console."
+        )
+    if settings.agent_backend == "ollama":
+        return (
+            "If this keeps happening, confirm Ollama is running "
+            f"({settings.ollama_api_base}) and the model is pulled: "
+            f"ollama pull {settings.agent_model.removeprefix('ollama/')}"
         )
     if settings.agent_backend == "litellm":
         return f"If this keeps happening, check {provider} usage limits and billing."
@@ -139,6 +161,12 @@ def _invalid_api_key_message() -> str:
             "AWS credentials are missing or invalid for Amazon Bedrock. "
             "Check AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_REGION_NAME in agent/.env, "
             "and confirm the model is enabled in Bedrock model access."
+        )
+    if settings.agent_backend == "ollama":
+        return (
+            f"Could not reach Ollama at {settings.ollama_api_base}. "
+            "Start Ollama (ollama serve) and pull the model "
+            f"(ollama pull {settings.agent_model.removeprefix('ollama/')})."
         )
     if settings.agent_backend == "litellm":
         model = settings.agent_model.lower()

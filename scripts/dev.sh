@@ -216,6 +216,11 @@ start_service "frontend" "$COLOR_FRONTEND" "$ROOT/frontend" yarn dev
 
 sleep 2
 
+if [[ "$(uname -s)" == "Darwin" ]] && command -v open >/dev/null 2>&1; then
+  open "http://localhost:5173" >/dev/null 2>&1 || \
+    log_line "system" "$COLOR_SYSTEM" "Could not open a browser automatically; visit http://localhost:5173"
+fi
+
 load_pg_config
 
 echo ""

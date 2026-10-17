@@ -287,6 +287,15 @@ When running the agent in Docker, point at the host Ollama server:
 OLLAMA_API_BASE=http://host.docker.internal:11434
 ```
 
+## Jira and GitHub MCP
+
+The agent can connect to remote Streamable HTTP MCP servers. Set `JIRA_MCP_URL` and
+`JIRA_MCP_TOKEN`, and/or `GITHUB_MCP_URL` and `GITHUB_MCP_TOKEN`, in `agent/.env` for
+local development or the repo-root `.env` for Docker Compose. Use HTTPS endpoints;
+HTTP is accepted only for localhost. These bearer tokens authenticate to the MCP
+servers, so configure Jira and GitHub credentials and permissions on those servers.
+The agent exposes the server-provided tools with `jira_` and `github_` prefixes.
+
 ## Database migrations
 
 Migrations run automatically when using `dev.sh` / `dev.ps1` and on backend startup.

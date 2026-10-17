@@ -1,6 +1,7 @@
 from google.adk.agents import Agent
 
 from app.agent.capabilities import attach_agent_metadata
+from app.agent.mcp import build_mcp_toolsets
 from app.callbacks.logger import AGENT_LOG_CALLBACKS
 from app.agent.config import ROOT_AGENT_DESCRIPTION, ROOT_AGENT_NAME
 from app.agent.prompts.consolidated import build_consolidated_instruction
@@ -16,13 +17,16 @@ def build_root_agent() -> Agent:
     # Local Ollama models often invent tool names instead of using transfer_to_agent.
     # Use a single consolidated agent (no sub-agents) for reliable tool calling.
     use_sub_agents = settings.agent_backend != "ollama"
+    mcp_toolsets = build_mcp_toolsets()
+    tools = [*ROOT_TOOLS, *mcp_toolsets] if use_sub_agents else mcp_toolsets
 
     agent = Agent(
         model=resolve_model(),
         name=ROOT_AGENT_NAME,
         description=ROOT_AGENT_DESCRIPTION,
-        instruction=build_root_instruction() if use_sub_agents else build_consolidated_instruction(),
-        tools=ROOT_TOOLS if use_sub_agents else [],
+        instruction=build_root_instruction(
+        ) if use_sub_agents else build_consolidated_instruction(),
+        tools=tools,
         sub_agents=REGISTERED_SUB_AGENTS if use_sub_agents else [],
         **AGENT_LOG_CALLBACKS,
     )

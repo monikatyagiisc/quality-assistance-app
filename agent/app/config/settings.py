@@ -1,31 +1,50 @@
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 AgentBackend = Literal["gemini", "litellm", "bedrock", "ollama"]
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    agent_backend: AgentBackend = Field(default="gemini", validation_alias="AGENT_BACKEND")
-    agent_model: str = Field(default="gemini-2.0-flash", validation_alias="AGENT_MODEL")
+    agent_backend: AgentBackend = Field(
+        default="gemini", validation_alias="AGENT_BACKEND")
+    agent_model: str = Field(default="gemini-2.0-flash",
+                             validation_alias="AGENT_MODEL")
 
-    google_api_key: str | None = Field(default=None, validation_alias="GOOGLE_API_KEY")
-    openai_api_key: str | None = Field(default=None, validation_alias="OPENAI_API_KEY")
+    google_api_key: str | None = Field(
+        default=None, validation_alias="GOOGLE_API_KEY")
+    openai_api_key: str | None = Field(
+        default=None, validation_alias="OPENAI_API_KEY")
 
     # AWS Bedrock (when AGENT_BACKEND=bedrock)
-    aws_access_key_id: str | None = Field(default=None, validation_alias="AWS_ACCESS_KEY_ID")
+    aws_access_key_id: str | None = Field(
+        default=None, validation_alias="AWS_ACCESS_KEY_ID")
     aws_secret_access_key: str | None = Field(
         default=None, validation_alias="AWS_SECRET_ACCESS_KEY"
     )
-    aws_session_token: str | None = Field(default=None, validation_alias="AWS_SESSION_TOKEN")
-    aws_region: str = Field(default="us-east-1", validation_alias="AWS_REGION_NAME")
+    aws_session_token: str | None = Field(
+        default=None, validation_alias="AWS_SESSION_TOKEN")
+    aws_region: str = Field(default="us-east-1",
+                            validation_alias="AWS_REGION_NAME")
 
     # Ollama (when AGENT_BACKEND=ollama) — local, no API key required
     ollama_api_base: str = Field(
         default="http://localhost:11434", validation_alias="OLLAMA_API_BASE"
+    )
+
+    jira_mcp_url: str | None = Field(
+        default=None, validation_alias="JIRA_MCP_URL")
+    jira_mcp_token: SecretStr | None = Field(
+        default=None, validation_alias="JIRA_MCP_TOKEN"
+    )
+    github_mcp_url: str | None = Field(
+        default=None, validation_alias="GITHUB_MCP_URL")
+    github_mcp_token: SecretStr | None = Field(
+        default=None, validation_alias="GITHUB_MCP_TOKEN"
     )
 
     agent_host: str = "0.0.0.0"
@@ -54,7 +73,8 @@ class Settings(BaseSettings):
             return None
 
         if self.agent_backend == "bedrock":
-            using_explicit_keys = bool(self.aws_access_key_id and self.aws_secret_access_key)
+            using_explicit_keys = bool(
+                self.aws_access_key_id and self.aws_secret_access_key)
             if not using_explicit_keys and not self.aws_session_token:
                 return (
                     "AWS credentials are required when AGENT_BACKEND=bedrock. "

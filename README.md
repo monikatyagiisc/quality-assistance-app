@@ -52,8 +52,11 @@ chmod +x scripts/dev.sh
 
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\scripts\setup-windows.ps1  # first run only
 .\scripts\dev.ps1
 ```
+
+Install the prerequisites in [docs/SETUP-WINDOWS.md](docs/SETUP-WINDOWS.md) first, and add your model API key to `agent\.env`. The setup script prepares local dependencies and the database; `dev.ps1` starts the app and opens the frontend.
 
 Both scripts:
 

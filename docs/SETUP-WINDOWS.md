@@ -156,21 +156,16 @@ CREATE DATABASE quality_assistance OWNER quality_assistance;
 
 ---
 
-## 5. Install dependencies (first time)
+## 5. First-time setup
 
-Run once from PowerShell (or let `dev.ps1` do this for you):
+After installing the prerequisites, run once from PowerShell at the project root. The script creates missing environment files; add your model credentials to `agent\.env` before launching the app:
 
 ```powershell
-cd quality-assistance-app\agent
-uv sync
-
-cd ..\backend
-uv sync
-uv run alembic upgrade head
-
-cd ..\frontend
-yarn install
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\scripts\setup-windows.ps1
 ```
+
+The setup script creates missing `.env` files, generates development JWT and encryption secrets without replacing custom values, starts Docker PostgreSQL if no local database is reachable, installs dependencies, and applies migrations. It does not install Windows applications such as Python, Node.js, or Docker Desktop; install those from the prerequisites above first.
 
 ---
 
@@ -211,10 +206,11 @@ Use the [Docker Compose](#run-full-stack-with-docker-compose) section above. For
 ```powershell
 cd quality-assistance-app
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+.\scripts\setup-windows.ps1   # first run only; repeat after dependency changes
 .\scripts\dev.ps1
 ```
 
-Starts **PostgreSQL** (if needed), **agent** (`:8001`), **backend** (`:8000`), **frontend** (`:5173`), runs migrations, installs deps.
+Starts **PostgreSQL** (if needed), **agent** (`:8001`), **backend** (`:8000`), and **frontend** (`:5173`), then opens the frontend in your default browser. The launcher also checks dependencies and migrations on startup.
 
 Logs: `.logs\agent.log`, `.logs\backend.log`, `.logs\frontend.log`
 

@@ -207,7 +207,23 @@ try {
     Start-DevService -Label "frontend" -WorkingDirectory $frontendDir `
         -CommandLine "yarn dev >> `"$(Join-Path $LogDir 'frontend.log')`" 2>&1"
 
-    Start-Sleep -Seconds 3
+    $frontendReady = $false
+    for ($attempt = 1; $attempt -le 30; $attempt++) {
+        try {
+            Invoke-WebRequest -Uri "http://localhost:5173/" -UseBasicParsing -TimeoutSec 2 | Out-Null
+            $frontendReady = $true
+            break
+        } catch {
+            Start-Sleep -Seconds 1
+        }
+    }
+
+    if ($frontendReady) {
+        Start-Process "http://localhost:5173"
+    } else {
+        Write-Warning "Frontend did not respond yet. Open http://localhost:5173 when Vite is ready."
+    }
+
     Load-PgConfig
 
     Write-Host ""

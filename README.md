@@ -24,6 +24,7 @@ Detailed install and troubleshooting:
 
 | Platform | Guide |
 |----------|--------|
+| **Ubuntu** | [scripts/README-Ubuntu.md](scripts/README-Ubuntu.md) |
 | **macOS** | [docs/SETUP-MAC.md](docs/SETUP-MAC.md) |
 | **Windows** | [docs/SETUP-WINDOWS.md](docs/SETUP-WINDOWS.md) |
 
@@ -37,11 +38,24 @@ Detailed install and troubleshooting:
 | **Docker Desktop** *or* local Postgres | Run Postgres on port **5432** |
 | **Gemini API key** | [Google AI Studio](https://aistudio.google.com/app/apikey) (or OpenAI for LiteLLM) |
 
-Full checklists: **[Windows](docs/SETUP-WINDOWS.md)** · **[macOS](docs/SETUP-MAC.md)**
+Full checklists: **[Ubuntu](scripts/README-Ubuntu.md)** · **[Windows](docs/SETUP-WINDOWS.md)** · **[macOS](docs/SETUP-MAC.md)**
 
 ## Quick start
 
-### macOS / Linux
+### Ubuntu
+
+Run the one-time setup, add your model API key to `agent/.env`, then start the app:
+
+```bash
+chmod +x scripts/setup-ubuntu.sh scripts/run-ubuntu.sh
+./scripts/setup-ubuntu.sh
+# Edit agent/.env and set GOOGLE_API_KEY
+./scripts/run-ubuntu.sh
+```
+
+The setup script checks the required tools, creates local environment files and development secrets, prepares PostgreSQL, installs dependencies, and applies migrations. See [scripts/README-Ubuntu.md](scripts/README-Ubuntu.md) for Ubuntu prerequisites.
+
+### macOS / other Linux
 
 ```bash
 chmod +x scripts/dev.sh
@@ -58,7 +72,7 @@ Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 
 Install the prerequisites in [docs/SETUP-WINDOWS.md](docs/SETUP-WINDOWS.md) first, and add your model API key to `agent\.env`. The setup script prepares local dependencies and the database; `dev.ps1` starts the app and opens the frontend.
 
-Both scripts:
+The Windows setup and development scripts:
 
 - Create `.env` files from examples if missing
 - Use existing local Postgres on `5432`, or start Docker Postgres

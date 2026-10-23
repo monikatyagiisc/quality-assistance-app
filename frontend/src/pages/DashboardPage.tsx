@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { api, type AssistanceResult, type RepositoryConnection } from '../api/client'
 import { getUserFriendlyError } from '../utils/errorMessages'
@@ -34,6 +34,41 @@ function downloadResultMarkdown(content: string) {
   URL.revokeObjectURL(url)
 }
 
+function downloadResultHtml(content: string) {
+  const html = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quality Assistance Results</title>
+  <style>
+    body { max-width: 960px; margin: 2rem auto; padding: 0 1.5rem; color: #1f2937; font: 16px/1.6 system-ui, sans-serif; }
+    h1, h2, h3, h4 { line-height: 1.3; margin: 1.5rem 0 0.75rem; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    th, td { border: 1px solid #cbd5e1; padding: 0.5rem 0.65rem; text-align: left; }
+    th { background: #f1f5f9; }
+    code { padding: 0.1rem 0.3rem; background: #f1f5f9; border-radius: 0.25rem; }
+    pre { overflow-x: auto; padding: 1rem; background: #f1f5f9; border-radius: 0.5rem; }
+    blockquote { margin-left: 0; padding-left: 1rem; border-left: 3px solid #94a3b8; color: #475569; }
+    img { max-width: 100%; }
+    @media print { body { max-width: none; margin: 0; } }
+  </style>
+</head>
+<body>
+  <main>${content}</main>
+</body>
+</html>`
+  const blob = new Blob([html], { type: 'text/html;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `quality-assistance-${new Date().toISOString().slice(0, 10)}.html`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
+}
+
 export function DashboardPage() {
   const { token, user } = useAuth()
   const [requirements, setRequirements] = useState('')
@@ -51,6 +86,7 @@ export function DashboardPage() {
   const [compareHead, setCompareHead] = useState('')
   const [diffImporting, setDiffImporting] = useState(false)
   const [diffImportNote, setDiffImportNote] = useState<string | null>(null)
+  const resultContentRef = useRef<HTMLDivElement>(null)
 
   const selectedSample = ASSISTANCE_SAMPLES.find((s) => s.id === selectedSampleId)
 
@@ -419,16 +455,29 @@ export function DashboardPage() {
               <div className="result-meta">
                 <span className={`badge badge-${result.status}`}>{result.status}</span>
                 <span>Session: {result.session_id}</span>
-                <button
-                  type="button"
-                  className="btn btn-ghost btn-sm result-download"
-                  onClick={() => downloadResultMarkdown(result.response)}
-                  aria-label="Download results as Markdown"
-                >
-                  Download Markdown
-                </button>
+                <div className="result-downloads" role="group" aria-label="Download results">
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm result-download"
+                    onClick={() => downloadResultMarkdown(result.response)}
+                  >
+                    Markdown
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm result-download"
+                    onClick={() => {
+                      const renderedResult = resultContentRef.current?.innerHTML
+                      if (renderedResult) downloadResultHtml(renderedResult)
+                    }}
+                  >
+                    HTML
+                  </button>
+                </div>
               </div>
-              <MarkdownContent content={result.response} />
+              <div ref={resultContentRef}>
+                <MarkdownContent content={result.response} />
+              </div>
             </article>
           )}
         </section>

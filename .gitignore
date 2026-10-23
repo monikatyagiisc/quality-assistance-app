@@ -33,3 +33,7 @@ postgres_data/
 
 # Dev script logs
 .logs/
+
+# Other
+tmp/
+temp/

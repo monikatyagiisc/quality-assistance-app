@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { api, type RepositoryConnection } from '../api/client'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 import { getUserFriendlyError } from '../utils/errorMessages'
 import './SettingsPage.css'
 

@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: frontend/yarn.lock
+      - name: Install dependencies
+        working-directory: frontend
+        run: yarn install --frozen-lockfile
+      - name: Lint
+        working-directory: frontend
+        run: yarn lint
+      - name: Build
+        working-directory: frontend
+        run: yarn build
+
+  python:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - service: agent
+            source: app
+          - service: backend
+            source: src
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: ${{ matrix.service }}/uv.lock
+      - name: Install dependencies
+        working-directory: ${{ matrix.service }}
+        run: uv sync --locked
+      - name: Run unit tests
+        working-directory: ${{ matrix.service }}
+        run: uv run python -m unittest discover -s tests
+      - name: Compile Python sources
+        working-directory: ${{ matrix.service }}
+        run: uv run python -m compileall -q ${{ matrix.source }}

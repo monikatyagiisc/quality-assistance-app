@@ -12,7 +12,7 @@ export function LandingPage() {
         </h1>
         <p className="landing-lead">
           Quality Assistance orchestrates specialized agents — from test case design to release
-          readiness — powered by Google ADK and your software requirements.
+          readiness — using your software requirements and configurable AI models.
         </p>
         <div className="landing-cta">
           <Link to="/register" className="btn btn-primary btn-lg">

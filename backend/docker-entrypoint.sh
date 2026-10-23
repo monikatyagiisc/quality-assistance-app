@@ -1,8 +1,9 @@
 #!/bin/sh
 set -e
 
-echo "Running database migrations..."
-alembic upgrade head
+if [ "$#" -gt 0 ]; then
+    exec "$@"
+fi
 
 echo "Starting backend API..."
 exec uvicorn quality_assistance_backend.main:app \

@@ -27,6 +27,7 @@ Detailed install and troubleshooting:
 | **Ubuntu** | [scripts/README-Ubuntu.md](scripts/README-Ubuntu.md) |
 | **macOS** | [docs/SETUP-MAC.md](docs/SETUP-MAC.md) |
 | **Windows** | [docs/SETUP-WINDOWS.md](docs/SETUP-WINDOWS.md) |
+| **AWS ECS production** | [docs/PRODUCTION-ECS.md](docs/PRODUCTION-ECS.md) |
 
 ## Prerequisites (all platforms)
 

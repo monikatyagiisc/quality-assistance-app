@@ -1,5 +1,5 @@
 import { Link, NavLink, Outlet } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
+import { useAuth } from '../context/useAuth'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { UserMenu } from './UserMenu'
 import './Layout.css'
@@ -50,7 +50,7 @@ export function Layout() {
       </main>
 
       <footer className="footer">
-        <p>AI-powered STLC assistant · Final year project</p>
+        <p>AI-assisted software quality engineering</p>
       </footer>
     </div>
   )

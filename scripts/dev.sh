@@ -219,6 +219,17 @@ sleep 2
 if [[ "$(uname -s)" == "Darwin" ]] && command -v open >/dev/null 2>&1; then
   open "http://localhost:5173" >/dev/null 2>&1 || \
     log_line "system" "$COLOR_SYSTEM" "Could not open a browser automatically; visit http://localhost:5173"
+elif [[ "$(uname -s)" == "Linux" ]] \
+  && [[ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]]; then
+  browser_command="${BROWSER:-xdg-open}"
+  if command -v "$browser_command" >/dev/null 2>&1; then
+    "$browser_command" "http://localhost:5173" >/dev/null 2>&1 || \
+      log_line "system" "$COLOR_SYSTEM" "Could not open a browser automatically; visit http://localhost:5173"
+  else
+    log_line "system" "$COLOR_SYSTEM" "Could not open a browser automatically; visit http://localhost:5173"
+  fi
+else
+  log_line "system" "$COLOR_SYSTEM" "Could not open a browser automatically; visit http://localhost:5173"
 fi
 
 load_pg_config

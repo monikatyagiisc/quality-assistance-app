@@ -134,10 +134,14 @@ echo "Installing agent and backend Python dependencies..."
 (cd "$ROOT/backend" && uv sync --system-certs --quiet)
 
 echo "Installing frontend dependencies..."
-(
-  cd "$ROOT/frontend"
-  NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--use-openssl-ca" yarn install --frozen-lockfile
-)
+if [[ -n "${JFROG_NPM_TOKEN:-}" ]]; then
+  "$ROOT/scripts/yarn-install-jfrog.sh"
+else
+  (
+    cd "$ROOT/frontend"
+    NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--use-openssl-ca" yarn install --frozen-lockfile
+  )
+fi
 
 echo "Applying database migrations..."
 (cd "$ROOT/backend" && uv run alembic upgrade head)

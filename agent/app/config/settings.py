@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     )
     aws_session_token: str | None = Field(
         default=None, validation_alias="AWS_SESSION_TOKEN")
+    aws_profile: str | None = Field(
+        default=None, validation_alias="AWS_PROFILE")
     aws_region: str = Field(default="us-east-1",
                             validation_alias="AWS_REGION_NAME")
 
@@ -75,11 +77,11 @@ class Settings(BaseSettings):
         if self.agent_backend == "bedrock":
             using_explicit_keys = bool(
                 self.aws_access_key_id and self.aws_secret_access_key)
-            if not using_explicit_keys and not self.aws_session_token:
+            if not using_explicit_keys and not self.aws_session_token and not self.aws_profile:
                 return (
                     "AWS credentials are required when AGENT_BACKEND=bedrock. "
-                    "Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY (or use an IAM role) "
-                    "in agent/.env."
+                    "Set AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY, AWS_PROFILE, "
+                    "or use an IAM role in agent/.env."
                 )
             return None
 

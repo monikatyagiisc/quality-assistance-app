@@ -28,6 +28,8 @@ if settings.aws_secret_access_key:
     os.environ.setdefault("AWS_SECRET_ACCESS_KEY", settings.aws_secret_access_key)
 if settings.aws_session_token:
     os.environ.setdefault("AWS_SESSION_TOKEN", settings.aws_session_token)
+if settings.aws_profile:
+    os.environ.setdefault("AWS_PROFILE", settings.aws_profile)
 if settings.aws_region:
     os.environ.setdefault("AWS_REGION_NAME", settings.aws_region)
     os.environ.setdefault("AWS_DEFAULT_REGION", settings.aws_region)

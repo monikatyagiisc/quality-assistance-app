@@ -8,10 +8,15 @@ LOCK_FILE="$FRONTEND/yarn.lock"
 REGISTRY="https://jfrog.alight.com/artifactory/api/npm/yarnpkg-npm-remote-virual/"
 
 if [[ -z "${JFROG_NPM_TOKEN:-}" ]]; then
-  echo "Error: Set JFROG_NPM_TOKEN to your JFrog access token and rerun this script." >&2
-  echo "The token is used temporarily and is not saved in the repository." >&2
-  exit 1
+  if [[ ! -t 0 ]]; then
+    echo "Error: Run this script interactively or set JFROG_NPM_TOKEN." >&2
+    exit 1
+  fi
+  read -rsp 'JFrog npm token: ' JFROG_NPM_TOKEN
+  echo
 fi
+
+export JFROG_NPM_TOKEN
 
 for command_name in node yarn python3; do
   if ! command -v "$command_name" >/dev/null 2>&1; then
@@ -30,11 +35,25 @@ LOCK_BACKUP="$TEMP_DIR/yarn.lock"
 NPM_CONFIG="$TEMP_DIR/npmrc"
 cp -p "$LOCK_FILE" "$LOCK_BACKUP"
 chmod 600 "$LOCK_BACKUP"
+INSTALL_SUCCEEDED=false
 
 cleanup() {
   local exit_code=$?
-  cp -p "$LOCK_BACKUP" "$LOCK_FILE"
+  if [[ "$INSTALL_SUCCEEDED" == true ]]; then
+    python3 - "$LOCK_FILE" "$REGISTRY" <<'PY'
+import sys
+from pathlib import Path
+
+lockfile = Path(sys.argv[1])
+registry = sys.argv[2]
+content = lockfile.read_text().replace(registry, "https://registry.yarnpkg.com/")
+lockfile.write_text(content)
+PY
+  else
+    cp -p "$LOCK_BACKUP" "$LOCK_FILE"
+  fi
   rm -rf -- "$TEMP_DIR"
+  unset JFROG_NPM_TOKEN
   exit "$exit_code"
 }
 trap cleanup EXIT
@@ -82,6 +101,7 @@ PY
 export NPM_CONFIG_USERCONFIG="$NPM_CONFIG"
 export NODE_OPTIONS="${NODE_OPTIONS:+$NODE_OPTIONS }--use-openssl-ca"
 
-echo "Installing frontend dependencies with the frozen lockfile..."
+echo "Installing frontend dependencies and updating yarn.lock if needed..."
 cd "$FRONTEND"
-yarn install --frozen-lockfile --non-interactive --registry "$REGISTRY"
+yarn install --non-interactive --registry "$REGISTRY"
+INSTALL_SUCCEEDED=true

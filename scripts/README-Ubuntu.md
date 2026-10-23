@@ -48,14 +48,10 @@ The development secrets in `backend/.env` are for local use only. Keep `.env` fi
 
 ## Install frontend packages through JFrog
 
-If setup has already completed and you only need to install the frontend dependencies through JFrog, run:
+If setup has already completed and you only need to install the frontend dependencies through JFrog, run this from the repository root. The script prompts for the token without echoing it:
 
 ```bash
-read -rsp 'JFrog npm token: ' JFROG_NPM_TOKEN
-echo
-export JFROG_NPM_TOKEN
 ./scripts/yarn-install-jfrog.sh
-unset JFROG_NPM_TOKEN
 ```
 
-The script uses the repository URL supplied for this setup, routes the Yarn lockfile's public registry download URLs through JFrog for the duration of the install, and restores `frontend/yarn.lock` afterward. It writes the token only to a permission-restricted temporary npm config and removes that file when it exits. It does not save credentials in project or global npm/Yarn configuration.
+The script uses the repository URL supplied for this setup, routes Yarn lockfile downloads through JFrog during installation, and keeps public registry URLs in the resulting `frontend/yarn.lock`. It updates the lockfile if dependencies such as `remark-gfm` are newly added. The token is written only to a permission-restricted temporary npm config, which is removed when the script exits; credentials are not saved in project or global npm/Yarn configuration.

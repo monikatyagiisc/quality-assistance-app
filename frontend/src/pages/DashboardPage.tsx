@@ -22,6 +22,18 @@ function canAcceptCodeDiffs(connection: RepositoryConnection | null, value: stri
   return !value.trim() || isGithubFetchReady(connection)
 }
 
+function downloadResultMarkdown(content: string) {
+  const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = `quality-assistance-${new Date().toISOString().slice(0, 10)}.md`
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  URL.revokeObjectURL(url)
+}
+
 export function DashboardPage() {
   const { token, user } = useAuth()
   const [requirements, setRequirements] = useState('')
@@ -407,6 +419,14 @@ export function DashboardPage() {
               <div className="result-meta">
                 <span className={`badge badge-${result.status}`}>{result.status}</span>
                 <span>Session: {result.session_id}</span>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm result-download"
+                  onClick={() => downloadResultMarkdown(result.response)}
+                  aria-label="Download results as Markdown"
+                >
+                  Download Markdown
+                </button>
               </div>
               <MarkdownContent content={result.response} />
             </article>

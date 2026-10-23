@@ -1,4 +1,5 @@
 import Markdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import './MarkdownContent.css'
 
 type MarkdownContentProps = {
@@ -8,7 +9,7 @@ type MarkdownContentProps = {
 export function MarkdownContent({ content }: MarkdownContentProps) {
   return (
     <div className="markdown-content">
-      <Markdown>{content}</Markdown>
+      <Markdown remarkPlugins={[remarkGfm]}>{content}</Markdown>
     </div>
   )
 }

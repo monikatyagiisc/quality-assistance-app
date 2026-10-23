@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { api, type AssistanceResult, type RepositoryConnection } from '../api/client'
 import { getUserFriendlyError } from '../utils/errorMessages'
@@ -71,6 +71,7 @@ function downloadResultHtml(content: string) {
 
 export function DashboardPage() {
   const { token, user } = useAuth()
+  const [activeTab, setActiveTab] = useState<'input' | 'results'>('input')
   const [requirements, setRequirements] = useState('')
   const [userStories, setUserStories] = useState('')
   const [codeDiffs, setCodeDiffs] = useState('')
@@ -162,6 +163,7 @@ export function DashboardPage() {
     }
 
     setLoading(true)
+    setActiveTab('results')
     setLoadingStartedAt(Date.now())
     setError(null)
     setResult(null)
@@ -188,6 +190,24 @@ export function DashboardPage() {
     setResult(null)
     setError(null)
     setSelectedSampleId(null)
+    setActiveTab('input')
+  }
+
+  const handleTabKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
+    const tabs = ['input', 'results'] as const
+    const currentIndex = tabs.indexOf(activeTab)
+    let nextIndex: number
+
+    if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length
+    else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length
+    else if (event.key === 'Home') nextIndex = 0
+    else if (event.key === 'End') nextIndex = tabs.length - 1
+    else return
+
+    event.preventDefault()
+    const nextTab = tabs[nextIndex]
+    setActiveTab(nextTab)
+    document.getElementById(`dashboard-tab-${nextTab}`)?.focus()
   }
 
   const importDiffFromRepo = async () => {
@@ -252,8 +272,46 @@ export function DashboardPage() {
         )}
       </section>
 
+      <div className="dashboard-tabs" role="tablist" aria-label="Quality assistance workspace">
+        <button
+          id="dashboard-tab-input"
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'input'}
+          aria-controls="dashboard-panel-input"
+          tabIndex={activeTab === 'input' ? 0 : -1}
+          className={`dashboard-tab${activeTab === 'input' ? ' active' : ''}`}
+          onClick={() => setActiveTab('input')}
+          onKeyDown={handleTabKeyDown}
+        >
+          Input
+        </button>
+        <button
+          id="dashboard-tab-results"
+          type="button"
+          role="tab"
+          aria-selected={activeTab === 'results'}
+          aria-controls="dashboard-panel-results"
+          tabIndex={activeTab === 'results' ? 0 : -1}
+          className={`dashboard-tab${activeTab === 'results' ? ' active' : ''}`}
+          onClick={() => setActiveTab('results')}
+          onKeyDown={handleTabKeyDown}
+        >
+          Results
+          {result && <span className="dashboard-tab-indicator" aria-label="Result available" />}
+        </button>
+      </div>
+
       <div className="dashboard-grid">
-        <form className="panel input-panel" onSubmit={handleSubmit}>
+        {activeTab === 'input' && (
+          <form
+            id="dashboard-panel-input"
+            className="panel input-panel"
+            role="tabpanel"
+            aria-labelledby="dashboard-tab-input"
+            tabIndex={0}
+            onSubmit={handleSubmit}
+          >
           <div className="input-panel-header">
             <h2>Input</h2>
             {(requirements || userStories || codeDiffs) && (
@@ -439,9 +497,17 @@ export function DashboardPage() {
           >
             {loading ? 'Running quality assistance...' : 'Get quality assistance'}
           </button>
-        </form>
+          </form>
+        )}
 
-        <section className="panel output-panel">
+        {activeTab === 'results' && (
+          <section
+            id="dashboard-panel-results"
+            className="panel output-panel"
+            role="tabpanel"
+            aria-labelledby="dashboard-tab-results"
+            tabIndex={0}
+          >
           <h2>Results</h2>
           {error && <div className="banner banner-error">{error}</div>}
           {!error && !result && !loading && (
@@ -480,7 +546,8 @@ export function DashboardPage() {
               </div>
             </article>
           )}
-        </section>
+          </section>
+        )}
       </div>
     </div>
   )

@@ -2,6 +2,8 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=tex-path.sh
+source "${SCRIPT_DIR}/tex-path.sh"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 SOURCE_DIR="${REPO_ROOT}/reports/quality-assistance-report"
 OUTPUT_DIR="${REPO_ROOT}/tmp/reports"

@@ -5,15 +5,18 @@ IISc seal image is kept separately in [`reports/images`](../images).
 
 ## Build the PDF on macOS
 
-Install the full [MacTeX distribution](https://tug.org/mactex/) and reopen Terminal so its TeX
-commands are available. From the repository root, run:
+From the repository root, run:
 
 ```bash
 ./scripts/build-report-macos.sh
 ```
 
-The script uses `pdflatex`, `bibtex`, and `makeindex`, then writes the PDF to
-`tmp/reports/quality-assistant-app.pdf` and copies it to `reports/quality-assistant-app.pdf`.
+The IISc class file needs `pdflatex` (not `tectonic`). If those tools are missing, the script
+installs a user-local [TinyTeX](https://yihui.org/tinytex/) and the packages this report uses.
+A full [MacTeX](https://tug.org/mactex/) install also works if you already have one.
+
+The script then runs `pdflatex`, `bibtex`, and `makeindex`, writes the PDF to
+`tmp/reports/quality-assistant-app.pdf`, and copies it to `reports/quality-assistant-app.pdf`.
 Open the finished report with:
 
 ```bash

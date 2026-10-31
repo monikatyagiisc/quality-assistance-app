@@ -107,7 +107,7 @@
     \DeclareGraphicsExtensions{.png, .jpg, .pdf}
 
     \pdfcompresslevel=9
-    \graphicspath{{ThesisFigs/PNG/}{ThesisFigs/PDF/}{ThesisFigs/}}
+    \graphicspath{{../images/}{ThesisFigs/PNG/}{ThesisFigs/PDF/}{ThesisFigs/}}
 \else
     \usepackage[ dvips, 
                  bookmarks,
@@ -332,4 +332,3 @@
   \renewcommand{\thepage}{\roman{page}}}
 {\newpage\renewcommand{\thepage}{\arabic{page}}}
 %{\newpage\renewcommand{\thepage}{\arabic{page}}\setcounter{page}{1}}
-

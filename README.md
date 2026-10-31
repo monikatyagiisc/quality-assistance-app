@@ -32,6 +32,7 @@ Detailed install and troubleshooting:
 | **AWS ECS production** | [docs/PRODUCTION-ECS.md](docs/PRODUCTION-ECS.md) |
 | **Jira Cloud OAuth** | [docs/JIRA-CLOUD-OAUTH.md](docs/JIRA-CLOUD-OAUTH.md) |
 | **Microsoft Entra SSO** | [docs/ENTRA-SSO.md](docs/ENTRA-SSO.md) |
+| **Project report PDF** | Build with [`scripts/build-report.sh`](scripts/build-report.sh); see [report instructions](reports/quality-assistance-report/README.md) |
 
 ## Prerequisites (all platforms)
 

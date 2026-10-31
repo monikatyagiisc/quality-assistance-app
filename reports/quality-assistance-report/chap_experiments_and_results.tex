@@ -21,7 +21,7 @@ Automated CI test execution and script mutation & Planned / out of scope of curr
 Comparative empirical evaluation & Pending & No measured baseline, benchmark results, or controlled organizational pilot results were supplied. \\
 \bottomrule
 \end{tabularx}
-\caption{Implementation status as of October 2026, distinguishing current behavior from planned work.}
+\caption{Implementation status as of November 2026, distinguishing current behavior from planned work.}
 \label{tab:implementation-status}
 \end{table}
 
@@ -39,6 +39,58 @@ The dashboard includes sample inputs that can be used to demonstrate several age
   \item a follow-up request that reuses the prior session identifier.
 \end{enumerate}
 These examples verify that the interface and request model support representative kinds of context. They are not a benchmark dataset and do not establish measured improvements in coverage, effort, or defect detection.
+
+\subsection{Interface Walkthrough and Illustrative Outputs}
+The screenshots below follow the user workflow: the workspace and integration settings are shown first, followed by the submitted requirements and user story, and then the response panels. They document the prototype interface and example generated content; they are not results from a controlled evaluation, and generated recommendations require human review.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.46\textheight,keepaspectratio]{home.jpg}
+\caption{Workspace dashboard used to start a quality-assistance request.}
+\label{fig:workspace-dashboard}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth,height=0.46\textheight,keepaspectratio]{settings.jpg}
+\caption{Settings page for configuring Jira, GitHub, and sign-in integrations. Availability depends on administrator configuration and valid credentials.}
+\label{fig:integration-settings}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.42\textheight,keepaspectratio]{input.jpg}
+\caption{Example request input containing quality context and a user story before agent processing.}
+\label{fig:request-input}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.46\textheight,keepaspectratio]{result.jpg}
+\caption{Example generated response with prioritized test-case recommendations.}
+\label{fig:prioritized-results}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.42\textheight,keepaspectratio]{result2.jpg}
+\caption{Example suggested test data presented as part of the generated response.}
+\label{fig:suggested-test-data}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.46\textheight,keepaspectratio]{result3.jpg}
+\caption{Example automation notes and test-script recommendations.}
+\label{fig:automation-results}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth,height=0.46\textheight,keepaspectratio]{result4.jpg}
+\caption{Example release-risk and readiness analysis based on the submitted context.}
+\label{fig:readiness-results}
+\end{figure}
 
 \section{Evaluation Plan}
 The evaluation should compare three conditions on the same tasks: a manual QA baseline, an existing point-automation workflow where available, and the proposed assistant-supported workflow. The initial phase should use public requirements and open-source repositories or issue trackers, as proposed in the project plan. Any later organizational evaluation should use anonymized artifacts and receive the required data-governance approval.

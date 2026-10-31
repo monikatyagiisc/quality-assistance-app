@@ -57,6 +57,15 @@ The application separates the browser interface, application API, database, and 
 \label{fig:system-architecture}
 \end{figure}
 
+The logical architecture describes the software components implemented in the repository. The following AWS diagram is a proposed deployment target rather than evidence of a deployed production environment; the repository currently provides deployment guidance, not infrastructure provisioning.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.98\textwidth,height=0.42\textheight,keepaspectratio]{SystemArchitecture.png}
+\caption{Proposed AWS deployment architecture for the Quality Assistance application. This target design is not currently deployed by the repository.}
+\label{fig:system-architecture-deployment}
+\end{figure}
+
 \subsection{Frontend}
 The frontend provides authentication, a dashboard for quality-assistance requests, settings, and user guidance. The dashboard accepts free-form requirements and user stories, supports code-change input, and includes sample requests for smoke planning, end-to-end examples, change impact, test execution and reporting, automation, and follow-up turns. When connected, Jira issues can populate the story context and GitHub can supply a pull-request or compare diff. Responses are rendered in the browser and can be downloaded as Markdown or HTML.
 
@@ -92,6 +101,13 @@ S09 & Release readiness evaluation & Weighs supplied test and risk signals and p
 
 The router's instructions map requirement and story requests to test-case and test-data agents, code diffs to change-impact analysis, execution logs to execution, defect, and summary agents, and release questions to the readiness agent. The root agent can also use a requirement-summarization tool. This is prompt- and agent-driven routing, not a separate deterministic workflow engine.
 
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.72\textwidth,height=0.45\textheight,keepaspectratio]{agentic_flow.jpg}
+\caption{Illustrative agentic workflow showing orchestration among the root agent and specialist agents.}
+\label{fig:agentic-flow}
+\end{figure}
+
 \begin{algorithm}[htbp]
 \caption{Assistance request processing}
 \label{alg:assistance}
@@ -112,6 +128,13 @@ The router's instructions map requirement and story requests to test-case and te
 \State Return the request identifier, session, response, and status
 \end{algorithmic}
 \end{algorithm}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.92\textwidth,height=0.48\textheight,keepaspectratio]{sequence_daigram.png}
+\caption{Illustrative request sequence through the application services for the deployment configuration shown.}
+\label{fig:request-sequence}
+\end{figure}
 
 \subsection{External Integrations and Model Providers}
 Jira Cloud connection uses OAuth 2.0 authorization, state records, and Jira APIs to retrieve a user's assigned issues and issue details. GitHub connection settings store a repository and an encrypted personal access token; the backend can fetch pull-request diffs or compare two references. Microsoft Entra single sign-on is an optional authentication path. The agent configuration accepts Gemini, LiteLLM, Amazon Bedrock, and Ollama backends, subject to provider credentials and model availability. These are configuration options, not a claim that all providers have been benchmarked under the same conditions.

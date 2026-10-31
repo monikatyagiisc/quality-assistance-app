@@ -31,5 +31,6 @@ intermediate compiler files outside this source directory:
 tmp/reports/quality-assistant-app.pdf
 ```
 
-Build logs and intermediate files are also kept under `tmp/reports`. The source files in this
+The finished PDF is also copied to `reports/quality-assistant-app.pdf` for convenient access.
+Build logs and intermediate files are kept under `tmp/reports`. The source files in this
 directory are not modified by compilation.

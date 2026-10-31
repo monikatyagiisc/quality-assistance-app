@@ -5,6 +5,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
 SOURCE_DIR="${REPO_ROOT}/reports/quality-assistance-report"
 OUTPUT_DIR="${REPO_ROOT}/tmp/reports"
+REPORTS_DIR="${REPO_ROOT}/reports"
 REPORT_NAME="quality-assistant-app"
 
 for tool in pdflatex bibtex makeindex; do
@@ -53,4 +54,7 @@ if [[ ! -s "${PDF_PATH}" ]]; then
   exit 1
 fi
 
-printf '\nReport generated successfully:\n%s\n' "${PDF_PATH}"
+REPORTS_PDF_PATH="${REPORTS_DIR}/${REPORT_NAME}.pdf"
+cp -- "${PDF_PATH}" "${REPORTS_PDF_PATH}"
+
+printf '\nReport generated successfully:\n%s\n%s\n' "${PDF_PATH}" "${REPORTS_PDF_PATH}"

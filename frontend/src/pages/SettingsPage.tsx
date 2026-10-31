@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
-import { Link } from 'react-router-dom'
-import { api, type RepositoryConnection } from '../api/client'
+import { Link, useSearchParams } from 'react-router-dom'
+import { api, type JiraConnectionStatus, type RepositoryConnection } from '../api/client'
 import { useAuth } from '../context/useAuth'
 import { getUserFriendlyError } from '../utils/errorMessages'
 import './SettingsPage.css'
@@ -14,10 +14,21 @@ const EMPTY_FORM = {
 
 export function SettingsPage() {
   const { token, loading: authLoading } = useAuth()
+  const [, setSearchParams] = useSearchParams()
+  const [jiraCallbackResult] = useState(() =>
+    new URLSearchParams(window.location.search).get('jira'),
+  )
+  const [entraCallbackResult] = useState(() =>
+    new URLSearchParams(window.location.search).get('entra'),
+  )
   const [connection, setConnection] = useState<RepositoryConnection | null>(null)
+  const [jiraConnection, setJiraConnection] = useState<JiraConnectionStatus | null>(null)
+  const [entraAccount, setEntraAccount] = useState<{ enabled: boolean; linked: boolean } | null>(null)
   const [form, setForm] = useState(EMPTY_FORM)
   const [loadingExisting, setLoadingExisting] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [jiraSaving, setJiraSaving] = useState(false)
+  const [entraSaving, setEntraSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -38,6 +49,10 @@ export function SettingsPage() {
             access_token: '',
           })
         }
+        const jiraData = await api.getJiraStatus(token)
+        setJiraConnection(jiraData)
+        const entraData = await api.getEntraAccount(token)
+        setEntraAccount(entraData)
       } catch (err) {
         setError(getUserFriendlyError(err))
       } finally {
@@ -47,6 +62,77 @@ export function SettingsPage() {
 
     void load()
   }, [token, authLoading])
+
+  useEffect(() => {
+    if (!jiraCallbackResult) return
+
+    if (jiraCallbackResult === 'connected' && token) {
+      void api.getJiraStatus(token).then(setJiraConnection).catch((err) => {
+        setError(getUserFriendlyError(err))
+      })
+    }
+
+    const nextParams = new URLSearchParams(window.location.search)
+    nextParams.delete('jira')
+    setSearchParams(nextParams, { replace: true })
+  }, [jiraCallbackResult, setSearchParams, token])
+
+  useEffect(() => {
+    if (!entraCallbackResult) return
+
+    if (entraCallbackResult === 'linked' && token) {
+      void api.getEntraAccount(token).then(setEntraAccount).catch((err) => {
+        setError(getUserFriendlyError(err))
+      })
+    }
+
+    const nextParams = new URLSearchParams(window.location.search)
+    nextParams.delete('entra')
+    setSearchParams(nextParams, { replace: true })
+  }, [entraCallbackResult, setSearchParams, token])
+
+  const handleEntraLink = async () => {
+    if (!token) return
+    setEntraSaving(true)
+    setError(null)
+    try {
+      const { authorization_url } = await api.startEntraLink(token)
+      window.location.assign(authorization_url)
+    } catch (err) {
+      setError(getUserFriendlyError(err))
+      setEntraSaving(false)
+    }
+  }
+
+  const handleJiraConnect = async () => {
+    if (!token) return
+    setJiraSaving(true)
+    setError(null)
+    try {
+      const { authorization_url } = await api.startJiraConnection(token)
+      window.location.assign(authorization_url)
+    } catch (err) {
+      setError(getUserFriendlyError(err))
+      setJiraSaving(false)
+    }
+  }
+
+  const handleJiraDisconnect = async () => {
+    if (!token || !window.confirm('Disconnect Jira and remove its saved authorization?')) return
+    setJiraSaving(true)
+    setError(null)
+    try {
+      await api.disconnectJira(token)
+      setJiraConnection((current) =>
+        current ? { ...current, connected: false, site_name: null, site_url: null } : current,
+      )
+      setMessage('Jira disconnected.')
+    } catch (err) {
+      setError(getUserFriendlyError(err))
+    } finally {
+      setJiraSaving(false)
+    }
+  }
 
   const handleSave = async (event: FormEvent) => {
     event.preventDefault()
@@ -113,11 +199,90 @@ export function SettingsPage() {
         <p className="eyebrow">Configuration</p>
         <h1>Settings</h1>
         <p className="settings-lead">
-          Connect a GitHub repository so the workspace can pull unified diffs for change-impact
-          analysis. Tokens are encrypted at rest and only used on the server — the agent never
-          receives your credentials.
+          Connect GitHub to import code changes or Jira Cloud to load your assigned user stories.
+          OAuth tokens are encrypted at rest and used only by the backend.
         </p>
       </header>
+
+      <section className="panel settings-panel jira-settings-panel">
+        <div className="settings-panel-title">
+          <h2>Jira Cloud</h2>
+          {jiraConnection?.connected && (
+            <span className="connection-status-badge">Connected</span>
+          )}
+        </div>
+        {jiraConnection?.configured ? (
+          <>
+            <p className="field-hint">
+              Authorize with your company Atlassian account to select issues assigned to you. Only
+              issue details needed for the workspace are fetched.
+            </p>
+            {jiraConnection.connected && jiraConnection.site_name && (
+              <p className="connection-status">
+                Connected site:{' '}
+                <a href={jiraConnection.site_url ?? undefined} target="_blank" rel="noreferrer">
+                  {jiraConnection.site_name}
+                </a>
+              </p>
+            )}
+            <div className="settings-actions">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleJiraConnect}
+                disabled={jiraSaving || !token}
+              >
+                {jiraSaving ? 'Opening Atlassian...' : jiraConnection.connected ? 'Reconnect Jira' : 'Connect Jira'}
+              </button>
+              {jiraConnection.connected && (
+                <button
+                  type="button"
+                  className="btn btn-ghost"
+                  onClick={handleJiraDisconnect}
+                  disabled={jiraSaving}
+                >
+                  Disconnect
+                </button>
+              )}
+            </div>
+          </>
+        ) : (
+          <p className="field-hint">
+            Jira OAuth is not configured by the application administrator yet.
+          </p>
+        )}
+      </section>
+
+      <section className="panel settings-panel">
+        <div className="settings-panel-title">
+          <h2>Microsoft Entra ID</h2>
+          {entraAccount?.linked && (
+            <span className="connection-status-badge">Linked</span>
+          )}
+        </div>
+        {entraAccount?.enabled ? (
+          <>
+            <p className="field-hint">
+              Link the Microsoft account with the same email as this app account. This one-time step
+              lets you use company SSO on future sign-ins.
+            </p>
+            <div className="settings-actions">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleEntraLink}
+                disabled={entraSaving || entraAccount.linked || !token}
+              >
+                {entraSaving ? 'Opening Microsoft...' : entraAccount.linked ? 'Microsoft linked' : 'Link Microsoft account'}
+              </button>
+            </div>
+          </>
+        ) : (
+          <p className="field-hint">
+            Microsoft Entra SSO is not configured by the application administrator yet.
+          </p>
+        )}
+      </section>
 
       <section className="panel settings-panel">
         <h2>How code diffs reach the agent</h2>
@@ -139,6 +304,30 @@ export function SettingsPage() {
 
       {error && <div className="banner banner-error">{error}</div>}
       {message && <div className="banner banner-success">{message}</div>}
+      {jiraCallbackResult === 'connected' && (
+        <div className="banner banner-success">Jira Cloud connected successfully.</div>
+      )}
+      {jiraCallbackResult === 'cancelled' && (
+        <div className="banner banner-success">Jira connection was cancelled.</div>
+      )}
+      {jiraCallbackResult === 'error' && (
+        <div className="banner banner-error">
+          Could not connect Jira. Check the OAuth app configuration and try again.
+        </div>
+      )}
+      {jiraCallbackResult === 'site-selection' && (
+        <div className="banner banner-error">
+          Multiple Jira sites were authorized. Reconnect and select only your office Jira site.
+        </div>
+      )}
+      {entraCallbackResult === 'linked' && (
+        <div className="banner banner-success">Microsoft account linked successfully.</div>
+      )}
+      {entraCallbackResult === 'error' && (
+        <div className="banner banner-error">
+          Could not link Microsoft. Confirm the email matches your app account and try again.
+        </div>
+      )}
 
       <section className="panel settings-panel">
         <div className="settings-panel-title">

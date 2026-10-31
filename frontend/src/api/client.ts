@@ -28,6 +28,27 @@ export type FetchDiffResult = {
   summary: string
 }
 
+export type JiraConnectionStatus = {
+  configured: boolean
+  connected: boolean
+  site_name: string | null
+  site_url: string | null
+}
+
+export type JiraIssue = {
+  id: string
+  key: string
+  summary: string
+  description: string
+  issue_type: string | null
+  status: string | null
+}
+
+export type JiraIssuePage = {
+  issues: JiraIssue[]
+  next_page_token: string | null
+}
+
 export type AssistanceResult = {
   id: string
   session_id: string
@@ -148,6 +169,27 @@ export const api = {
   login: (data: { email: string; password: string }) =>
     request<AuthResponse>('/api/auth/login', { method: 'POST', body: JSON.stringify(data) }),
 
+  getEntraSsoStatus: () => request<{ enabled: boolean }>('/api/auth/entra/status'),
+
+  startEntraSignIn: () =>
+    request<{ authorization_url: string }>('/api/auth/entra/start', { method: 'POST' }),
+
+  getEntraAccount: (token: string) =>
+    request<{ enabled: boolean; linked: boolean }>('/api/auth/entra/account', {}, token),
+
+  startEntraLink: (token: string) =>
+    request<{ authorization_url: string }>(
+      '/api/auth/entra/link/start',
+      { method: 'POST' },
+      token,
+    ),
+
+  exchangeEntraTicket: (ticket: string) =>
+    request<AuthResponse>(
+      '/api/auth/entra/exchange',
+      { method: 'POST', body: JSON.stringify({ ticket }) },
+    ),
+
   me: (token: string) => request<User>('/api/auth/me', {}, token),
 
   assist: (
@@ -197,6 +239,33 @@ export const api = {
     request<FetchDiffResult>(
       '/api/settings/repository/fetch-diff',
       { method: 'POST', body: JSON.stringify(data) },
+      token,
+    ),
+
+  getJiraStatus: (token: string) =>
+    request<JiraConnectionStatus>('/api/settings/jira/status', {}, token),
+
+  startJiraConnection: (token: string) =>
+    request<{ authorization_url: string }>(
+      '/api/settings/jira/connect',
+      { method: 'POST' },
+      token,
+    ),
+
+  disconnectJira: (token: string) =>
+    request<void>('/api/settings/jira', { method: 'DELETE' }, token),
+
+  getAssignedJiraIssues: (token: string, nextPageToken?: string | null) => {
+    const query = nextPageToken
+      ? `?next_page_token=${encodeURIComponent(nextPageToken)}`
+      : ''
+    return request<JiraIssuePage>(`/api/settings/jira/issues${query}`, {}, token)
+  },
+
+  getJiraIssue: (token: string, issueKey: string) =>
+    request<JiraIssue>(
+      `/api/settings/jira/issues/${encodeURIComponent(issueKey)}`,
+      {},
       token,
     ),
 }

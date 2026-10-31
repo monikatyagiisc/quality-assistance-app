@@ -63,6 +63,23 @@
   font-size: 0.9rem;
 }
 
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.15rem 0;
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  flex: 1;
+  height: 1px;
+  background: rgba(148, 163, 184, 0.2);
+  content: '';
+}
+
 .auth-footer {
   margin-top: 1.25rem;
   text-align: center;

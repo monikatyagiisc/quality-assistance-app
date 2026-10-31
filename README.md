@@ -27,7 +27,11 @@ Detailed install and troubleshooting:
 | **Ubuntu** | [scripts/README-Ubuntu.md](scripts/README-Ubuntu.md) |
 | **macOS** | [docs/SETUP-MAC.md](docs/SETUP-MAC.md) |
 | **Windows** | [docs/SETUP-WINDOWS.md](docs/SETUP-WINDOWS.md) |
+| **Ubuntu EC2 demo** | [Markdown guide](docs/EC2-UBUNTU-DEMO.md) · [HTML guide](docs/EC2-UBUNTU-DEMO.html) |
+| **AWS ECS pilot overview** | [docs/ECS-PILOT-OVERVIEW.md](docs/ECS-PILOT-OVERVIEW.md) |
 | **AWS ECS production** | [docs/PRODUCTION-ECS.md](docs/PRODUCTION-ECS.md) |
+| **Jira Cloud OAuth** | [docs/JIRA-CLOUD-OAUTH.md](docs/JIRA-CLOUD-OAUTH.md) |
+| **Microsoft Entra SSO** | [docs/ENTRA-SSO.md](docs/ENTRA-SSO.md) |
 
 ## Prerequisites (all platforms)
 

@@ -21,6 +21,9 @@ export function LandingPage() {
           <Link to="/about" className="btn btn-ghost btn-lg">
             Learn more
           </Link>
+          <Link to="/user-guide" className="btn btn-ghost btn-lg">
+            Read the user guide
+          </Link>
         </div>
       </section>
 

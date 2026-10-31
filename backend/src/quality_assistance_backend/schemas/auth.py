@@ -24,6 +24,10 @@ class LoginInput(BaseModel):
     password: str
 
 
+class EntraTicketInput(BaseModel):
+    ticket: str = Field(min_length=32, max_length=256)
+
+
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"

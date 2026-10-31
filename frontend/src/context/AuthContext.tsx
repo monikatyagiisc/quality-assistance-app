@@ -41,6 +41,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [persistAuth],
   )
 
+  const completeEntraSignIn = useCallback(
+    async (ticket: string) => {
+      const result = await api.exchangeEntraTicket(ticket)
+      persistAuth(result.access_token, result.user)
+    },
+    [persistAuth],
+  )
+
   const register = useCallback(
     async (fullName: string, email: string, password: string) => {
       const result = await api.register({ full_name: fullName, email, password })
@@ -50,8 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   )
 
   const value = useMemo(
-    () => ({ user, token, loading, login, register, logout }),
-    [user, token, loading, login, register, logout],
+    () => ({ user, token, loading, login, completeEntraSignIn, register, logout }),
+    [user, token, loading, login, completeEntraSignIn, register, logout],
   )
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

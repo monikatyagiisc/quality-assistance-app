@@ -17,6 +17,30 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+class OAuthCallbackAccessLogFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        args = record.args
+        if (
+            isinstance(args, tuple)
+            and len(args) >= 3
+            and isinstance(args[2], str)
+            and (
+                "/api/settings/jira/callback" in args[2]
+                or "/api/auth/entra/callback" in args[2]
+            )
+        ):
+            path = (
+                "/api/settings/jira/callback"
+                if "/api/settings/jira/callback" in args[2]
+                else "/api/auth/entra/callback"
+            )
+            record.args = (*args[:2], path, *args[3:])
+        return True
+
+
+logging.getLogger("uvicorn.access").addFilter(OAuthCallbackAccessLogFilter())
+
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     if settings.run_migrations:

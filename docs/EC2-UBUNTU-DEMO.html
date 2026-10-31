@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="Walkthrough for deploying the Quality Assistance App on one Ubuntu EC2 instance for a small demo."
+    >
+    <title>Ubuntu EC2 Demo Deployment | Quality Assistance App</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #172033;
+        --muted: #596579;
+        --brand: #174ea6;
+        --brand-soft: #eaf1ff;
+        --line: #dce3ed;
+        --surface: #ffffff;
+        --page: #f4f7fb;
+        --warning: #fff5dc;
+        --warning-line: #d99a00;
+        --code: #101827;
+        --code-ink: #eef4ff;
+      }
+
+      * { box-sizing: border-box; }
+
+      html { scroll-behavior: smooth; }
+
+      body {
+        margin: 0;
+        background: var(--page);
+        color: var(--ink);
+        font: 16px/1.65 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .hero {
+        padding: 3.5rem 1.25rem 3rem;
+        background: linear-gradient(135deg, #102d5c, #2064b5);
+        color: white;
+      }
+
+      .hero-inner, main {
+        width: min(100% - 2rem, 940px);
+        margin-inline: auto;
+      }
+
+      .eyebrow {
+        margin: 0 0 .6rem;
+        color: #c9dcff;
+        font-size: .78rem;
+        font-weight: 750;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 760px;
+        margin: 0;
+        font-size: clamp(2rem, 5vw, 3.3rem);
+        line-height: 1.12;
+      }
+
+      .hero p:last-child {
+        max-width: 720px;
+        margin: 1rem 0 0;
+        color: #e2ecff;
+        font-size: 1.08rem;
+      }
+
+      main { padding-block: 2rem 4rem; }
+
+      nav, section {
+        margin-block: 1.25rem;
+        padding: 1.5rem clamp(1rem, 3vw, 2rem);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        background: var(--surface);
+        box-shadow: 0 6px 20px rgb(23 32 51 / 4%);
+      }
+
+      nav h2, section h2 { margin-top: 0; }
+
+      nav ol {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: .35rem 1.5rem;
+        margin-bottom: 0;
+        padding-left: 1.35rem;
+      }
+
+      h2 {
+        margin: 2rem 0 .75rem;
+        font-size: 1.55rem;
+        line-height: 1.25;
+      }
+
+      h3 {
+        margin: 1.5rem 0 .5rem;
+        font-size: 1.12rem;
+      }
+
+      p, ul, ol { margin-block: .7rem; }
+
+      a { color: var(--brand); }
+      a:hover { text-decoration-thickness: 2px; }
+
+      .hero a { color: white; }
+
+      .notice {
+        margin-block: 1rem;
+        padding: 1rem 1.1rem;
+        border-left: 4px solid var(--warning-line);
+        border-radius: 8px;
+        background: var(--warning);
+      }
+
+      .checklist { padding-left: 1.5rem; }
+      .checklist li { margin-block: .45rem; }
+
+      .architecture {
+        overflow-x: auto;
+        padding: 1rem;
+        border-radius: 10px;
+        background: var(--brand-soft);
+        color: #16315d;
+        font: .9rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        white-space: pre;
+      }
+
+      .table-wrap { overflow-x: auto; }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-block: 1rem;
+      }
+
+      th, td {
+        padding: .7rem .8rem;
+        border: 1px solid var(--line);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th { background: #f0f4fa; }
+
+      code {
+        padding: .12rem .32rem;
+        border-radius: 4px;
+        background: #edf1f7;
+        font: .9em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        overflow-wrap: anywhere;
+      }
+
+      pre {
+        position: relative;
+        overflow-x: auto;
+        margin-block: .8rem 1rem;
+        padding: 1rem 1.1rem;
+        border: 1px solid #253149;
+        border-radius: 10px;
+        background: var(--code);
+        color: var(--code-ink);
+        font: .9rem/1.55 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        tab-size: 2;
+      }
+
+      pre code { padding: 0; background: transparent; color: inherit; }
+
+      .links li { margin-block: .45rem; }
+
+      footer {
+        padding: 1.5rem 1rem 2.5rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      @media (max-width: 600px) {
+        body { font-size: 15px; }
+        .hero { padding-block: 2.5rem; }
+        nav, section { border-radius: 10px; }
+      }
+
+      @media print {
+        body { background: white; font-size: 11pt; }
+        .hero { padding: 1rem 0; background: white; color: var(--ink); }
+        .hero p:last-child, .eyebrow { color: var(--muted); }
+        main { width: 100%; padding: 0; }
+        nav, section { break-inside: avoid; box-shadow: none; }
+        pre { white-space: pre-wrap; overflow-wrap: anywhere; }
+        a { color: inherit; }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <div class="hero-inner">
+        <p class="eyebrow">Quality Assistance App · Demo deployment</p>
+        <h1>Deploy on one Ubuntu EC2 instance</h1>
+        <p>A step-by-step Docker Compose guide for a presentation or small, time-limited test group.</p>
+      </div>
+    </header>
+
+    <main>
+      <div class="notice">
+        <strong>Demo scope:</strong> This is not a production deployment. One EC2 instance is a single point of failure, and the database shares its disk with the application.
+      </div>
+
+      <nav aria-label="Contents">
+        <h2>On this page</h2>
+        <ol>
+          <li><a href="#architecture">What you will run</a></li>
+          <li><a href="#checklist">Pre-deployment checklist</a></li>
+          <li><a href="#references">Documentation to consult</a></li>
+          <li><a href="#launch">Launch and secure the instance</a></li>
+          <li><a href="#docker">Install Docker and retrieve the code</a></li>
+          <li><a href="#compose">Prepare Docker Compose</a></li>
+          <li><a href="#config">Configure secrets and Bedrock</a></li>
+          <li><a href="#https">Configure HTTPS with Caddy</a></li>
+          <li><a href="#run">Build, start, and test</a></li>
+          <li><a href="#operations">Backups, updates, and troubleshooting</a></li>
+          <li><a href="#limitations">Scope and limitations</a></li>
+        </ol>
+      </nav>
+
+      <section id="architecture">
+        <h2>What you will run</h2>
+        <pre class="architecture">Tester browser
+    |
+    | HTTPS (80/443)
+    v
+Caddy reverse proxy
+    |-- /api/* -> backend container (8000)
+    `-- everything else -> frontend container (8080)
+
+Backend -> PostgreSQL container (5432)
+Backend -> agent container (8001)
+Agent -> Amazon Bedrock</pre>
+        <p>Resources: one Ubuntu EC2 instance, one EBS volume, one EC2 instance profile for Bedrock, and optionally a domain name and DNS record. PostgreSQL runs as a Compose service and stores its files in the <code>postgres_data</code> named volume.</p>
+      </section>
+
+      <section id="checklist">
+        <h2>Checklist: collect these before starting</h2>
+        <h3>AWS access and instance details</h3>
+        <ul class="checklist">
+          <li>☐ AWS account and target region.</li>
+          <li>☐ Permission to create/start EC2 instances, security groups, instance profiles, and (if needed) Elastic IPs.</li>
+          <li>☐ Ubuntu 24.04 LTS AMI, instance type, and disk size approved by your administrator. A useful starting point for this four-container demo is 2 vCPU, 8 GiB RAM, and 30–50 GiB gp3 EBS.</li>
+          <li>☐ A way to connect: an SSH key pair with the private key stored safely, or an approved Systems Manager Session Manager setup.</li>
+          <li>☐ VPC and subnet selection, and whether outbound internet access is available for package/image downloads and Bedrock.</li>
+          <li>☐ Public IP or Elastic IP for the instance.</li>
+        </ul>
+
+        <h3>Network access</h3>
+        <ul class="checklist">
+          <li>☐ Security group allows SSH on port 22 only from your own IP, or allows the approved Session Manager path.</li>
+          <li>☐ Security group allows HTTP 80 and HTTPS 443 from the tester audience.</li>
+          <li>☐ No inbound rules for PostgreSQL 5432, agent 8001, backend 8000, or frontend 5173.</li>
+          <li>☐ For an EC2 instance profile accessed by containers, configure instance metadata options so IMDSv2 responses have a hop limit of 2. Use a narrowly scoped instance role because containers on this host may be able to access it.</li>
+        </ul>
+
+        <h3>Bedrock and application</h3>
+        <ul class="checklist">
+          <li>☐ The chosen Bedrock model or inference profile is enabled and available in the selected region/account.</li>
+          <li>☐ An EC2 instance profile with least-privilege permission to invoke only the approved Bedrock model/profile.</li>
+          <li>☐ The model ID, e.g. <code>openai.gpt-oss-120b-1:0</code>, confirmed in the target region/account.</li>
+          <li>☐ A domain name and DNS A/AAAA record pointing to the instance if you want Caddy to issue HTTPS automatically. Without a domain, restrict the demo to a controlled network; do not collect real passwords over plain HTTP.</li>
+          <li>☐ A Git checkout/deploy method for this repository. For a private repository, use an approved SSH deploy key or other organization-approved method; do not place a personal access token in a clone URL.</li>
+        </ul>
+      </section>
+
+      <section id="references">
+        <h2>AWS and software documentation to consult</h2>
+        <p>Follow current AWS guidance and your organization's policies:</p>
+        <ol class="links">
+          <li><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/LaunchingAndUsingInstances.html">Launch an EC2 instance</a> — AMI, instance type, storage, key pair, and metadata options.</li>
+          <li><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/ec2-security-groups.html">EC2 security groups</a> — restrict SSH and web traffic.</li>
+          <li><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/iam-roles-for-amazon-ec2.html">IAM roles for EC2</a> — attach an instance profile rather than storing AWS keys on the VM.</li>
+          <li><a href="https://docs.aws.amazon.com/bedrock/latest/userguide/model-access.html">Bedrock model access</a> and <a href="https://docs.aws.amazon.com/service-authorization/latest/reference/list_amazonbedrock.html">Bedrock IAM actions</a> — verify model access and scope the role.</li>
+          <li><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/configuring-instance-metadata-options.html">EC2 instance metadata options</a> — require IMDSv2 and set the container-compatible response hop limit.</li>
+          <li><a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html">Elastic IP addresses</a> — optional stable public IP.</li>
+          <li><a href="https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/rrsets-working-with.html">Route 53 DNS records</a> — optional domain-to-instance mapping.</li>
+          <li><a href="https://docs.docker.com/engine/install/ubuntu/">Install Docker Engine on Ubuntu</a> — Docker and the Compose plugin.</li>
+          <li><a href="https://caddyserver.com/docs/install">Caddy installation</a> — install the reverse proxy from its official package source.</li>
+        </ol>
+      </section>
+
+      <section id="launch">
+        <h2>1. Launch and secure the instance</h2>
+        <p>Launch the approved Ubuntu instance with the checklist settings. Attach the Bedrock instance profile. Require IMDSv2; when Docker containers need the instance profile, set the metadata response hop limit to 2. Ensure the role contains only the Bedrock actions/resources needed by this demo.</p>
+        <p>Configure the security group before launching:</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Port</th><th>Source</th><th>Purpose</th></tr></thead>
+            <tbody>
+              <tr><td>22</td><td>Your IP only, or omit if using Session Manager</td><td>Administration</td></tr>
+              <tr><td>80</td><td>Tester network or internet if using public DNS/ACME</td><td>HTTP redirect and certificate validation</td></tr>
+              <tr><td>443</td><td>Tester network or internet</td><td>HTTPS application access</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Do not open ports 5432, 8000, 8001, or 5173 to the public internet.</strong></p>
+      </section>
+
+      <section id="docker">
+        <h2>2. Install Docker and retrieve the code</h2>
+        <p>Connect to the instance using SSH or Session Manager, then install Docker Engine and its Compose plugin using the official Docker Ubuntu instructions linked above. Verify the installation:</p>
+        <pre><code>docker --version
+docker compose version
+sudo systemctl enable --now docker</code></pre>
+        <p>For convenience, you can add your login user to the Docker group:</p>
+        <pre><code>sudo usermod -aG docker "$USER"</code></pre>
+        <p>Log out and reconnect before using Docker without <code>sudo</code>. Membership in the Docker group is effectively root-level access, so only do this for a trusted admin account.</p>
+        <p>Clone the repository into the admin user's home directory:</p>
+        <pre><code>cd ~
+git clone &lt;approved-repository-url&gt;
+cd quality-assistance-app</code></pre>
+      </section>
+
+      <section id="compose">
+        <h2>3. Make the Compose file suitable for the EC2 demo</h2>
+        <p>The checked-in <a href="../docker-compose.yml">docker-compose.yml</a> is for local development. It contains default database credentials and publishes internal service ports. Before running it on EC2, edit it as follows:</p>
+        <ol>
+          <li>In <code>postgres.environment</code>, replace the fixed user, password, and database:
+            <pre><code>POSTGRES_USER: ${DB_USER}
+POSTGRES_PASSWORD: ${DB_PASSWORD}
+POSTGRES_DB: ${DB_NAME}</code></pre>
+          </li>
+          <li>In <code>backend.environment</code>, replace the fixed database credentials:
+            <pre><code>DB_USER: ${DB_USER}
+DB_PASSWORD: ${DB_PASSWORD}
+DB_NAME: ${DB_NAME}</code></pre>
+            Keep <code>DB_HOST: postgres</code> and <code>DB_PORT: 5432</code>; Compose provides private service-to-service DNS. Set <code>RUN_MIGRATIONS: "true"</code> for this single-instance demo so the backend applies migrations on startup.
+          </li>
+          <li>Remove the <code>ports</code> section from both the <code>postgres</code> and <code>agent</code> services.</li>
+          <li>Bind the backend and frontend only to the local host so Caddy is the only internet-facing process:
+            <pre><code># backend
+ports:
+  - "127.0.0.1:8000:8000"
+
+# frontend
+ports:
+  - "127.0.0.1:5173:8080"</code></pre>
+          </li>
+          <li>In <code>agent.environment</code>, remove <code>AWS_ACCESS_KEY_ID</code>, <code>AWS_SECRET_ACCESS_KEY</code>, and <code>AWS_SESSION_TOKEN</code>. Set:
+            <pre><code>AWS_USE_IAM_ROLE: "true"</code></pre>
+            Keep <code>AWS_REGION_NAME</code>. This lets the agent use the EC2 instance profile rather than long-lived AWS credentials.
+          </li>
+          <li>Set <code>API_DOCS_ENABLED: "false"</code> and use non-default JWT and encryption keys. Keep <code>APP_ENV</code> as <code>development</code> for this single-host Compose setup: the backend's strict production mode requires a TLS-enabled database, which this local Compose PostgreSQL setup does not configure. HTTPS from browser to Caddy is still recommended.</li>
+        </ol>
+        <p>Validate the edited configuration before starting containers:</p>
+        <pre><code>docker compose config --quiet</code></pre>
+      </section>
+
+      <section id="config">
+        <h2>4. Configure secrets and model settings</h2>
+        <p>Create a root <code>.env</code> file. It is ignored by Git; do not commit it or paste secrets into tickets/chat:</p>
+        <pre><code>nano .env</code></pre>
+        <p>Example values:</p>
+        <pre><code>DB_USER=quality_assistance
+DB_NAME=quality_assistance
+DB_PASSWORD=&lt;unique-random-database-password&gt;
+
+JWT_SECRET=&lt;unique-random-secret-at-least-32-characters&gt;
+ENCRYPTION_KEY=&lt;valid-Fernet-key&gt;
+
+AGENT_BACKEND=bedrock
+AGENT_MODEL=openai.gpt-oss-120b-1:0
+AWS_USE_IAM_ROLE=true
+AWS_REGION_NAME=us-east-1
+
+API_DOCS_ENABLED=false
+CORS_ORIGINS=https://qa.example.com
+VITE_API_URL=https://qa.example.com</code></pre>
+        <p>Replace the example model and region with values actually enabled in your account. Generate secrets locally on the instance:</p>
+        <pre><code>openssl rand -hex 32
+python3 -c 'import base64,secrets; print(base64.urlsafe_b64encode(secrets.token_bytes(32)).decode())'</code></pre>
+        <p>Use the first output for <code>JWT_SECRET</code> and the second for <code>ENCRYPTION_KEY</code>. Keep the encryption key backed up and unchanged; rotating it without a migration makes previously encrypted repository credentials unreadable.</p>
+        <p>The frontend embeds <code>VITE_API_URL</code> at build time. Set it to the public site origin (no <code>/api</code> suffix), such as <code>https://qa.example.com</code>; the app adds <code>/api/...</code> to its requests.</p>
+      </section>
+
+      <section id="https">
+        <h2>5. Install and configure Caddy for HTTPS</h2>
+        <p>Point the domain's DNS A record to the instance's public/Elastic IP and allow inbound 80 and 443. Install Caddy using its official Ubuntu instructions linked above. Configure <code>/etc/caddy/Caddyfile</code>:</p>
+        <pre><code>qa.example.com {
+    @api path /api/*
+    reverse_proxy @api 127.0.0.1:8000
+    reverse_proxy 127.0.0.1:5173
+}</code></pre>
+        <p>Replace <code>qa.example.com</code> with your domain, validate and reload:</p>
+        <pre><code>sudo caddy validate --config /etc/caddy/Caddyfile
+sudo systemctl reload caddy</code></pre>
+        <p>Caddy will request and renew a certificate when DNS points to this instance and the required network access is available. If you have no domain, do not claim the plain-HTTP setup is safe for real credentials; use a VPN or limit access to the demo audience/network.</p>
+      </section>
+
+      <section id="run">
+        <h2>6. Build, start, and test the services</h2>
+        <p>From the repository root:</p>
+        <pre><code>docker compose config --quiet
+docker compose up -d --build
+docker compose ps</code></pre>
+        <p>Watch startup logs:</p>
+        <pre><code>docker compose logs --tail=100 postgres backend agent frontend</code></pre>
+        <p>Check backend readiness from the instance:</p>
+        <pre><code>curl -fsS http://127.0.0.1:8000/ready</code></pre>
+        <p>Then open <code>https://qa.example.com</code>, create a test account, and submit a representative request. <code>/ready</code> checks the database and agent health; the representative request verifies the agent can call Bedrock.</p>
+      </section>
+
+      <section id="operations">
+        <h2>7. Data, updates, and troubleshooting</h2>
+        <p>PostgreSQL data persists in the <code>postgres_data</code> Docker volume on the instance's EBS disk. Back it up before significant demos or updates:</p>
+        <pre><code>mkdir -p ~/quality-assistance-backups
+docker compose exec -T postgres sh -c \
+  'pg_dump -U "$POSTGRES_USER" "$POSTGRES_DB"' \
+  &gt; "$HOME/quality-assistance-backups/db-$(date +%F-%H%M).sql"</code></pre>
+        <p>Copy backups off the instance if you need protection from instance/disk loss. Never run <code>docker compose down -v</code> unless you intend to delete the database volume.</p>
+        <p>To update the app, pull the approved revision and rebuild:</p>
+        <pre><code>git pull
+docker compose up -d --build
+docker compose ps</code></pre>
+        <p>Useful checks:</p>
+        <pre><code>docker compose logs -f backend agent
+docker compose exec postgres sh -c 'pg_isready -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
+curl -fsS http://127.0.0.1:8000/ready</code></pre>
+        <p>If Bedrock calls fail, verify the instance profile is attached, IMDSv2 is enabled and reachable from the agent container, the region/model ID are correct, and the model is enabled for the account. Do not solve credential errors by adding permanent AWS keys to <code>.env</code>.</p>
+      </section>
+
+      <section id="limitations">
+        <h2>Scope and limitations</h2>
+        <ul>
+          <li>One EC2 instance means downtime during host maintenance or failure; all app services and database share its resources.</li>
+          <li>The Compose PostgreSQL volume is not a managed backup or high-availability solution.</li>
+          <li>Use only synthetic/demo data unless the application's data handling has been reviewed and approved.</li>
+          <li>This guide is separate from the multi-service managed deployment in <a href="./PRODUCTION-ECS.md">PRODUCTION-ECS.md</a>.</li>
+        </ul>
+      </section>
+    </main>
+
+    <footer>
+      Quality Assistance App · Ubuntu EC2 demo deployment guide
+    </footer>
+  </body>
+</html>

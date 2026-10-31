@@ -34,7 +34,18 @@ AGENT_SERVICE_URL=http://<private-agent-service>:8001
 CORS_ORIGINS=https://<application-domain>
 RUN_MIGRATIONS=false
 API_DOCS_ENABLED=false
+JIRA_CLIENT_ID=<Atlassian OAuth client ID>
+JIRA_REDIRECT_URI=https://<application-domain>/api/settings/jira/callback
+JIRA_FRONTEND_URL=https://<application-domain>/settings
+ENTRA_TENANT_ID=<Microsoft Entra tenant GUID>
+ENTRA_CLIENT_ID=<Microsoft Entra application client ID>
+ENTRA_REDIRECT_URI=https://<application-domain>/api/auth/entra/callback
+ENTRA_FRONTEND_URL=https://<application-domain>/login
 ```
+
+Set `JIRA_CLIENT_ID` as an environment value and inject `JIRA_CLIENT_SECRET` from Secrets Manager when enabling Jira Cloud OAuth. Register `JIRA_REDIRECT_URI` exactly in the Atlassian OAuth app. See [Jira Cloud OAuth setup](./JIRA-CLOUD-OAUTH.md).
+
+When enabling Microsoft Entra sign-in, set the tenant and client IDs as environment values, inject `ENTRA_CLIENT_SECRET` from Secrets Manager, and register `ENTRA_REDIRECT_URI` exactly in the Entra app registration. See [Microsoft Entra SSO setup](./ENTRA-SSO.md).
 
 Inject `DB_PASSWORD`, `JWT_SECRET`, and `ENCRYPTION_KEY` from Secrets Manager. Generate unique production values, for example:
 

@@ -42,6 +42,32 @@ class ProductionSettingsTests(unittest.TestCase):
         with self.assertRaises(ValidationError):
             self.valid_production_settings(DB_HOST="localhost")
 
+    def test_requires_all_jira_oauth_settings_together(self) -> None:
+        with self.assertRaises(ValidationError):
+            self.valid_production_settings(JIRA_CLIENT_ID="client-id")
+
+    def test_requires_complete_secure_entra_sso_configuration(self) -> None:
+        with self.assertRaises(ValidationError):
+            self.valid_production_settings(ENTRA_CLIENT_ID="client-id")
+
+        valid = self.valid_production_settings(
+            ENTRA_TENANT_ID="12345678-1234-5678-1234-567812345678",
+            ENTRA_CLIENT_ID="client-id",
+            ENTRA_CLIENT_SECRET="client-secret",
+            ENTRA_REDIRECT_URI="https://app.example.com/api/auth/entra/callback",
+            ENTRA_FRONTEND_URL="https://app.example.com/login",
+        )
+        self.assertTrue(valid.entra_sso_enabled)
+
+        with self.assertRaises(ValidationError):
+            self.valid_production_settings(
+                ENTRA_TENANT_ID="12345678-1234-5678-1234-567812345678",
+                ENTRA_CLIENT_ID="client-id",
+                ENTRA_CLIENT_SECRET="client-secret",
+                ENTRA_REDIRECT_URI="http://app.example.com/api/auth/entra/callback",
+                ENTRA_FRONTEND_URL="https://app.example.com/login",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

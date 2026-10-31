@@ -1,6 +1,12 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { api, type AssistanceResult, type RepositoryConnection } from '../api/client'
+import {
+  api,
+  type AssistanceResult,
+  type JiraConnectionStatus,
+  type JiraIssue,
+  type RepositoryConnection,
+} from '../api/client'
 import { getUserFriendlyError } from '../utils/errorMessages'
 import { ASSISTANCE_SAMPLES } from '../data/assistanceSamples'
 import { useAuth } from '../context/useAuth'
@@ -82,19 +88,71 @@ export function DashboardPage() {
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<AssistanceResult | null>(null)
   const [repoConnection, setRepoConnection] = useState<RepositoryConnection | null>(null)
+  const [jiraConnection, setJiraConnection] = useState<JiraConnectionStatus | null>(null)
+  const [jiraIssues, setJiraIssues] = useState<JiraIssue[]>([])
+  const [jiraNextPageToken, setJiraNextPageToken] = useState<string | null>(null)
+  const [selectedJiraIssue, setSelectedJiraIssue] = useState<JiraIssue | null>(null)
+  const [jiraLoading, setJiraLoading] = useState(false)
+  const [jiraDetailLoading, setJiraDetailLoading] = useState(false)
   const [diffMode, setDiffMode] = useState<'paste' | 'fetch'>('paste')
   const [pullNumber, setPullNumber] = useState('')
   const [compareHead, setCompareHead] = useState('')
   const [diffImporting, setDiffImporting] = useState(false)
   const [diffImportNote, setDiffImportNote] = useState<string | null>(null)
   const resultContentRef = useRef<HTMLDivElement>(null)
+  const jiraSelectionRef = useRef(0)
 
   const selectedSample = ASSISTANCE_SAMPLES.find((s) => s.id === selectedSampleId)
 
   useEffect(() => {
     if (!token) return
     void api.getRepositorySettings(token).then(setRepoConnection).catch(() => setRepoConnection(null))
+    void api.getJiraStatus(token).then(setJiraConnection).catch((err) => {
+      setError(getUserFriendlyError(err))
+    })
   }, [token])
+
+  const loadJiraIssues = async (nextPageToken?: string | null) => {
+    if (!token) return
+    setJiraLoading(true)
+    setError(null)
+    try {
+      const page = await api.getAssignedJiraIssues(token, nextPageToken)
+      setJiraIssues((current) => (nextPageToken ? [...current, ...page.issues] : page.issues))
+      setJiraNextPageToken(page.next_page_token)
+    } catch (err) {
+      setError(getUserFriendlyError(err))
+    } finally {
+      setJiraLoading(false)
+    }
+  }
+
+  const selectJiraIssue = async (issueKey: string) => {
+    const selection = ++jiraSelectionRef.current
+    const issue = jiraIssues.find((candidate) => candidate.key === issueKey) ?? null
+    if (!issue || !token) {
+      setSelectedJiraIssue(null)
+      setJiraDetailLoading(false)
+      return
+    }
+
+    setSelectedJiraIssue(issue)
+    setJiraDetailLoading(true)
+    setUserStories(`${issue.key}: ${issue.summary}`)
+    setSelectedSampleId(null)
+    try {
+      const details = await api.getJiraIssue(token, issue.key)
+      if (selection !== jiraSelectionRef.current) return
+      setSelectedJiraIssue(details)
+      setUserStories(
+        `${details.key}: ${details.summary}${details.description ? `\n\n${details.description}` : ''}`,
+      )
+    } catch (err) {
+      if (selection === jiraSelectionRef.current) setError(getUserFriendlyError(err))
+    } finally {
+      if (selection === jiraSelectionRef.current) setJiraDetailLoading(false)
+    }
+  }
 
   const applyCodeDiffs = (nextValue: string): boolean => {
     if (!canAcceptCodeDiffs(repoConnection, nextValue)) {
@@ -368,6 +426,71 @@ export function DashboardPage() {
               required
             />
           </label>
+          <div className="jira-issue-picker">
+            <div className="jira-issue-picker-header">
+              <span>Import an assigned Jira issue</span>
+              {jiraConnection?.connected ? (
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => void loadJiraIssues()}
+                  disabled={jiraLoading}
+                >
+                  {jiraLoading ? 'Loading issues…' : jiraIssues.length ? 'Refresh list' : 'Load my issues'}
+                </button>
+              ) : (
+                <Link to="/settings">Connect Jira in Settings</Link>
+              )}
+            </div>
+            {jiraConnection?.connected && (
+              <>
+                <label className="jira-issue-select-label">
+                  Assigned issue
+                  <select
+                    value={selectedJiraIssue?.key ?? ''}
+                    onChange={(event) => void selectJiraIssue(event.target.value)}
+                    disabled={jiraLoading || jiraIssues.length === 0}
+                  >
+                    <option value="">
+                      {jiraIssues.length ? 'Select an issue…' : 'Load your assigned issues first'}
+                    </option>
+                    {jiraIssues.map((issue) => (
+                      <option key={issue.id} value={issue.key}>
+                        {issue.key} — {issue.summary}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {jiraNextPageToken && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm jira-more-button"
+                    onClick={() => void loadJiraIssues(jiraNextPageToken)}
+                    disabled={jiraLoading}
+                  >
+                    {jiraLoading ? 'Loading…' : 'Load more issues'}
+                  </button>
+                )}
+                {selectedJiraIssue && (
+                  <div className="jira-issue-preview" aria-live="polite">
+                    <div className="jira-issue-preview-heading">
+                      <strong>{selectedJiraIssue.key}: {selectedJiraIssue.summary}</strong>
+                      <span>
+                        {[selectedJiraIssue.issue_type, selectedJiraIssue.status]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </span>
+                    </div>
+                    <p>
+                      {jiraDetailLoading
+                        ? 'Loading issue description…'
+                        : selectedJiraIssue.description || 'This Jira issue has no description.'}
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
           <label>
             User stories (optional)
             <textarea

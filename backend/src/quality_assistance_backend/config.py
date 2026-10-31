@@ -1,9 +1,10 @@
 import hashlib
 from base64 import urlsafe_b64encode
 from urllib.parse import quote_plus
+from uuid import UUID
 
 from cryptography.fernet import Fernet
-from pydantic import AliasChoices, Field, computed_field, model_validator
+from pydantic import AliasChoices, Field, SecretStr, computed_field, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -51,12 +52,74 @@ class Settings(BaseSettings):
         default=True,
         validation_alias=AliasChoices("RUN_MIGRATIONS"),
     )
+    jira_client_id: str | None = Field(default=None, validation_alias=AliasChoices("JIRA_CLIENT_ID"))
+    jira_client_secret: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices("JIRA_CLIENT_SECRET"),
+    )
+    jira_redirect_uri: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("JIRA_REDIRECT_URI"),
+    )
+    jira_frontend_url: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("JIRA_FRONTEND_URL"),
+    )
+    entra_tenant_id: str | None = Field(default=None, validation_alias=AliasChoices("ENTRA_TENANT_ID"))
+    entra_client_id: str | None = Field(default=None, validation_alias=AliasChoices("ENTRA_CLIENT_ID"))
+    entra_client_secret: SecretStr | None = Field(
+        default=None,
+        validation_alias=AliasChoices("ENTRA_CLIENT_SECRET"),
+    )
+    entra_redirect_uri: str | None = Field(default=None, validation_alias=AliasChoices("ENTRA_REDIRECT_URI"))
+    entra_frontend_url: str | None = Field(default=None, validation_alias=AliasChoices("ENTRA_FRONTEND_URL"))
 
     @model_validator(mode="after")
     def validate_production_settings(self) -> "Settings":
+        jira_oauth_values = (
+            self.jira_client_id,
+            self.jira_client_secret.get_secret_value() if self.jira_client_secret else None,
+            self.jira_redirect_uri,
+        )
+        if any(jira_oauth_values) and not all(jira_oauth_values):
+            raise ValueError(
+                "JIRA_CLIENT_ID, JIRA_CLIENT_SECRET, and JIRA_REDIRECT_URI must be configured together."
+            )
+
+        entra_values = (
+            self.entra_tenant_id,
+            self.entra_client_id,
+            self.entra_client_secret.get_secret_value() if self.entra_client_secret else None,
+            self.entra_redirect_uri,
+            self.entra_frontend_url,
+        )
+        if any(entra_values) and not all(entra_values):
+            raise ValueError(
+                "ENTRA_TENANT_ID, ENTRA_CLIENT_ID, ENTRA_CLIENT_SECRET, "
+                "ENTRA_REDIRECT_URI, and ENTRA_FRONTEND_URL must be configured together."
+            )
+        if all(entra_values):
+            try:
+                self.entra_tenant_id = str(UUID(self.entra_tenant_id or ""))
+            except ValueError as exc:
+                raise ValueError("ENTRA_TENANT_ID must be the Microsoft Entra tenant GUID.") from exc
+
         if self.app_env.lower() != "production":
             return self
 
+        if self.jira_oauth_enabled and (
+            not self.jira_redirect_uri.startswith("https://")
+            or (
+                self.jira_frontend_url
+                and not self.jira_frontend_url.startswith("https://")
+            )
+        ):
+            raise ValueError("Production Jira OAuth redirect URLs must use HTTPS.")
+        if self.entra_sso_enabled and (
+            not self.entra_redirect_uri.startswith("https://")
+            or not self.entra_frontend_url.startswith("https://")
+        ):
+            raise ValueError("Production Microsoft Entra SSO redirect URLs must use HTTPS.")
         if (
             self.jwt_secret in {"change-me-in-production", "docker-dev-jwt-secret-change-me"}
             or len(self.jwt_secret) < 32
@@ -102,6 +165,26 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
+
+    @property
+    def jira_oauth_enabled(self) -> bool:
+        return bool(
+            self.jira_client_id
+            and self.jira_client_secret
+            and self.jira_client_secret.get_secret_value()
+            and self.jira_redirect_uri
+        )
+
+    @property
+    def entra_sso_enabled(self) -> bool:
+        return bool(
+            self.entra_tenant_id
+            and self.entra_client_id
+            and self.entra_client_secret
+            and self.entra_client_secret.get_secret_value()
+            and self.entra_redirect_uri
+            and self.entra_frontend_url
+        )
 
 
 settings = Settings()

@@ -6,6 +6,7 @@ export type AuthContextValue = {
   token: string | null
   loading: boolean
   login: (email: string, password: string) => Promise<void>
+  completeEntraSignIn: (ticket: string) => Promise<void>
   register: (fullName: string, email: string, password: string) => Promise<void>
   logout: () => void
 }

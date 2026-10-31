@@ -50,3 +50,17 @@ async def get_user_by_id(db: AsyncSession, user_id: UUID) -> User | None:
 async def get_user_by_email(db: AsyncSession, email: str) -> User | None:
     result = await db.execute(select(User).where(User.email == email.lower()))
     return result.scalar_one_or_none()
+
+
+async def get_user_by_entra_identity(
+    db: AsyncSession,
+    tenant_id: str,
+    object_id: str,
+) -> User | None:
+    result = await db.execute(
+        select(User).where(
+            User.entra_tenant_id == tenant_id,
+            User.entra_object_id == object_id,
+        )
+    )
+    return result.scalar_one_or_none()

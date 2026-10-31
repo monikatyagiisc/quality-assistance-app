@@ -2,9 +2,9 @@
 \label{chap:methodology}
 
 \section{Development Method}
-The project follows an iterative software-engineering approach: define the quality-workflow problem, design a service-oriented prototype, implement the user-facing and agent paths, and identify evidence required for evaluation. This approach is appropriate for a project whose artifact is an end-to-end application. The proposal describes a phased plan using public and open-source projects before any controlled use of anonymized organizational artifacts, and the mid-term presentation records the earlier prototype and evaluation status \cite{projectproposal,midtermpresentation}. This report describes the current implementation and retains comparative evaluation as planned work.
+Development proceeded iteratively: first framing the quality-workflow problem, then designing a service-oriented prototype, implementing the user and agent paths, and identifying what evidence would be needed to evaluate them. The proposal lays out a phased evaluation, beginning with public and open-source projects before any controlled use of anonymized organizational artifacts. The mid-term presentation records the earlier prototype and evaluation status \cite{projectproposal,midtermpresentation}. The implementation is described here; comparative evaluation remains planned work.
 
-The implementation was examined across the frontend, backend, agent service, tests, and deployment documentation. Claims about current functionality in this chapter are limited to those code paths and user-facing flows. The mid-term presentation is used as an earlier statement of research objectives, while the project proposal provides the initial scope and evaluation plan.
+To document the current state, the frontend, backend, agent service, tests, and deployment documentation were examined. Claims about implemented behavior below are limited to the code paths and user-facing flows found in those materials. The presentation and proposal provide the earlier research objectives and evaluation plan; they are not treated as evidence that planned experiments have been completed.
 
 \section{Requirements and Actors}
 The principal actor is a quality engineer, developer, or release stakeholder who needs structured testing guidance. The user authenticates, supplies requirements or stories, optionally adds a code diff or test-run log, and reviews the generated response. A follow-up can reuse a session identifier. An administrator configures the model provider and optional integrations through environment settings.
@@ -29,7 +29,7 @@ Operational configuration & Supports provider/model selection, containerized loc
 \end{table}
 
 \section{System Architecture}
-The application separates the browser interface, application API, database, and agent runtime. The frontend is implemented in React and TypeScript and communicates with the FastAPI backend. The backend validates user access, stores assistance requests, constructs the message sent to the agent, and records the agent response. The separate agent service uses Google ADK and a model abstraction to run the root agent and its specialists. PostgreSQL stores user, request, and integration records.
+The application has four main parts: a browser interface, an API, a database, and an agent runtime. The React and TypeScript frontend communicates with the FastAPI backend. After checking access, the backend stores the request, prepares the agent message, and records the response. A separate service runs the root agent and its specialists through Google ADK and a model abstraction. PostgreSQL holds user, request, and integration records.
 
 \begin{figure}[htbp]
 \centering
@@ -57,7 +57,7 @@ The application separates the browser interface, application API, database, and 
 \label{fig:system-architecture}
 \end{figure}
 
-The logical architecture describes the software components implemented in the repository. The following AWS diagram is a proposed deployment target rather than evidence of a deployed production environment; the repository currently provides deployment guidance, not infrastructure provisioning.
+The logical architecture above reflects the software components in the repository. The AWS diagram below shows a proposed deployment target. It is not a deployed environment: the repository provides deployment guidance, but does not provision this infrastructure.
 
 \begin{figure}[H]
 \centering
@@ -72,7 +72,7 @@ The frontend provides authentication, a dashboard for quality-assistance request
 \subsection{Backend and Persistence}
 The backend is a FastAPI service backed by asynchronous SQLAlchemy and PostgreSQL \cite{fastapidocs}. The \texttt{/api/assist} route requires an authenticated user. It stores a request with its owner, source text, session identifier, status, timestamps, and eventual response. It constructs a structured agent message and calls the agent service. Success and failure states are recorded, and errors are returned to the frontend using the API's error-handling path.
 
-The persistence model separates users, assistance requests, Jira connections, and GitHub repository connections. Stored requests provide an application record of prior submissions. This is distinct from the conversational state maintained by the agent runtime: the current ADK runner uses in-memory session storage, so agent context should not be treated as a durable conversation archive across service restarts.
+The persistence model keeps users, assistance requests, Jira connections, and GitHub repository connections in separate records. This lets the application retain prior submissions, but it does not make agent conversations durable. The current ADK runner keeps session state in memory, so that context may not survive a service restart.
 
 \subsection{Agent Orchestration}
 The root agent is named \texttt{quality\_assistance\_agent}. It is built with Google ADK, a configured model, logging callbacks, and available tools \cite{googleadk}. For supported providers, the root agent can transfer work to the registered sub-agents; the local Ollama configuration uses a consolidated instruction path without those sub-agents. The backend constructs a prompt from requirements, stories, and code changes and requests prioritized test cases, suggested data, automation notes, and release risks.
@@ -142,7 +142,7 @@ Jira Cloud connection uses OAuth 2.0 authorization, state records, and Jira APIs
 \section{Security and Data Handling}
 The backend scopes assistance records to an authenticated user and issues JWT access tokens after successful registration or login. Password handling is delegated to the project's password manager. Jira and GitHub credentials are stored in encrypted form; Jira OAuth state is represented by a digest and expires. Production settings validate that sensitive secrets, an encryption key, explicit HTTPS origins, database TLS, and non-default database credentials are supplied. The ECS guide describes a deployment pattern with private application and database services, IAM roles, and managed secrets.
 
-The submitted requirements, stories, code diffs, and test results may contain proprietary information. They are persisted with the request and sent to the configured model provider for inference. Deployers must therefore select providers and retention settings consistent with organizational policy, limit access to stored artifacts, rotate credentials appropriately, and avoid submitting secrets. The prototype's security controls reduce exposure but do not replace a privacy impact assessment, threat model, independent security review, or organization-specific data-governance approval.
+Requirements, stories, diffs, and test results can contain proprietary information. The application stores these artifacts with the request and sends them to the configured model provider for inference. Deployers should choose a provider and retention settings that meet organizational policy, restrict access to stored data, rotate credentials, and keep secrets out of submitted content. The controls in the prototype help limit exposure; they do not replace a privacy assessment, threat model, independent security review, or organization-specific approval.
 
 \section{Deployment and Operations}
 The repository supports a local full-stack Docker Compose configuration for PostgreSQL, frontend, backend, and agent services. Development scripts are also provided for a local frontend and Python services with a local or containerized database. Deployment documentation describes an AWS ECS Fargate pilot using separate containers, RDS PostgreSQL, an Application Load Balancer, and a configured model provider. That document is an operational plan and checklist rather than an infrastructure-as-code deployment; this report does not claim that an AWS production environment has been deployed.

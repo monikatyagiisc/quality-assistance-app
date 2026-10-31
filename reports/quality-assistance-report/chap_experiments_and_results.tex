@@ -2,7 +2,7 @@
 \label{chap:experiments_and_results}
 
 \section{Prototype Implementation Status}
-The repository contains a functional full-stack prototype rather than only the architecture proposal. The implemented product path includes user registration and login, an authenticated assistance API, persistent request records, an agent service, a dashboard for submitting quality context, and settings for external connections. Nine specialist agents are registered and selected through the root agent's routing instructions. GitHub diff retrieval, Jira Cloud OAuth and issue retrieval, and optional Microsoft Entra authentication are present in the source.
+The repository contains a working full-stack prototype, not just an architecture proposal. A user can register and sign in, submit context through an authenticated API, and review a response in the dashboard. Requests are persisted, and the separate agent service registers nine specialists that the root agent can select through its routing instructions. The source also includes GitHub diff retrieval, Jira Cloud OAuth and issue retrieval, and optional Microsoft Entra authentication.
 
 \begin{table}[htbp]
 \centering
@@ -26,7 +26,7 @@ Comparative empirical evaluation & Pending & No measured baseline, benchmark res
 \end{table}
 
 \section{Existing Automated Test Assets}
-The repository includes focused test modules for agent Bedrock credential settings, backend production configuration, Jira Cloud service behavior, and Microsoft Entra SSO behavior. The test assets provide evidence that provider configuration and selected integration paths are being tested. Their existence is not equivalent to a passing run or to end-to-end validation of every UI, model, database, or agent workflow. A final submission should record the exact test command, environment, commit, test count, and pass/fail outcome from a reproducible run.
+Focused test modules cover Bedrock credential settings, backend production configuration, Jira Cloud service behavior, and Microsoft Entra SSO behavior. These tests show that selected configuration and integration paths have dedicated checks. They do not establish that the tests pass, nor do they validate every UI, model, database, or agent workflow end to end. A reproducible submission should include the command, environment, commit, test count, and outcome from an actual run.
 
 \section{Demonstration Scenarios}
 The dashboard includes sample inputs that can be used to demonstrate several agent routes:
@@ -38,10 +38,10 @@ The dashboard includes sample inputs that can be used to demonstrate several age
   \item a Playwright selector change for automation and self-healing recommendations; and
   \item a follow-up request that reuses the prior session identifier.
 \end{enumerate}
-These examples verify that the interface and request model support representative kinds of context. They are not a benchmark dataset and do not establish measured improvements in coverage, effort, or defect detection.
+These examples show that the interface and request model can handle several kinds of context. They are demonstrations, not a benchmark, and provide no measurement of coverage, effort, or defect detection.
 
 \subsection{Interface Walkthrough and Illustrative Outputs}
-The screenshots below follow the user workflow: the workspace and integration settings are shown first, followed by the submitted requirements and user story, and then the response panels. They document the prototype interface and example generated content; they are not results from a controlled evaluation, and generated recommendations require human review.
+The screenshots follow a typical request: opening the workspace, checking integration settings, entering requirements and a user story, then reviewing the response. They document the interface and sample output only. No controlled evaluation was performed, and recommendations shown here still need human review.
 
 \begin{figure}[H]
 \centering
@@ -125,9 +125,9 @@ For quantitative comparisons, report sample sizes, distributions, confidence int
 Threats to validity include dataset representativeness, evaluator subjectivity, model nondeterminism, changes in external model services, contamination between task examples and prompts, and the possibility that generated cases increase review burden. A small public-data evaluation would support feasibility claims but would not alone establish generalization to enterprise workflows.
 
 \section{Results and Discussion}
-The implementation evidence supports the claim that the repository contains an integrated application capable of receiving quality context, persisting a request, invoking an orchestrated agent, and returning a response. The specialist registry and sample dashboard scenarios demonstrate breadth across several STLC tasks. Integration and deployment code further establish a path toward connecting the prototype with common engineering systems.
+The evidence available here is implementation evidence. The application accepts quality context, stores a request, calls the orchestrated agent, and returns a response. Its specialist registry and dashboard examples cover several STLC tasks, while the integration code provides a starting point for connecting engineering systems.
 
-No experiment results, benchmark dataset, measured time savings, coverage percentage, defect-detection rate, or user-study result were provided in the proposal, presentation, or inspected source materials. Accordingly, this report makes no quantitative claim that the system improves quality or reduces effort. The key result is the implemented software artifact and an evaluation protocol that can test those hypotheses. The distinction is important: an agent can generate plausible test cases without proving that they are complete, valid, or effective at finding defects.
+The materials reviewed for this report did not include experiment results, a benchmark dataset, measured time savings, coverage figures, defect-detection rates, or user-study findings. It is therefore not possible to claim that the system improves quality or reduces effort. The result at this stage is the software artifact and a protocol for testing those claims. Plausible-looking generated cases are not, on their own, evidence that the cases are complete, correct, or effective at finding defects.
 
 \section{Limitations}
 \begin{itemize}

@@ -2,18 +2,18 @@
 \label{chap:appendix}
 
 \section{Representative Request and Response Flow}
-A typical request starts with a signed-in user entering some mix of requirements, user stories, and a code diff. The frontend posts that context to the backend assistance route. The backend ties the request to the current user, saves it with a processing status, and builds an agent message. The agent service reuses an existing session or opens a new one, calls the root agent, and collects text from the agent events. The backend then stores the reply and the final status and returns the request and session identifiers. If the user wants to continue, the same session identifier goes back with the next turn.
+A request usually starts after login. The user enters some mix of requirements, stories, and a diff. The frontend posts that to the backend assistance route. The backend attaches the current user, saves the request as processing, and builds an agent message. The agent service reuses a session if one exists, otherwise it opens a new one, calls the root agent, and collects text from the events. The backend stores the reply and the final status and returns the request and session ids. For a follow-up, the same session id goes back with the next turn.
 
 \section{Reproducibility Checklist for a Future Evaluation}
 \begin{itemize}
-  \item Record the application revision, model provider, model identifier, prompt revision, and runtime configuration.
-  \item Keep anonymized inputs and the reference cases that will be used for scoring.
-  \item Use the same task set and the same review rubric for every baseline and assistant condition.
-  \item Time generation separately from human editing and review.
-  \item Track accepted, edited, and rejected items, and why.
-  \item Report aggregate scores and the failures; do not drop unsafe or misleading outputs.
-  \item Get approval before using organizational requirements, source code, or defect records.
+  \item Write down the application revision, model provider, model id, prompt revision, and runtime config.
+  \item Keep anonymized inputs and the reference cases used for scoring.
+  \item Use the same tasks and the same review rubric for every baseline and for the assistant.
+  \item Time generation separately from editing and review.
+  \item Track what was accepted, edited, or rejected, and why.
+  \item Report the scores and the failures. Do not drop unsafe or misleading outputs.
+  \item Get approval before using organisational requirements, source code, or defect records.
 \end{itemize}
 
 \section{Project Materials}
-The project proposal records the motivation, the questions, the phased evaluation, and the work plan. The mid-term presentation describes the agent framework that was intended and the status at that point. Implementation and deployment notes in the repository are the source for the as-built architecture and for the feature limits stated in this report.
+The proposal has the motivation, the questions, the phased evaluation, and the work plan. The mid-term presentation has the agent framework I intended at that point and the status then. The implementation and deployment notes in the repo are what I used for the as-built architecture and for the feature limits in this report.

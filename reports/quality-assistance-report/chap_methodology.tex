@@ -2,12 +2,12 @@
 \label{chap:methodology}
 
 \section{Development Method}
-I built the prototype in passes rather than from a frozen specification. The first pass was about naming the quality-workflow problem clearly. The second was a service-oriented sketch. After that came the user path, the agent path, and only then a hard look at what evidence would be needed to evaluate either. The proposal already asked for a phased evaluation: public and open-source material first, and only later, if approved, anonymized organizational artifacts. The mid-term presentation captured an earlier snapshot of the prototype and of that evaluation plan \cite{projectproposal,midtermpresentation}. This chapter describes the implementation. Comparative evaluation is still planned.
+I did not start from a frozen specification. First I tried to write down the quality-workflow problem in a way that would survive review. Then I sketched services. After that I implemented the user path, then the agent path. Only later did I sit down and ask what evidence I would actually need to evaluate either. The proposal already said evaluation should be phased: public and open-source material first, and only then, if approved, anonymized work artifacts. The mid-term slides are an earlier snapshot of the prototype and of that plan \cite{projectproposal,midtermpresentation}. This chapter is the implementation. The comparison study is still ahead.
 
-To write about the current state I went through the frontend, backend, agent service, tests, and deployment notes. Claims below are limited to paths I could actually find. The proposal and presentation explain what the project set out to do; they are not evidence that the planned experiments have been run.
+When I wrote the ``as built'' sections I went through the frontend, backend, agent service, tests, and deployment notes. If I could not find a path in the code, I did not report it as done. The proposal and presentation say what I intended. They are not a substitute for experiments I have not run.
 
 \section{Requirements and Actors}
-The main user is a quality engineer, a developer, or someone on a release call who needs structured testing guidance rather than another chat window. After signing in, that person supplies requirements or stories, optionally a diff or a test-run log, and then reads the response. A follow-up can reuse a session identifier. An administrator chooses the model provider and turns integrations on or off through environment settings.
+The person I had in mind is a quality engineer, a developer, or someone on a release call who wants structured testing help, not another open-ended chat. After login they provide requirements or stories, maybe a diff or a test-run log, and then they read the reply. A follow-up can reuse a session id. An administrator picks the model and turns Jira or GitHub on through environment settings.
 
 \begin{table}[htbp]
 \centering
@@ -29,7 +29,7 @@ Operational configuration & Supports provider/model selection, containerized loc
 \end{table}
 
 \section{System Architecture}
-The application has four main parts: the browser interface, the API, the database, and the agent runtime. The React and TypeScript frontend talks to the FastAPI backend. After access is checked, the backend stores the request, builds the agent message, and later stores the reply. A separate service runs the root agent and the specialists through Google ADK and a model abstraction. PostgreSQL holds users, requests, and integration records.
+There are four pieces: the browser UI, the API, the database, and the agent process. The React and TypeScript frontend calls the FastAPI backend. After the user is authenticated, the backend stores the request, builds the agent message, and later stores the reply. A separate service runs the root agent and the specialists through Google ADK. PostgreSQL holds users, requests, and the integration records.
 
 \begin{figure}[htbp]
 \centering
@@ -57,7 +57,7 @@ The application has four main parts: the browser interface, the API, the databas
 \label{fig:system-architecture}
 \end{figure}
 
-Figure~\ref{fig:system-architecture} is the software that is actually in the repository. The AWS drawing that follows is a proposed target. It is not running today. The repository has deployment notes, but it does not provision that infrastructure.
+Figure~\ref{fig:system-architecture} matches what is in the repo. The AWS picture after it is a target I wrote up, not something that is running. The repo has notes for that layout. It does not create the accounts or the cluster.
 
 \begin{figure}[H]
 \centering
@@ -67,15 +67,15 @@ Figure~\ref{fig:system-architecture} is the software that is actually in the rep
 \end{figure}
 
 \subsection{Frontend}
-The frontend covers sign-in, a dashboard for assistance requests, settings, and a short user guide. On the dashboard a user can type free-form requirements and stories, paste a code change, and start from sample requests: smoke planning, an end-to-end example, change impact, execution and reporting, automation, and a follow-up turn. If Jira is connected, assigned issues can fill the story field. If GitHub is connected, a pull-request or compare diff can be fetched rather than pasted. The reply is shown in the browser and can be downloaded as Markdown or HTML.
+The UI has login, a dashboard for requests, a settings page, and a short user guide. On the dashboard the user can type requirements and stories, paste a change, or start from the samples I added: smoke planning, an end-to-end example, change impact, execution and reporting, automation, and a follow-up. If Jira is connected, assigned issues can fill the story field. If GitHub is connected, a pull-request or compare diff can be fetched. The reply is rendered in the browser. It can also be downloaded as Markdown or HTML.
 
 \subsection{Backend and Persistence}
-The backend is a FastAPI service using asynchronous SQLAlchemy against PostgreSQL \cite{fastapidocs}. The \texttt{/api/assist} route is authenticated. It stores a request with its owner, source text, session identifier, status, timestamps, and, later, the response. It then builds a structured agent message and calls the agent service. Success and failure are both recorded. Errors go back to the frontend through the API's usual error path.
+The backend is FastAPI, with asynchronous SQLAlchemy on PostgreSQL \cite{fastapidocs}. \texttt{/api/assist} needs a logged-in user. The request is stored with owner, source text, session id, status, timestamps, and later the response. Then the backend builds a structured message and calls the agent service. Both success and failure are written back. Errors go to the frontend on the normal error path.
 
-Users, assistance requests, Jira connections, and GitHub repository connections are stored as separate records. That is enough to look up an earlier submission. It is not enough to treat agent conversations as durable history. The current ADK runner keeps session state in memory, so a restart can drop a follow-up context that a user still has on screen.
+Users, assistance requests, Jira connections, and GitHub repo connections are separate tables. That is enough to open an old submission. It is not enough if you expect the agent conversation to survive a restart. The ADK runner I used keeps session state in memory. I found that out the hard way: after a restart, a follow-up could lose context that was still on the screen.
 
 \subsection{Agent Orchestration}
-The root agent is named \texttt{quality\_assistance\_agent}. It is assembled with Google ADK, a configured model, logging callbacks, and the tools that are available at start-up \cite{googleadk}. For the supported cloud providers the root agent can hand work to registered sub-agents. The local Ollama path uses a single, consolidated instruction instead; the specialists are not transferred in that configuration. The backend prompt asks for prioritized test cases, suggested data, automation notes, and release risks, built from the requirements, stories, and diffs that were submitted.
+The root agent is \texttt{quality\_assistance\_agent}. I built it with Google ADK, the configured model, logging callbacks, and the tools available at start-up \cite{googleadk}. On the supported cloud providers the root agent can pass work to the registered sub-agents. On local Ollama I used one combined instruction instead, because that path does not transfer the specialists. The backend prompt asks for prioritized cases, suggested data, automation notes, and release risks, using the requirements, stories, and diffs that came in.
 
 \begin{table}[htbp]
 \centering
@@ -99,7 +99,7 @@ S09 & Release readiness evaluation & Weighs supplied test and risk signals and p
 \label{tab:agents}
 \end{table}
 
-The router maps requirement and story text to the test-case and test-data agents, diffs to change-impact analysis, execution logs to the execution, defect, and summary agents, and release questions to readiness. There is also a requirement-summarization tool on the root agent. This is prompt-driven routing. There is no separate deterministic workflow engine sitting beside it.
+Requirement and story text go to the test-case and test-data agents. Diffs go to change impact. Execution logs go to execution, defect, and summary. Release questions go to readiness. The root agent also has a small requirement-summarization tool. All of this is prompt routing. There is no second engine underneath it that would force the same path every time.
 
 \begin{figure}[H]
 \centering
@@ -137,21 +137,21 @@ The router maps requirement and story text to the test-case and test-data agents
 \end{figure}
 
 \subsection{External Integrations and Model Providers}
-Jira Cloud uses OAuth 2.0, a short-lived state record, and Jira APIs to list a user's assigned issues and to fetch issue detail. GitHub settings store a repository and an encrypted personal access token; the backend can then pull a pull-request diff or compare two references. Microsoft Entra single sign-on is optional. The agent configuration accepts Gemini, LiteLLM, Amazon Bedrock, and Ollama, provided credentials and models are available. Those are options in the code. They are not a claim that every provider was benchmarked on the same tasks.
+Jira Cloud is OAuth 2.0, a short-lived state record, and Jira APIs to list assigned issues and fetch detail. GitHub settings store a repo and an encrypted personal access token. From there the backend can pull a pull-request diff or compare two references. Microsoft Entra SSO is optional. The agent side can use Gemini, LiteLLM, Amazon Bedrock, or Ollama if the credentials and models are there. I put those options in so the same code can run in more than one place. I did not benchmark every provider on the same tasks.
 
 \section{Security and Data Handling}
-Assistance records belong to the signed-in user. JWT access tokens are issued after registration or login. Password handling is delegated to the project's password manager. Jira and GitHub credentials are stored encrypted. Jira OAuth state is a digest and it expires. In production the settings check looks for real secrets, an encryption key, explicit HTTPS origins, database TLS, and non-default database credentials. The ECS guide describes a pattern with private application and database services, IAM roles, and managed secrets.
+Assistance records are scoped to the signed-in user. JWT tokens are issued after register or login. Passwords go through the project's password manager. Jira and GitHub credentials are stored encrypted. Jira OAuth state is a digest and it expires. In production the settings check expects real secrets, an encryption key, explicit HTTPS origins, database TLS, and non-default database credentials. The ECS note describes private app and database services, IAM roles, and managed secrets.
 
-Requirements, stories, diffs, and test results can easily contain proprietary information. The application stores them with the request and sends them to whatever model provider is configured. Anyone deploying this has to pick a provider and retention policy that their organization will accept, restrict who can see stored data, rotate credentials, and keep secrets out of the prompt. The controls in the prototype reduce accidental exposure. They do not replace a privacy assessment, a threat model, an independent review, or an internal approval.
+Requirements, stories, diffs, and test results are often confidential. The application stores them with the request and sends them to the configured model provider. Anyone who deploys this has to pick a provider and a retention policy the organisation will accept, limit who can see stored data, rotate credentials, and keep secrets out of the prompt. The checks I added reduce accidental leaks. They are not a privacy assessment, a threat model, or an internal security sign-off.
 
 \section{Deployment and Operations}
-For local work the repository has a Docker Compose stack covering PostgreSQL, frontend, backend, and agent. There are also scripts for a local frontend and Python services against a local or containerized database. The AWS ECS Fargate notes describe a pilot with separate containers, RDS PostgreSQL, an Application Load Balancer, and a chosen model provider. That document is a checklist. It is not infrastructure-as-code, and this report does not claim that an AWS production environment has been stood up.
+For local use there is a Docker Compose file with PostgreSQL, frontend, backend, and agent. There are also scripts if you want the UI and Python services on the host, with the database local or in a container. The AWS ECS Fargate note is a pilot layout: separate containers, RDS PostgreSQL, an Application Load Balancer, and a chosen model. It is a checklist. It is not Terraform or CloudFormation, and I am not claiming that an AWS production stack has been brought up.
 
 \section{Quality Attributes}
 \begin{itemize}
-  \item \textbf{Modularity:} frontend, API, persistence, and agent service are separate processes; specialists are registered on their own.
-  \item \textbf{Configurability:} model providers, endpoints, integrations, and production flags come from the environment.
-  \item \textbf{Traceability:} the backend stores each user's inputs and responses; a formal requirement-to-case evidence trail and durable agent memory are still missing.
-  \item \textbf{Availability:} health and readiness endpoints and container notes help operations; how resilient a real deployment is depends on the topology that is actually chosen.
-  \item \textbf{Reliability:} the backend has explicit error paths and settings checks. Generated quality artifacts still need a person to read them, and they still need an empirical evaluation.
+  \item \textbf{Modularity:} frontend, API, database, and agent run as separate processes. Specialists are registered on their own.
+  \item \textbf{Configurability:} model, endpoints, integrations, and production flags come from the environment.
+  \item \textbf{Traceability:} each user's inputs and replies are stored. I still do not have a formal requirement-to-case trail, and agent memory is not durable.
+  \item \textbf{Availability:} health and readiness endpoints are there, and the container notes help. How well a real install holds up depends on the topology someone actually chooses.
+  \item \textbf{Reliability:} the backend has error paths and settings checks. Generated test artifacts still need a person to read them, and they still need a proper study.
 \end{itemize}

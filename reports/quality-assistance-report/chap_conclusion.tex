@@ -1,20 +1,20 @@
 \chapter{Conclusions}
 \label{chap:conclusion}
 
-I set out to join several STLC tasks in one place, and the repository now has a full-stack application that does that in draft form. The React and TypeScript frontend, the FastAPI and PostgreSQL backend, and the Google ADK agent service meet at a root agent that can send work to nine specialists. Those specialists cover test design and data, change impact, defect reports, and release-readiness notes. Authentication, request storage, Jira Cloud and GitHub context, optional Microsoft Entra SSO, and a choice of model providers are also in place.
+The aim was to keep several STLC jobs in one place. The repo now has a full-stack application that does that, at least as a draft workflow. The React and TypeScript UI, the FastAPI and PostgreSQL backend, and the Google ADK agent service meet at a root agent that can send work to nine specialists. Those specialists write test design and data, comment on a change, draft a defect, and write release-readiness notes. Login, request storage, Jira Cloud and GitHub context, optional Microsoft Entra SSO, and a choice of model providers are also there.
 
-Connecting those pieces is a useful engineering result. It is not yet a result about quality. I have not shown, in a controlled comparison, that the assistant improves coverage, reduces the total time a quality engineer spends, or finds more defects. The agents write suggestions for people to judge. Execution analysis does not run a suite. A self-healing note does not change code. A readiness paragraph does not approve a release.
+Getting those pieces to talk to each other was the engineering work. It is not the same as showing that quality improved. I have not run a controlled comparison, so I cannot say the assistant improves coverage, cuts the time a tester spends, or finds more defects. The agents write drafts. Someone still has to judge them. Execution analysis does not launch a suite. A self-healing note does not change the code. A readiness paragraph does not approve a release.
 
 \section{Future Work}
-The next phase should, in my view, concentrate on:
+What I would do next, in order:
 \begin{enumerate}
-  \item structured outputs and explicit checks between specialist stages;
-  \item human approval and edit points for test cases and for anything that could affect a release;
-  \item an evaluation of requirement-to-test traceability, correctness, review effort, latency, and cost against a baseline that is written down in advance;
-  \item trials on public projects and, after approval, on anonymized organizational artifacts;
-  \item retrieval over approved requirements, test repositories, and historical defects;
-  \item a careful CI/CD hook for test execution, together with durable, auditable session history; and
-  \item load, reliability, accessibility, privacy, and security reviews before anyone treats this as a broader deployment.
+  \item structured outputs and checks between specialist stages;
+  \item a place for a person to approve or edit test cases, and anything that could affect a release;
+  \item an evaluation of traceability, correctness, review effort, latency, and cost against a baseline written down in advance;
+  \item trials on public projects and, after approval, on anonymized organisational artifacts;
+  \item retrieval over approved requirements, test repos, and historical defects;
+  \item a careful CI/CD hook for test execution, and session history that survives a restart and can be audited; and
+  \item load, reliability, accessibility, privacy, and security reviews before this is treated as a wider deployment.
 \end{enumerate}
 
-The interesting question is no longer whether an LLM can produce a testing artifact that looks plausible. It is whether an orchestrated assistant can produce useful, traceable work often enough that the review it creates is still cheaper than the work it replaced. The prototype is a place to ask that question. The answer will have to come from a comparison against a baseline, not from the screenshots of a working demo.
+I already know an LLM can write something that looks like a test case. The question I still cannot answer is whether this orchestrated assistant produces work that people can trace and use, often enough that the review it creates is still cheaper than doing the task without it. The prototype is the place to run that comparison. Screenshots of a working demo are not the comparison.

@@ -2,7 +2,7 @@
 \label{chap:experiments_and_results}
 
 \section{Prototype Implementation Status}
-What I can show at this stage is a working full-stack prototype, not only an architecture sketch. A user can register, sign in, send context through an authenticated API, and read a response on the dashboard. Requests are stored. The agent service registers nine specialists, and the root agent chooses among them using its routing instructions. The same repository also contains GitHub diff retrieval, Jira Cloud OAuth and issue retrieval, and optional Microsoft Entra authentication.
+What I have at this point is a running full-stack prototype. It is more than a slide architecture. A user can register, sign in, send context through the authenticated API, and read a reply on the dashboard. Requests are stored. Nine specialists are registered, and the root agent picks among them from its routing instructions. GitHub diff retrieval, Jira Cloud OAuth and issue fetch, and optional Microsoft Entra login are in the same repo.
 
 \begin{table}[htbp]
 \centering
@@ -26,22 +26,22 @@ Comparative empirical evaluation & Pending & No measured baseline, benchmark res
 \end{table}
 
 \section{Existing Automated Test Assets}
-There are focused tests for Bedrock credential settings, backend production configuration, Jira Cloud service behavior, and Microsoft Entra SSO. Those files show that a few configuration and integration paths were important enough to get their own checks. They do not tell a reader that the suite currently passes, and they do not cover every UI, model, database, or agent path end to end. A later submission that wants to claim test evidence should include the command, environment, commit, test count, and the actual run outcome.
+I wrote focused tests for Bedrock credentials, backend production settings, Jira Cloud behaviour, and Microsoft Entra SSO. Those files show that a few paths mattered enough to get checks. They do not tell you the suite is green today, and they do not cover the UI, the model, the database, and the agents end to end. If a later version of this report is going to claim test evidence, it should include the command, the environment, the commit, the test count, and the actual result of a run.
 
 \section{Demonstration Scenarios}
-The dashboard ships with sample inputs that exercise several agent routes:
+The dashboard includes samples I used while building, so I could hit several agent routes without inventing a ticket every time:
 \begin{enumerate}
-  \item a password-reset requirement, used for test planning and requirement summarization;
-  \item an e-commerce checkout with requirements, user stories, and a code diff;
-  \item a diff-heavy authentication change, used for regression impact;
-  \item a test-run log with pass, fail, and skipped cases, used for execution analysis and reporting;
-  \item a Playwright selector change, used for automation and self-healing notes; and
-  \item a follow-up that reuses the previous session identifier.
+  \item a password-reset requirement, for planning and summarising;
+  \item an e-commerce checkout with requirements, stories, and a diff;
+  \item an authentication change with a large diff, for regression impact;
+  \item a test-run log with pass, fail, and skipped cases, for execution analysis and reporting;
+  \item a Playwright selector change, for automation and self-healing notes; and
+  \item a follow-up that reuses the previous session id.
 \end{enumerate}
-These examples were useful while building and demonstrating the interface. They are not a benchmark. They do not measure coverage, effort, or defect detection.
+They were useful for demos. They are not a benchmark. They do not measure coverage, effort, or defects found.
 
 \subsection{Interface Walkthrough and Illustrative Outputs}
-The screenshots follow an ordinary request: open the workspace, glance at integration settings, enter a requirement and a user story, then read the reply. They document the screens and a sample output. No controlled evaluation sits behind them, and the recommendations still need a person to review them.
+The screenshots are one ordinary path: open the workspace, check settings, type a requirement and a story, then read the reply. They show the screens and a sample output. I did not run a controlled evaluation on them. The recommendations still need a person.
 
 \begin{figure}[H]
 \centering
@@ -93,10 +93,10 @@ The screenshots follow an ordinary request: open the workspace, glance at integr
 \end{figure}
 
 \section{Evaluation Plan}
-A later evaluation should put three conditions on the same tasks: a manual QA baseline, an existing point-automation workflow where the team already has one, and the assistant-supported workflow. The first phase should stay on public requirements and open-source repositories or issue trackers, as the project plan already proposed. Any later organizational study should use anonymized artifacts and should wait for the data-governance approval that the organization requires.
+When I do the study, I want three conditions on the same tasks: a person doing the work by hand, whatever point automation the team already has, and this assistant. The first round should stay on public requirements and open-source repos or trackers, which is what the project plan already said. If we later use organisational material, it has to be anonymized, and it has to wait for the data-governance approval that organisation needs.
 
 \subsection{Dataset and Protocol}
-For each project, pick a bounded set of requirements, user stories, code changes, and any test-run or defect records that already exist. Write down the expected requirement-to-test links and expert-reviewed reference outputs before the assistant is run. Freeze the model, model version, prompt revision, and application configuration for a given comparison. Because model output moves around, repeat tasks where it is practical and keep both the raw output and the review decision. Where it is feasible, the reviewer rating the artifacts should not know which workflow produced them.
+For each project I would pick a small, closed set of requirements, stories, code changes, and any test-run or defect records that already exist. Expected requirement-to-test links and expert-reviewed reference outputs should be written down before the assistant is run. Model, model version, prompt revision, and app config stay fixed for a comparison. Because the model does not always give the same answer, I would repeat tasks where I can and keep both the raw output and the review decision. If it is practical, the person scoring the artifacts should not know which workflow produced them.
 
 \subsection{Measures}
 \begin{table}[htbp]
@@ -120,22 +120,22 @@ User acceptance & Structured ratings of usefulness, clarity, and trust from repr
 \end{table}
 
 \subsection{Analysis and Validity}
-Quantitative comparisons should report sample sizes, distributions, confidence intervals, and the tests that were used. Error categories matter as much as averages. Qualitative review should look for omissions, unsupported statements, muddy requirements, and places where the model and an expert disagree. Model and prompt versions have to be recorded, otherwise a later rerun is hard to interpret.
+For numbers I would report sample size, the shape of the data, confidence intervals, and which tests I used. I would also look at error types, not only averages. On the qualitative side I would look for missing cases, claims with no support, unclear requirements, and places where the model and an expert disagree. Model and prompt versions have to be written down, otherwise a rerun later is hard to explain.
 
-The usual threats apply: datasets that do not look like the work people actually do, reviewers who disagree, models that do not give the same answer twice, provider-side changes, examples that leak into prompts, and generated cases that simply create more review work. A small public-data study would be enough to talk about feasibility. It would not, by itself, support claims about enterprise workflows.
+The threats I worry about are the usual ones. The dataset may not look like the work people actually do. Reviewers will disagree. The model will not give the same answer twice. The provider may change the model under us. Examples may leak into prompts. And a long generated list may simply create more review. A small public-data run would be enough to talk about feasibility. It would not be enough to talk about enterprise workflows.
 
 \section{Results and Discussion}
-The evidence I have for this chapter is implementation evidence. The application takes quality context, stores a request, calls the orchestrated agent, and returns a response. The specialist registry and the dashboard samples cover several STLC tasks. The integration code is a starting point for connecting the engineering systems a team already uses.
+The evidence in this chapter is that the software exists and can be exercised. It takes quality context, stores a request, calls the orchestrated agent, and returns a response. The specialist list and the dashboard samples cover several STLC jobs. The Jira and GitHub code is a starting point for systems a team already has.
 
-I did not have experiment results, a benchmark set, time-saved numbers, coverage figures, defect-detection rates, or a user study to put next to that software. I therefore cannot claim that the system improves quality or reduces effort. What this stage produced is the artifact and a protocol for testing those claims later. A plausible-looking generated case is not proof that the case is complete, correct, or good at finding defects.
+I do not have experiment results to put next to that. No benchmark set, no time-saved numbers, no coverage figures, no defect-detection rates, no user study. So I am not claiming the system improves quality or reduces effort. What this stage produced is the application and a way to test those claims later. A generated case can look complete and still be wrong, incomplete, or useless for finding defects.
 
 \section{Limitations}
 \begin{itemize}
-  \item Recommendation quality follows the completeness of the submitted context and the behaviour of the chosen model.
-  \item Routing and synthesis between agents are still mostly prompt-driven. Formal schemas between stages and independent quality gates are not in the inspected code.
-  \item Agent session state lives in an in-memory runner. It is not a durable conversation store across restarts.
-  \item The system does not run external test suites, edit scripts, or enforce a release approval.
-  \item Persistent retrieval over requirements, test assets, and historical defects, and a Jenkins or equivalent CI/CD hook, remain future work.
-  \item Repository tests cover selected settings and services. UI, model-quality, load, and full end-to-end tests are still needed.
-  \item Production deployment, and organization-specific security and privacy approval, are not demonstrated by the deployment planning notes.
+  \item If the user gives thin or wrong context, or if the chosen model is weak, the recommendations follow that.
+  \item Routing between agents is still mostly the prompt. I did not add formal schemas or independent quality gates between stages.
+  \item Session state is in memory. Restart the agent process and the conversation is gone.
+  \item The system does not run external suites, edit scripts, or block a release.
+  \item Retrieval over requirements, test assets, and old defects, and a Jenkins or similar CI hook, are still to be done.
+  \item Tests cover a few settings and services. UI, model quality, load, and a full end-to-end path still need work.
+  \item I have planning notes for production, not a signed-off deployment or an organisation-specific privacy review.
 \end{itemize}

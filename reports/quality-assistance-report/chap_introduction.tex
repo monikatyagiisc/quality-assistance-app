@@ -2,40 +2,40 @@
 \label{chap:introduction}
 
 \section{Background}
-Software quality is produced through a sequence of connected activities rather than by test execution alone. A typical Software Testing Life Cycle (STLC) interprets requirements, plans test scope, designs cases and data, executes checks, reports defects, summarizes evidence, and informs release decisions. Testing standards and practitioner guidance emphasize that these activities should be planned, traceable, and adapted to risk \cite{iso29119,istqb2023}.
+Software quality is not produced by running tests alone. In a typical Software Testing Life Cycle (STLC) a team reads requirements, decides what is in scope, designs cases and data, executes checks, files defects, writes a summary, and then argues---sometimes late---about whether a release is ready. Standards and practitioner syllabi treat these steps as planned, traceable work that should follow risk rather than habit \cite{iso29119,istqb2023}.
 
-In practice, the information needed for these activities is spread across issue trackers, source-control systems, test frameworks, spreadsheets, and team discussions. A requirement has to be interpreted as a test; a code change has to be connected to regression scope; and test results have to be turned into evidence that a release team can use. Each hand-off creates another opportunity to lose context or interpret the same requirement differently. The work is not always difficult in isolation, but repeating it across tools can take time and make traceability harder to maintain.
+The difficulty I kept seeing is less about any one of those steps and more about how they sit in different tools. Requirements arrive as tickets. Code changes arrive as diffs. Failures arrive as logs. Someone still has to interpret a story as a test, map a commit onto regression scope, and turn a run into evidence a release manager can use. None of this is mysterious on a single ticket. It becomes expensive when the same interpretation is repeated, slightly differently, every sprint.
 
-Large language models (LLMs) can assist with language-intensive transformations such as summarizing a requirement, proposing boundary cases, or organizing failure logs. They do not, by themselves, guarantee factual correctness, completeness, or safe execution. A useful quality assistant must therefore combine contextual input, focused task instructions, explicit output expectations, access controls, and human review.
+Large language models (LLMs) are a reasonable fit for the language-heavy parts of that work: summarizing a requirement, proposing boundary cases, or putting a noisy log into a defect template. They are a poor fit for unsupervised judgement. A model can miss a constraint, invent a field, or sound sure when the input is thin. Any assistant that is actually useful in a quality team has to take context in, keep the task narrow, show what it produced, and leave a person to accept or reject it.
 
 \section{Problem Statement and Motivation}
-This work starts from a practical gap: teams may have automation for individual tasks, yet still rely on manual interpretation to connect requirements, code changes, test results, and release decisions. Requirements analysis, defect triage, and readiness assessment are especially likely to sit outside an automated test pipeline. When context is not carried forward, teams can repeat work, miss scenarios, or discover risk late.
+The gap this project tries to close is a practical one. Many teams already automate individual jobs---a test generator here, a report formatter there---yet still stitch requirements, diffs, results, and release notes together by hand. Analysis, triage, and readiness sit outside the pipeline more often than people admit. Context drops between tools, scenarios are missed, and risk shows up in a late review rather than in the original plan.
 
-The prototype addresses this gap with an orchestrated assistant for STLC-related work. A user can submit requirements and stories alongside a source-code diff or test-run evidence. A root agent selects relevant specialists and combines their responses. The assistant is intended to prepare and organize quality artifacts, not to approve them: an engineer must still check the test cases, run tests in the appropriate environment, and make the release decision.
+I therefore built an orchestrated assistant rather than a single prompt. The user can bring requirements and stories, a source-code diff, or a test-run log. A root agent picks the specialists that fit that mix and returns a draft. The draft is meant to be checked. An engineer still has to read the cases, run tests in the right environment, and decide whether a release goes out.
 
 \section{Research Questions}
-The project is guided by three questions adapted from the proposal and mid-term presentation \cite{projectproposal,midtermpresentation}:
+The questions below follow the project proposal and the mid-term presentation \cite{projectproposal,midtermpresentation}:
 \begin{enumerate}
-  \item \textbf{RQ1:} How can a multi-agent AI system coordinate multiple STLC activities through a single quality-assistance interface?
-  \item \textbf{RQ2:} What validation, provenance, and human-review controls are needed to make AI-generated testing artifacts more reliable and traceable?
+  \item \textbf{RQ1:} How can a multi-agent AI system coordinate several STLC activities through one quality-assistance interface?
+  \item \textbf{RQ2:} What validation, provenance, and human-review controls are needed before AI-generated testing artifacts can be trusted enough to use?
   \item \textbf{RQ3:} How should the system be evaluated for its effect on requirement-to-test traceability, quality-engineering effort, coverage, and defect analysis?
 \end{enumerate}
 
 \section{Objectives}
-The objectives are to:
+The work set out to:
 \begin{itemize}
-  \item design and implement a full-stack application for submitting software-quality context and reviewing AI-assisted results;
+  \item design and implement a full-stack application in which a user can submit quality context and review an AI-assisted response;
   \item implement a central agent with specialist capabilities for common STLC tasks;
-  \item persist user-scoped requests and provide authenticated access to the application;
-  \item connect selected engineering context sources, including Jira issues and GitHub code changes;
-  \item support configurable model providers and deployment settings; and
-  \item define a reproducible, human-reviewed evaluation plan without claiming unmeasured benefits.
+  \item persist requests against the signed-in user and keep the application behind authentication;
+  \item connect selected engineering sources, in particular Jira issues and GitHub code changes;
+  \item keep model providers and deployment settings configurable; and
+  \item define an evaluation plan that can be repeated, with human review, without claiming benefits that have not been measured.
 \end{itemize}
 
 \section{Scope and Contributions}
-This report describes the application and agent implementation present in the repository as of November 2026. The main contribution is a working prototype that connects a browser interface, a persistent API, and an agent service. Users can provide requirements and stories, attach code diffs or execution logs, continue a request in a follow-up turn, and export the response. When configured, Jira Cloud supplies issue context and GitHub supplies diffs. Behind the interface, a root agent coordinates nine registered STLC specialists.
+This report describes the application as it exists in the repository in November 2026. The main contribution is a working prototype, not a new theory of agents. A browser interface, a persistent API, and an agent service sit together. Users can paste requirements and stories, attach a diff or an execution log, continue a request in a later turn, and export the reply. If Jira Cloud and GitHub are configured, issue text and diffs can be pulled in rather than typed. Behind that, a root agent coordinates nine registered STLC specialists.
 
-Several boundaries matter when interpreting these contributions. The prototype does not execute a user's test suite, modify repository scripts, establish that generated cases are complete, or make release decisions. Execution, self-healing, and readiness responses are suggestions based on the submitted context. Persistent retrieval over test assets, CI/CD execution, formal output validation, and comparative evaluation are not implemented in the inspected repository and remain future work.
+A few limits should be kept in view. The prototype does not run a user's test suite, rewrite scripts in a repository, prove that generated cases are complete, or approve a release. Execution, self-healing, and readiness outputs are suggestions based on what was submitted. Persistent retrieval over test assets, CI/CD execution, formal output validation, and a comparative study are not in the inspected code. They remain future work.
 
 \section{Report Organization}
-\Cref{chap:literature_review} reviews the testing lifecycle, LLM-assisted testing, agent orchestration, and validation concerns. \Cref{chap:methodology} describes the development method, system architecture, implementation, and security model. \Cref{chap:experiments_and_results} records the implementation evidence available and defines the evaluation needed to answer the research questions. \Cref{chap:conclusion} summarizes the work and identifies limitations and next steps.
+\Cref{chap:literature_review} reviews the testing lifecycle, LLM-assisted testing, agent orchestration, and the validation issues that follow from them. \Cref{chap:methodology} covers how the prototype was built: method, architecture, implementation, and security. \Cref{chap:experiments_and_results} records what can actually be shown from the repository and sets out the evaluation needed to answer the research questions. \Cref{chap:conclusion} closes with limitations and the work that should come next.

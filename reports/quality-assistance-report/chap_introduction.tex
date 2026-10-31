@@ -1,0 +1,41 @@
+\chapter{Introduction}
+\label{chap:introduction}
+
+\section{Background}
+Software quality is produced through a sequence of connected activities rather than by test execution alone. A typical Software Testing Life Cycle (STLC) interprets requirements, plans test scope, designs cases and data, executes checks, reports defects, summarizes evidence, and informs release decisions. Testing standards and practitioner guidance emphasize that these activities should be planned, traceable, and adapted to risk \cite{iso29119,istqb2023}.
+
+In practice, quality information is often distributed across issue trackers, source-control systems, test frameworks, spreadsheets, and team discussions. Requirements may be restated manually as test cases; code changes may not be consistently mapped to regression scope; and results from a test run may not be converted into a concise, risk-aware release summary. Repetition and inconsistent interpretation can consume engineering time and weaken traceability.
+
+Large language models (LLMs) can assist with language-intensive transformations such as summarizing a requirement, proposing boundary cases, or organizing failure logs. They do not, by themselves, guarantee factual correctness, completeness, or safe execution. A useful quality assistant must therefore combine contextual input, focused task instructions, explicit output expectations, access controls, and human review.
+
+\section{Problem Statement and Motivation}
+The motivating problem is the lack of a connected, intelligent workflow that helps a quality team move from change context to test and release evidence without repeating the same interpretation at every stage. Existing automation can be effective at individual tasks, while upstream requirements analysis and downstream defect triage or readiness assessment may remain dependent on manual work. The resulting gaps can lead to omitted scenarios, duplicated effort, and late discovery of risk.
+
+The project proposes an orchestrated assistant for STLC-related work. Users submit requirements and user stories, and may provide a source-code diff or execution evidence. A root agent selects relevant specialists and returns a synthesized response. The goal is decision support: the system drafts and organizes quality artifacts; a qualified engineer remains responsible for confirming test correctness, executing tests in the appropriate environment, and deciding whether a release is acceptable.
+
+\section{Research Questions}
+The project is guided by three questions adapted from the proposal and mid-term presentation \cite{projectproposal,midtermpresentation}:
+\begin{enumerate}
+  \item \textbf{RQ1:} How can a multi-agent AI system coordinate multiple STLC activities through a single quality-assistance interface?
+  \item \textbf{RQ2:} What validation, provenance, and human-review controls are needed to make AI-generated testing artifacts more reliable and traceable?
+  \item \textbf{RQ3:} How should the system be evaluated for its effect on requirement-to-test traceability, quality-engineering effort, coverage, and defect analysis?
+\end{enumerate}
+
+\section{Objectives}
+The objectives are to:
+\begin{itemize}
+  \item design and implement a full-stack application for submitting software-quality context and reviewing AI-assisted results;
+  \item implement a central agent with specialist capabilities for common STLC tasks;
+  \item persist user-scoped requests and provide authenticated access to the application;
+  \item connect selected engineering context sources, including Jira issues and GitHub code changes;
+  \item support configurable model providers and deployment settings; and
+  \item define a reproducible, human-reviewed evaluation plan without claiming unmeasured benefits.
+\end{itemize}
+
+\section{Scope and Contributions}
+This report covers the application and agent implementation present in the project repository as of October 2026. Its contribution is a working, modular prototype that connects a browser-based interface, a persistent API, and a specialized agent service. The implemented interface accepts requirements and user stories, provides a place for code diffs and execution logs, supports follow-up turns, and renders or exports generated responses. Optional integrations provide Jira Cloud issue context and GitHub diffs. The agent service registers nine STLC specialists and configures a root orchestrator.
+
+The project does not claim that the prototype autonomously executes a user's test suite, changes scripts in a repository, proves that generated cases are complete, or makes an authoritative release decision. Execution, script-healing, and readiness responses are analytical suggestions based on supplied context. Retrieval-augmented generation over a persistent test repository, automated CI/CD execution, formal output validation, and controlled comparative evaluation remain future work unless otherwise configured outside the repository.
+
+\section{Report Organization}
+\Cref{chap:literature_review} reviews the testing lifecycle, LLM-assisted testing, agent orchestration, and validation concerns. \Cref{chap:methodology} describes the development method, system architecture, implementation, and security model. \Cref{chap:experiments_and_results} records the implementation evidence available and defines the evaluation needed to answer the research questions. \Cref{chap:conclusion} summarizes the work and identifies limitations and next steps.

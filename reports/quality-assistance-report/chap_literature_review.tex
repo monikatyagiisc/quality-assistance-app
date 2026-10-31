@@ -1,0 +1,30 @@
+\chapter{Literature Review}
+\label{chap:literature_review}
+
+\section{Software Testing Life Cycle}
+Software testing is a planned set of activities that evaluates software products and provides evidence about quality. The ISO/IEC/IEEE 29119 series describes concepts, processes, and documentation for software testing, while the ISTQB Foundation syllabus presents a practitioner-oriented view of test planning, analysis, design, implementation, execution, and completion \cite{iso29119,istqb2023}. Across these approaches, a recurring principle is traceability: test conditions and results should relate to requirements and risks, and conclusions should be based on recorded evidence.
+
+The STLC is not always a strictly linear sequence. Test results may reveal unclear requirements; a defect may lead to new regression cases; and a code change may alter the appropriate scope of testing. A system that assists with several phases should therefore preserve context and make transitions understandable, rather than treating each generated artifact as an isolated answer.
+
+\section{LLMs in Software Quality Engineering}
+LLMs offer flexible text understanding and generation, which makes them suitable for drafting test scenarios from natural-language requirements, proposing data partitions, classifying failure descriptions, and summarizing test runs. These are useful capabilities for reducing repetitive composition work. The same flexibility creates risks: a model can omit constraints, invent details, generate invalid steps, or state conclusions more confidently than the evidence supports.
+
+Work on machine-learning-enabled software engineering emphasizes the need for human-centered workflow design, clear ownership, data quality, testing, and continuous monitoring \cite{amershi2019}. In a testing assistant, model output should be treated as a candidate artifact. A practitioner should be able to check assumptions, revise generated cases, and reject unsupported recommendations before they affect a test plan or release decision.
+
+\section{Agent-Orchestrated Workflows}
+An agent architecture can assign distinct responsibilities to specialized components and use a coordinating component to select or combine them. The ReAct approach studies interleaving reasoning with actions, while surveys of LLM agents discuss planning, tool use, memory, and coordination as core design dimensions \cite{yao2023react,wang2023agents}. Specialization can improve task focus and make prompts easier to maintain, but it does not automatically produce correct outputs. Additional model calls also introduce latency, cost, and coordination failure modes.
+
+The present project applies this pattern through a root agent and a registry of STLC specialists. Routing is based on the submitted work context and the request's intent. The architecture is modular, but the current implementation primarily coordinates through agent instructions and generated text. It should not be confused with a deterministic workflow engine or a formally verified pipeline: explicit schemas, validation gates, and a user approval interface for each stage are areas for further work.
+
+\section{Grounding, Traceability, and Human Review}
+Retrieval-Augmented Generation (RAG) combines a language model with retrieval from an external knowledge source. The original RAG work shows how retrieved documents can supply context for knowledge-intensive generation \cite{lewis2020rag}. For software testing, retrieval could ground generation in approved requirements, test policies, API specifications, or prior defects. The project proposal and mid-term presentation identify this as a future direction; the repository inspected for this report does not implement a persistent retrieval index for test assets. The current prototype relies on the context supplied in each request and any available agent session context.
+
+Grounding is only one part of reliability. An evaluation should distinguish source traceability from factual correctness, and should record the requirement or code change that motivated each suggested test. Human review can identify omissions and unsupported assertions. For higher-impact decisions, the workflow should preserve the evidence behind the result, expose uncertainty, and require an explicit human decision.
+
+\section{Evaluation of AI-Assisted Testing}
+A credible evaluation needs a defined baseline, representative inputs, consistent model and prompt settings, and measurable outcomes. Proposed measures include requirement-to-test traceability, scenario coverage, human-rated artifact accuracy, time spent on comparable tasks, defect-classification quality, and end-to-end response latency. These measures answer different questions; for example, more generated cases do not necessarily mean better coverage, and faster drafting does not necessarily mean less total review effort.
+
+The NIST AI Risk Management Framework recommends managing AI risks through governance, mapping, measurement, and management activities \cite{nistairmf}. For this project, that perspective supports recording model and configuration versions, defining review criteria, separating model suggestions from verified results, and assessing privacy and operational risks alongside productivity metrics.
+
+\section{Research Gap and Project Position}
+The problem framing in the project proposal and mid-term presentation is that QA automation frequently emphasizes isolated activities, whereas teams also need coordination between requirements, test design, changes, failures, and release evidence. This project addresses the integration gap by building one application with a coordinating agent and task-specialized capabilities. It is an engineering prototype, not a claim that agent orchestration is itself novel across the research field. Its research value depends on demonstrating useful coordination, dependable output, and measurable improvement against an explicit baseline.

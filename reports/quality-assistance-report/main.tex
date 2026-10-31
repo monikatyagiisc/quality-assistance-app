@@ -1,0 +1,159 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% IISc M.Tech (Online) project report
+%% AI-Driven Quality Assistant Agent for STLC Automation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[oneside,12pt]{IIScthesisPSnPDF}
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{latexsym}
+\usepackage{multicol}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{fancyhdr}
+\usepackage[numbers]{natbib}
+\usepackage{cleveref}
+\usepackage{wrapfig}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{enumerate}
+\usepackage{cancel}
+\usepackage{mathrsfs}
+\usepackage{color}
+\usepackage[compact]{titlesec}
+\usepackage{mdwlist}
+\usepackage{tikz}
+\usepackage{varwidth}
+\usepackage{url}
+\usepackage{datetime}
+\usepackage{pdfpages}
+\usepackage{notoccite}
+\usepackage{diagbox}
+\usepackage{hhline}
+\usepackage{subfigure}
+\usepackage{etoolbox}
+\usetikzlibrary{shapes,arrows,trees,positioning,calc,arrows.meta}
+
+\renewcommand\nomgroup[1]{%
+  \item[\bfseries
+  \ifstrequal{#1}{A}{Acronyms}{%
+  \ifstrequal{#1}{B}{Abbreviations}{%
+  \ifstrequal{#1}{S}{Symbols}{}}}%
+]}
+
+\input{preamble}
+\newdateformat{monthyeardate}{ \monthname[\THEMONTH], \THEYEAR}
+\setstretch{1.5}
+\hbadness=10000
+\hfuzz=50pt
+
+\newcommand{\mytitle}{AI-Driven Quality Assistant Agent\\for STLC Automation}
+\newcommand{\myauthor}{Monika Tyagi}
+\newcommand{\mysrno}{13-19-02-19-52-24-1-24515}
+\newcommand{\mysubmitdate}{October, 2026}
+\newcommand{\mydegreejoindate}{August, 2024}
+\newcommand{\mydegreeenddate}{October, 2026}
+\newcommand{\mystream}{Data Science and Business Analytics}
+\newcommand{\mycompanyguide}{Kapil Madaan}
+\newcommand{\mycompanyname}{Alight Services India Pvt Ltd}
+\newcommand{\myfacultymentor}{Punit Rathore}
+\newcommand{\mymentordept}{Cyber Physical Systems}
+
+\title{\mytitle}
+\author{\myauthor}
+\srno{\mysrno}
+\submitdate{\mysubmitdate}
+\stream{Data Sciences and Business Analytics}
+\mtech
+\degree{Master of Technology (Online)}
+\faculty{Faculty of Engineering}
+
+\newcommand{\blankpage}{
+  \newpage
+  \thispagestyle{empty}
+  \mbox{}
+  \newpage
+}
+
+\begin{document}
+\maketitle
+\pagenumbering{gobble}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+
+\blankpage
+\thispagestyle{empty}
+\begin{center}
+\LARGE{\underline{\textbf{Declaration of Originality}}}
+\end{center}
+\noindent I, \textbf{\myauthor}, with SR No. \textbf{\mysrno}, hereby declare that the material presented in the project report titled
+\begin{center}
+\textbf{\mytitle}
+\end{center}
+\noindent represents work carried out by me at \textbf{\mycompanyname} as part of the project credit requirements of the \textbf{Master of Technology (Online)} degree in \textbf{\mystream} at the Indian Institute of Science, between \textbf{\mydegreejoindate} and \textbf{\mydegreeenddate}. All external sources and prior work used in preparing this report are cited.
+
+\noindent With my signature, I certify that:
+\begin{itemize}
+  \item I have not manipulated any data or results reported in this document.
+  \item I have clearly indicated and referenced the contributions of others.
+  \item I have acknowledged collaborative research and discussions relevant to this work.
+  \item I understand that false claims or unacknowledged use of intellectual property may result in disciplinary action.
+\end{itemize}
+
+\vspace{10mm}
+\noindent {\footnotesize Date: \hfill Student Signature}
+
+\vspace{10mm}
+\noindent In our capacities as internal project guide and faculty mentor of the above-mentioned work, we certify that the above statements are true to the best of our knowledge.
+
+\vspace{10mm}
+\noindent {\footnotesize Internal Guide: \textit{\mycompanyguide} \hfill Internal Guide Signature}\\
+\noindent {\footnotesize Organisation: \textit{\mycompanyname}}
+\vspace{5mm}
+
+\noindent {\footnotesize Faculty Mentor: \textit{\myfacultymentor} \hfill Faculty Mentor Signature}\\
+\noindent {\footnotesize Department: \textit{\mymentordept}}
+
+\blankpage
+\vspace*{\fill}
+\begin{center}
+\large\bf \textcopyright\ \myauthor\\
+\large\bf \mysubmitdate\\
+\large\bf All rights reserved
+\end{center}
+\vspace*{\fill}
+\thispagestyle{empty}
+\blankpage
+
+\frontmatter
+\pagenumbering{roman}
+\prefacesection{Acknowledgements}
+\input{acknowledgements}
+\prefacesection{Abstract}
+\input{abstract}
+\tableofcontents
+\listoffigures
+\listoftables
+\listofalgorithms
+\addcontentsline{toc}{chapter}{List of Algorithms}
+\addtocontents{toc}{\def\string\figurename{Algorithm}}
+\input{nomenclature}
+\printnomenclature
+\addcontentsline{toc}{chapter}{Acronyms, Abbreviations and Symbols}
+
+\mainmatter
+\setcounter{page}{1}
+\input{chap_introduction}
+\input{chap_literature_review}
+\input{chap_methodology}
+\input{chap_experiments_and_results}
+\input{chap_conclusion}
+
+\backmatter
+\appendix
+\include{appendix}
+\bibliographystyle{unsrtnat}
+\renewcommand{\bibname}{References}
+\bibliography{references}
+\end{document}

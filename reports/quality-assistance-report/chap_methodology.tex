@@ -1,0 +1,134 @@
+\chapter{Methodology and Implementation}
+\label{chap:methodology}
+
+\section{Development Method}
+The project follows an iterative software-engineering approach: define the quality-workflow problem, design a service-oriented prototype, implement the user-facing and agent paths, and identify evidence required for evaluation. This approach is appropriate for a project whose artifact is an end-to-end application. The proposal describes a phased plan using public and open-source projects before any controlled use of anonymized organizational artifacts, and the mid-term presentation records the earlier prototype and evaluation status \cite{projectproposal,midtermpresentation}. This report describes the current implementation and retains comparative evaluation as planned work.
+
+The implementation was examined across the frontend, backend, agent service, tests, and deployment documentation. Claims about current functionality in this chapter are limited to those code paths and user-facing flows. The mid-term presentation is used as an earlier statement of research objectives, while the project proposal provides the initial scope and evaluation plan.
+
+\section{Requirements and Actors}
+The principal actor is a quality engineer, developer, or release stakeholder who needs structured testing guidance. The user authenticates, supplies requirements or stories, optionally adds a code diff or test-run log, and reviews the generated response. A follow-up can reuse a session identifier. An administrator configures the model provider and optional integrations through environment settings.
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{p{0.22\textwidth}X}
+\toprule
+\textbf{Requirement} & \textbf{Prototype behavior} \\
+\midrule
+Context submission & Accepts requirements, user stories, code diffs, and optional session context through the authenticated assistance API. \\
+Quality assistance & Returns a generated response that can include prioritized cases, test data, automation notes, and release risks. \\
+Specialized analysis & Routes suitable requests to registered STLC agents for test design, execution-log analysis, change impact, defects, summaries, and readiness. \\
+User separation & Associates assistance requests with the authenticated user and persists request inputs and responses in PostgreSQL. \\
+Engineering context & Offers Jira Cloud story retrieval and GitHub pull-request or branch-diff retrieval when configured. \\
+Operational configuration & Supports provider/model selection, containerized local startup, health checks, and production configuration checks. \\
+\bottomrule
+\end{tabularx}
+\caption{Selected functional requirements and corresponding implemented behavior.}
+\label{tab:functional-requirements}
+\end{table}
+
+\section{System Architecture}
+The application separates the browser interface, application API, database, and agent runtime. The frontend is implemented in React and TypeScript and communicates with the FastAPI backend. The backend validates user access, stores assistance requests, constructs the message sent to the agent, and records the agent response. The separate agent service uses Google ADK and a model abstraction to run the root agent and its specialists. PostgreSQL stores user, request, and integration records.
+
+\begin{figure}[htbp]
+\centering
+\resizebox{0.98\textwidth}{!}{%
+\begin{tikzpicture}[
+  component/.style={draw,rounded corners,align=center,minimum width=3.0cm,minimum height=1.05cm,fill=gray!10},
+  external/.style={draw,rounded corners,align=center,minimum width=2.7cm,minimum height=0.9cm,fill=blue!7},
+  arrow/.style={-{Stealth[length=2.4mm]},thick}
+]
+\node[component] (browser) {User\\Browser};
+\node[component,right=1.5cm of browser] (frontend) {React + TypeScript\\Web application};
+\node[component,right=1.5cm of frontend] (backend) {FastAPI backend\\Auth, API, orchestration};
+\node[component,below=1.3cm of backend] (db) {PostgreSQL\\Requests and connections};
+\node[component,right=1.5cm of backend] (agent) {ADK agent service\\Root + STLC specialists};
+\node[external,right=1.5cm of agent] (models) {Configured model\\Gemini / LiteLLM / Bedrock / Ollama};
+\node[external,below=1.3cm of agent] (integrations) {Optional context\\Jira Cloud / GitHub};
+\draw[arrow] (browser) -- (frontend);
+\draw[arrow] (frontend) -- node[above,align=center]{HTTPS / REST\\JWT-authenticated} (backend);
+\draw[arrow] (backend) -- (db);
+\draw[arrow] (backend) -- node[above]{agent request} (agent);
+\draw[arrow] (agent) -- (models);
+\draw[arrow] (backend) -- (integrations);
+\end{tikzpicture}}
+\caption{Logical application architecture. Optional external integrations and model providers are enabled by configuration.}
+\label{fig:system-architecture}
+\end{figure}
+
+\subsection{Frontend}
+The frontend provides authentication, a dashboard for quality-assistance requests, settings, and user guidance. The dashboard accepts free-form requirements and user stories, supports code-change input, and includes sample requests for smoke planning, end-to-end examples, change impact, test execution and reporting, automation, and follow-up turns. When connected, Jira issues can populate the story context and GitHub can supply a pull-request or compare diff. Responses are rendered in the browser and can be downloaded as Markdown or HTML.
+
+\subsection{Backend and Persistence}
+The backend is a FastAPI service backed by asynchronous SQLAlchemy and PostgreSQL \cite{fastapidocs}. The \texttt{/api/assist} route requires an authenticated user. It stores a request with its owner, source text, session identifier, status, timestamps, and eventual response. It constructs a structured agent message and calls the agent service. Success and failure states are recorded, and errors are returned to the frontend using the API's error-handling path.
+
+The persistence model separates users, assistance requests, Jira connections, and GitHub repository connections. Stored requests provide an application record of prior submissions. This is distinct from the conversational state maintained by the agent runtime: the current ADK runner uses in-memory session storage, so agent context should not be treated as a durable conversation archive across service restarts.
+
+\subsection{Agent Orchestration}
+The root agent is named \texttt{quality\_assistance\_agent}. It is built with Google ADK, a configured model, logging callbacks, and available tools \cite{googleadk}. For supported providers, the root agent can transfer work to the registered sub-agents; the local Ollama configuration uses a consolidated instruction path without those sub-agents. The backend constructs a prompt from requirements, stories, and code changes and requests prioritized test cases, suggested data, automation notes, and release risks.
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{p{0.06\textwidth}p{0.34\textwidth}X}
+\toprule
+\textbf{ID} & \textbf{Specialist} & \textbf{Implemented responsibility} \\
+\midrule
+S01 & Test case generation & Drafts structured, prioritized cases from requirements and stories, including positive, negative, and boundary scenarios. \\
+S02 & Test data generation & Suggests representative and edge-case test data. \\
+S03 & Test script automation & Suggests automation approaches and repeatable script outlines. \\
+S04 & Test execution & Interprets supplied or simulated test-run results and highlights failures; it does not itself launch the user's test suite. \\
+S05 & Self-healing test scripts & Recommends maintenance strategies when selectors or interfaces change; it does not directly edit repository files. \\
+S06 & Change impact analysis & Relates supplied code diffs to potentially affected areas and regression scope. \\
+S07 & Bug report generation & Structures failure information into an actionable defect report. \\
+S08 & Test summary reporting & Summarizes test outcomes for stakeholders. \\
+S09 & Release readiness evaluation & Weighs supplied test and risk signals and provides a reasoned recommendation. \\
+\bottomrule
+\end{tabularx}
+\caption{Registered specialist agents and the scope described by their instructions.}
+\label{tab:agents}
+\end{table}
+
+The router's instructions map requirement and story requests to test-case and test-data agents, code diffs to change-impact analysis, execution logs to execution, defect, and summary agents, and release questions to the readiness agent. The root agent can also use a requirement-summarization tool. This is prompt- and agent-driven routing, not a separate deterministic workflow engine.
+
+\begin{algorithm}[htbp]
+\caption{Assistance request processing}
+\label{alg:assistance}
+\begin{algorithmic}[1]
+\Require Authenticated user $u$, requirements $r$, optional stories $s$, diff $d$, session $q$
+\State Validate the request and associate it with $u$
+\State Persist request inputs with status \texttt{processing}
+\State Construct a message from $r$, $s$, and $d$
+\State Resolve or create an agent session for $u$
+\State Invoke the root agent with the message and session
+\State Route to one or more specialists according to the request context
+\State Collect the generated response from the agent events
+\If{agent call succeeds}
+  \State Persist session identifier, response, and status \texttt{completed}
+\Else
+  \State Persist failure status and return an explicit service error
+\EndIf
+\State Return the request identifier, session, response, and status
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{External Integrations and Model Providers}
+Jira Cloud connection uses OAuth 2.0 authorization, state records, and Jira APIs to retrieve a user's assigned issues and issue details. GitHub connection settings store a repository and an encrypted personal access token; the backend can fetch pull-request diffs or compare two references. Microsoft Entra single sign-on is an optional authentication path. The agent configuration accepts Gemini, LiteLLM, Amazon Bedrock, and Ollama backends, subject to provider credentials and model availability. These are configuration options, not a claim that all providers have been benchmarked under the same conditions.
+
+\section{Security and Data Handling}
+The backend scopes assistance records to an authenticated user and issues JWT access tokens after successful registration or login. Password handling is delegated to the project's password manager. Jira and GitHub credentials are stored in encrypted form; Jira OAuth state is represented by a digest and expires. Production settings validate that sensitive secrets, an encryption key, explicit HTTPS origins, database TLS, and non-default database credentials are supplied. The ECS guide describes a deployment pattern with private application and database services, IAM roles, and managed secrets.
+
+The submitted requirements, stories, code diffs, and test results may contain proprietary information. They are persisted with the request and sent to the configured model provider for inference. Deployers must therefore select providers and retention settings consistent with organizational policy, limit access to stored artifacts, rotate credentials appropriately, and avoid submitting secrets. The prototype's security controls reduce exposure but do not replace a privacy impact assessment, threat model, independent security review, or organization-specific data-governance approval.
+
+\section{Deployment and Operations}
+The repository supports a local full-stack Docker Compose configuration for PostgreSQL, frontend, backend, and agent services. Development scripts are also provided for a local frontend and Python services with a local or containerized database. Deployment documentation describes an AWS ECS Fargate pilot using separate containers, RDS PostgreSQL, an Application Load Balancer, and a configured model provider. That document is an operational plan and checklist rather than an infrastructure-as-code deployment; this report does not claim that an AWS production environment has been deployed.
+
+\section{Quality Attributes}
+\begin{itemize}
+  \item \textbf{Modularity:} frontend, API, persistence, and agent service are separated; specialists are registered independently.
+  \item \textbf{Configurability:} model providers, endpoints, integrations, and production settings are selected through environment configuration.
+  \item \textbf{Traceability:} the backend persists request inputs and responses by user; detailed requirement-to-case evidence and durable agent memory are not yet formalized.
+  \item \textbf{Availability:} health and readiness endpoints and container deployment guidance support operations; production resilience depends on the selected deployment topology.
+  \item \textbf{Reliability:} explicit backend error paths and settings validation exist, while generated quality artifacts still require human review and empirical evaluation.
+\end{itemize}

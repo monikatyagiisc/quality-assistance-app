@@ -1,0 +1,20 @@
+\chapter{Conclusions}
+\label{chap:conclusion}
+
+This project addresses fragmentation across software quality activities by implementing an AI-assisted application for STLC-oriented analysis. The prototype combines a React and TypeScript frontend, a FastAPI and PostgreSQL backend, and a Google ADK agent service. A root agent can route requests among nine specialists covering test design, test data, automation recommendations, execution analysis, self-healing suggestions, change impact, defect reports, test summaries, and release readiness. The application also supports user authentication, request persistence, Jira Cloud issue context, GitHub diffs, optional Microsoft Entra SSO, and configurable model providers.
+
+The project demonstrates the feasibility of bringing these capabilities into one user workflow. It does not yet demonstrate, through controlled empirical results, that the approach increases coverage, lowers total quality-engineering effort, or detects more defects. The agents provide decision support and should remain subject to human review. In particular, execution analysis is not the same as running a test suite, a script-healing recommendation is not an applied code change, and a generated readiness assessment is not an approval gate.
+
+\section{Future Work}
+The next phase should prioritize:
+\begin{enumerate}
+  \item introducing structured outputs and explicit validation between specialist stages;
+  \item adding human approval and edit checkpoints for test cases and higher-impact recommendations;
+  \item evaluating requirement-to-test traceability, correctness, review effort, latency, and cost against a documented baseline;
+  \item testing with public projects and, after approval, anonymized organizational artifacts;
+  \item investigating retrieval over approved requirements, test repositories, and historical defect data;
+  \item integrating safely with CI/CD test execution and preserving durable, auditable session history; and
+  \item conducting load, reliability, accessibility, privacy, and security reviews before broader deployment.
+\end{enumerate}
+
+The central research question is therefore not whether an LLM can produce a plausible testing artifact, but whether an orchestrated assistant can do so consistently, with useful traceability and acceptable review effort. The implemented prototype provides a basis for answering that question through controlled evaluation.

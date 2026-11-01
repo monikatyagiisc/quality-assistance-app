@@ -2,7 +2,7 @@
 \label{chap:appendix}
 
 \section{Representative Request and Response Flow}
-A request usually starts after login. The user enters some mix of requirements, stories, and a diff. The frontend posts that to the backend assistance route. The backend attaches the current user, saves the request as processing, and builds an agent message. The agent service reuses a session if one exists, otherwise it opens a new one, calls the root agent, and collects text from the events. The backend stores the reply and the final status and returns the request and session ids. For a follow-up, the same session id goes back with the next turn.
+A request usually starts after login. The user enters some mix of requirements, stories, and code differences. The frontend posts that to the backend assistance route. The backend attaches the current user, saves the request as processing, and builds an agent message. The agent service reuses a session if one exists, otherwise it opens a new one, calls the root agent, and collects text from the events. The backend stores the reply and the final status and returns the request and session ids. For a follow-up, the same session id goes back with the next turn.
 
 \section{Reproducibility Checklist for a Future Evaluation}
 \begin{itemize}

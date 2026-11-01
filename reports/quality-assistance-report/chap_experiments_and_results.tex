@@ -2,7 +2,7 @@
 \label{chap:experiments_and_results}
 
 \section{Prototype Implementation Status}
-What I have at this point is a running full-stack prototype. It is more than a slide architecture. A user can register, sign in, send context through the authenticated API, and read a reply on the dashboard. Requests are stored. Nine specialists are registered, and the root agent picks among them from its routing instructions. GitHub diff retrieval, Jira Cloud OAuth and issue fetch, and optional Microsoft Entra login are in the same repo.
+What I have at this point is a running full-stack prototype. It is more than a slide architecture. A user can register, sign in, send context through the authenticated API, and read a reply on the dashboard. Requests are stored. Nine specialists are registered, and the root agent picks among them from its routing instructions. GitHub code-difference retrieval, Jira Cloud OAuth and issue fetch, and optional Microsoft Entra login are in the same repo.
 
 \begin{table}[htbp]
 \centering
@@ -14,7 +14,7 @@ What I have at this point is a running full-stack prototype. It is more than a s
 Problem analysis and architecture & Implemented & Research framing is documented in the proposal and presentation; current services are separated into frontend, backend, and agent. \\
 Core quality-assistance flow & Implemented & Authenticated request persistence, prompt construction, agent call, and response persistence are present. \\
 Specialist STLC capabilities & Implemented & Nine task-focused agents are registered; orchestration is controlled by ADK and agent instructions. \\
-Jira and GitHub context & Implemented, configuration-dependent & OAuth and issue retrieval are available for Jira; GitHub repository settings support diff retrieval. \\
+Jira and GitHub context & Implemented, configuration-dependent & OAuth and issue retrieval are available for Jira; GitHub repository settings support code-difference retrieval. \\
 Authentication and deployment controls & Implemented in part & Password/JWT authentication, optional Entra SSO, encrypted integration credentials, and production settings validation are present. \\
 RAG over organizational test assets & Planned & No persistent requirements/test/defect retrieval index is evidenced in the inspected implementation. \\
 Automated CI test execution and script mutation & Planned / out of scope of current behavior & Execution and healing agents analyze or recommend; they do not execute external suites or commit changes. \\
@@ -32,8 +32,8 @@ I wrote focused tests for Bedrock credentials, backend production settings, Jira
 The dashboard includes samples I used while building, so I could hit several agent routes without inventing a ticket every time:
 \begin{enumerate}
   \item a password-reset requirement, for planning and summarising;
-  \item an e-commerce checkout with requirements, stories, and a diff;
-  \item an authentication change with a large diff, for regression impact;
+  \item an e-commerce checkout with requirements, stories, and code differences;
+  \item an authentication change with large code differences, for regression impact;
   \item a test-run log with pass, fail, and skipped cases, for execution analysis and reporting;
   \item a Playwright selector change, for automation and self-healing notes; and
   \item a follow-up that reuses the previous session id.

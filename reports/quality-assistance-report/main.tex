@@ -44,6 +44,7 @@
 ]}
 
 \input{preamble}
+\graphicspath{{../images/}{ThesisFigs/PNG/}{ThesisFigs/PDF/}{ThesisFigs/}}
 \newdateformat{monthyeardate}{ \monthname[\THEMONTH], \THEYEAR}
 \setstretch{1.5}
 \hbadness=10000
@@ -85,6 +86,7 @@
 
 \blankpage
 \thispagestyle{empty}
+\begingroup\setstretch{1.15}
 \begin{center}
 \LARGE{\underline{\textbf{Declaration of Originality}}}
 \end{center}
@@ -120,7 +122,8 @@
 \vspace{5mm}
 
 \noindent  {\footnotesize{Faculty Mentor Name: \textit{\myfacultymentor} \hfill Faculty Mentor Signature}} \qquad\\
-\noindent  {\footnotesize{Department: \textit{\mymentordept}}}
+\noindent  {\footnotesize{Department: \textit{\mymentordept}}}\par
+\endgroup
 
 \blankpage
 \vspace*{\fill}
@@ -146,7 +149,12 @@
 \addcontentsline{toc}{chapter}{List of Algorithms}
 \addtocontents{toc}{\def\string\figurename{Algorithm}}
 \input{nomenclature}
+\makeatletter
+\let\IISc@origmkboth\@mkboth
+\def\@mkboth#1#2{\IISc@origmkboth{#1}{}}
 \printnomenclature
+\let\@mkboth\IISc@origmkboth
+\makeatother
 \addcontentsline{toc}{chapter}{Acronyms, Abbreviations and Symbols}
 
 \mainmatter

@@ -107,7 +107,7 @@
     \DeclareGraphicsExtensions{.png, .jpg, .pdf}
 
     \pdfcompresslevel=9
-    \graphicspath{{../images/}{ThesisFigs/PNG/}{ThesisFigs/PDF/}{ThesisFigs/}}
+    \graphicspath{{ThesisFigs/PNG/}{ThesisFigs/PDF/}{ThesisFigs/}}
 \else
     \usepackage[ dvips, 
                  bookmarks,
@@ -177,7 +177,8 @@
 \renewcommand{\chaptermark}[1]{\markboth{\MakeUppercase{\thechapter. #1 }}{}}
 \renewcommand{\sectionmark}[1]{}
 \fancyhf{}
-\fancyhead[R]{\bfseries\rightmark}
+\fancyhead[RO]{\bfseries\rightmark}
+\fancyhead[L]{\bfseries\leftmark}
 \fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{0pt}
 \renewcommand{\footrulewidth}{0pt}
@@ -331,3 +332,4 @@
   \renewcommand{\thepage}{\roman{page}}}
 {\newpage\renewcommand{\thepage}{\arabic{page}}}
 %{\newpage\renewcommand{\thepage}{\arabic{page}}\setcounter{page}{1}}
+

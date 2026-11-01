@@ -30,6 +30,36 @@ Operational configuration & Supports provider/model selection, containerized loc
 \label{tab:functional-requirements}
 \end{table}
 
+\section{Technology Stack}
+\Cref{tab:technology-stack} lists the technologies used in the prototype and the role each one plays.
+
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.27\textwidth}>{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Layer} & \textbf{Technology} & \textbf{Role} \\
+\midrule
+Frontend & React 19, TypeScript, Vite & User interface, component rendering, and build tooling. \\
+Routing & React Router & Client-side navigation between login, workspace, settings, and guide pages. \\
+Markdown rendering & react-markdown, remark-gfm & Renders the formatted agent response, including tables, in the browser. \\
+HTTP client & Browser Fetch API & Calls from the browser to the backend REST API. \\
+Backend API & FastAPI (Python), Uvicorn & REST endpoints, request validation, and routing. \\
+Agent orchestration & Google Agent Development Kit (ADK) & Root agent, nine specialised agents, tool use, and session handling. \\
+LLM access & Gemini, LiteLLM, Amazon Bedrock, Ollama & Configurable model providers used by the agents for text generation. \\
+Database & PostgreSQL & Users, assistance requests, and Jira and GitHub connections. \\
+ORM and migrations & SQLAlchemy (async), Alembic & Data access and database schema migrations. \\
+Authentication & JWT (python-jose), bcrypt & Access tokens and password hashing; Microsoft Entra single sign-on is optional. \\
+Encryption & Cryptography (Fernet) & Encrypts stored Jira and GitHub credentials. \\
+External APIs & HTTPX & Asynchronous calls from the backend to the agent service, Jira Cloud, and GitHub. \\
+Deployment & Docker, Docker Compose & Runs the frontend, backend, agent service, and database together. \\
+Configuration & Environment variables (\texttt{.env}) & Provider selection, credentials, and production settings. \\
+\bottomrule
+\end{tabularx}
+\caption{Technology stack used in the prototype.}
+\label{tab:technology-stack}
+\end{table}
+
 \section{System Architecture}
 There are four pieces: the browser UI, the API, the database, and the agent process. The React and TypeScript frontend calls the FastAPI backend. After the user is authenticated, the backend stores the request, builds the agent message, and later stores the reply. A separate service runs the root agent and the specialists through Google ADK. PostgreSQL holds users, requests, and the integration records.
 
@@ -111,26 +141,18 @@ Requirement and story text go to the test-case and test-data agents. Code differ
 \label{fig:agentic-flow}
 \end{figure}
 
-\begin{algorithm}[htbp]
-\caption{Assistance request processing}
-\label{alg:assistance}
-\begin{algorithmic}[1]
-\Require Authenticated user $u$, requirements $r$, optional stories $s$, code differences $d$, session $q$
-\State Validate the request and associate it with $u$
-\State Persist request inputs with status \texttt{processing}
-\State Construct a message from $r$, $s$, and $d$
-\State Resolve or create an agent session for $u$
-\State Invoke the root agent with the message and session
-\State Route to one or more specialists according to the request context
-\State Collect the generated response from the agent events
-\If{agent call succeeds}
-  \State Persist session identifier, response, and status \texttt{completed}
-\Else
-  \State Persist failure status and return an explicit service error
-\EndIf
-\State Return the request identifier, session, response, and status
-\end{algorithmic}
-\end{algorithm}
+The steps for processing an assistance request are:
+\begin{enumerate}
+  \item Validate the request and associate it with the authenticated user.
+  \item Persist the request inputs (requirements, optional stories, and code differences) with status \texttt{processing}.
+  \item Construct a message from the requirements, stories, and code differences.
+  \item Resolve or create an agent session for the user.
+  \item Invoke the root agent with the message and session.
+  \item Route to one or more specialists according to the request context.
+  \item Collect the generated response from the agent events.
+  \item If the agent call succeeds, persist the session identifier, response, and status \texttt{completed}; otherwise persist the failure status and return an explicit service error.
+  \item Return the request identifier, session, response, and status.
+\end{enumerate}
 
 \begin{figure}[H]
 \centering

@@ -24,20 +24,20 @@ The project is guided by the following research questions:
 \end{enumerate}
 
 \section{Objectives}
-The practical goals were:
+The main objectives of this project are to:
 \begin{itemize}
-  \item put up a full-stack application where a user can submit quality context and read an AI-assisted reply;
-  \item put a central agent in place, with specialists for the STLC jobs I needed;
-  \item store requests against the signed-in user and keep the app behind login;
-  \item pull context from Jira and GitHub when those are configured;
-  \item leave the model provider and deployment settings in the environment, so they can change without a rewrite; and
-  \item write an evaluation plan that can be repeated, with human review, and not report benefits I have not measured.
+  \item design and develop a full-stack application where users can submit software-testing information and review the results generated with AI assistance;
+  \item build a central agent that can understand user requests and delegate tasks to specialised agents covering different activities of the STLC;
+  \item provide secure, authenticated access to the application and maintain user-specific records of submitted requests and their results;
+  \item integrate with engineering tools such as Jira for accessing user stories and GitHub for retrieving source-code changes;
+  \item allow users to configure different AI model providers and application deployment settings; and
+  \item establish a practical and reproducible evaluation approach in which the generated results are reviewed by humans, without making claims about improvements that have not yet been measured.
 \end{itemize}
 
 \section{Scope and Contributions}
-This report is about the code in the repository as of November 2026. What I am submitting is a working prototype. I am not offering a new theory of agents. The browser UI, the API, and the agent service run together. Users can paste requirements and stories, attach a diff or a log, continue in a later turn, and export the reply. If Jira Cloud and GitHub are set up, issue text and diffs can be fetched instead of typed. The root agent then works with nine STLC specialists.
+This report is about the code in the project repository \cite{qaapprepo} as of November 2026. What I am submitting is a working prototype. I am not offering a new theory of agents. The browser UI, the API, and the agent service run together. Users can paste requirements and stories, attach git code differences or a link to a GitHub pull request with the changes, add a test log, continue in a later turn, and export the reply. If Jira Cloud and GitHub are set up, issue text and pull-request or branch diffs can be fetched instead of typed. The root agent then works with nine STLC specialists.
 
 There are limits I do not want to hide. The prototype will not run someone else's suite. It will not rewrite scripts in a git repo. It cannot prove that the generated cases are complete, and it cannot approve a release. Execution, self-healing, and readiness answers are suggestions from the text that was submitted. I also did not implement retrieval over a test repository, CI/CD execution, strict output schemas, or a comparative study. Those are listed later as future work.
 
 \section{Report Organization}
-\Cref{chap:literature_review} is the reading I used: STLC, LLMs in testing, agent setups, and the validation issues. \Cref{chap:methodology} is how I built the prototype, including architecture and security. \Cref{chap:experiments_and_results} is what I can actually show from the repo, plus the evaluation I still need for the research questions. \Cref{chap:conclusion} is the wrap-up and the list of next steps.
+\Cref{chap:literature_review} is the reading I used: STLC, LLMs in testing, agent setups, and the validation issues. \Cref{chap:methodology} is how I built the prototype, including architecture and security. \Cref{chap:experiments_and_results} is what I can actually show, plus the evaluation I still need for the research questions. \Cref{chap:conclusion} is the wrap-up and the list of next steps.

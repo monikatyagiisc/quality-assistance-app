@@ -2,9 +2,11 @@
 \label{chap:methodology}
 
 \section{Development Method}
-I did not start from a frozen specification. First I tried to write down the quality-workflow problem in a way that would survive review. Then I sketched services. After that I implemented the user path, then the agent path. Only later did I sit down and ask what evidence I would actually need to evaluate either. The proposal already said evaluation should be phased: public and open-source material first, and only then, if approved, anonymized work artifacts. The mid-term slides are an earlier snapshot of the prototype and of that plan. This chapter is the implementation. The comparison study is still ahead.
+The project was carried out in an iterative manner, starting with identifying the challenges faced by quality teams, followed by designing and developing a working prototype. The work involved planning the overall architecture, building the frontend and backend services, integrating the AI agents, and identifying how the completed system could be evaluated. This approach was suitable for the project, as the main outcome was a working application that brings together different activities of the Software Testing Life Cycle.
 
-When I wrote the ``as built'' sections I went through the frontend, backend, agent service, tests, and deployment notes. If I could not find a path in the code, I did not report it as done. The proposal and presentation say what I intended. They are not a substitute for experiments I have not run.
+The initial proposal outlined a phased approach, beginning with public and open-source projects to explore the system's capabilities, with the possibility of using anonymised organisational data in a controlled setting at a later stage.
+
+To understand the actual state of the system, the implementation was reviewed across its main components, including the frontend, backend, agent service, test cases, and deployment documentation. The description of implemented features in this report is based on the functionality available in the code and the workflows that can currently be accessed through the application.
 
 \section{Requirements and Actors}
 The person I had in mind is a quality engineer, a developer, or someone on a release call who wants structured testing help, not another open-ended chat. After login they provide requirements or stories, maybe a diff or a test-run log, and then they read the reply. A follow-up can reuse a session id. An administrator picks the model and turns Jira or GitHub on through environment settings.
@@ -37,19 +39,20 @@ There are four pieces: the browser UI, the API, the database, and the agent proc
 \begin{tikzpicture}[
   component/.style={draw,rounded corners,align=center,minimum width=3.0cm,minimum height=1.05cm,fill=gray!10},
   external/.style={draw,rounded corners,align=center,minimum width=2.7cm,minimum height=0.9cm,fill=blue!7},
-  arrow/.style={-{Stealth[length=2.4mm]},thick}
+  arrow/.style={-{Stealth[length=2.4mm]},thick},
+  elabel/.style={font=\footnotesize,align=center,above=2pt,inner sep=1pt}
 ]
 \node[component] (browser) {User\\Browser};
 \node[component,right=1.5cm of browser] (frontend) {React + TypeScript\\Web application};
-\node[component,right=1.5cm of frontend] (backend) {FastAPI backend\\Auth, API, orchestration};
+\node[component,right=3.4cm of frontend] (backend) {FastAPI backend\\Auth, API, orchestration};
 \node[component,below=1.3cm of backend] (db) {PostgreSQL\\Requests and connections};
-\node[component,right=1.5cm of backend] (agent) {ADK agent service\\Root + STLC specialists};
-\node[external,right=1.5cm of agent] (models) {Configured model\\Gemini / LiteLLM / Bedrock / Ollama};
+\node[component,right=3.0cm of backend] (agent) {ADK agent service\\Root + STLC specialists};
+\node[external,right=1.5cm of agent] (models) {Configured model\\Gemini, LiteLLM,\\Bedrock, Ollama};
 \node[external,below=1.3cm of agent] (integrations) {Optional context\\Jira Cloud / GitHub};
 \draw[arrow] (browser) -- (frontend);
-\draw[arrow] (frontend) -- node[above,align=center]{HTTPS / REST\\JWT-authenticated} (backend);
+\draw[arrow] (frontend) -- node[elabel]{HTTPS / REST\\JWT-authenticated} (backend);
 \draw[arrow] (backend) -- (db);
-\draw[arrow] (backend) -- node[above]{agent request} (agent);
+\draw[arrow] (backend) -- node[elabel]{agent\\request} (agent);
 \draw[arrow] (agent) -- (models);
 \draw[arrow] (backend) -- (integrations);
 \end{tikzpicture}}
@@ -57,7 +60,7 @@ There are four pieces: the browser UI, the API, the database, and the agent proc
 \label{fig:system-architecture}
 \end{figure}
 
-Figure~\ref{fig:system-architecture} matches what is in the repo. The AWS picture after it is a target I wrote up, not something that is running. The repo has notes for that layout. It does not create the accounts or the cluster.
+Figure~\ref{fig:system-architecture} matches what is in the code repository \cite{qaapprepo}. The AWS picture after it is a target I wrote up, not something that is running. The repo has notes for that layout. It does not create the accounts or the cluster.
 
 \begin{figure}[H]
 \centering

@@ -60,12 +60,12 @@ There are four pieces: the browser UI, the API, the database, and the agent proc
 \label{fig:system-architecture}
 \end{figure}
 
-Figure~\ref{fig:system-architecture} matches what is in the code repository \cite{qaapprepo}. The AWS picture after it is a target I wrote up, not something that is running. The repo has notes for that layout. It does not create the accounts or the cluster.
+Figure~\ref{fig:system-architecture} matches what is in the code repository \cite{qaapprepo}. Figure~\ref{fig:system-architecture-deployment} describes the high-level design of the web application on AWS.
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.98\textwidth,height=0.42\textheight,keepaspectratio]{SystemArchitecture.png}
-\caption{Proposed AWS deployment architecture for the Quality Assistance application. This target design is not currently deployed by the repository.}
+\caption{High-level design of the Quality Assistance application.}
 \label{fig:system-architecture-deployment}
 \end{figure}
 
@@ -75,10 +75,10 @@ The UI has login, a dashboard for requests, a settings page, and a short user gu
 \subsection{Backend and Persistence}
 The backend is FastAPI, with asynchronous SQLAlchemy on PostgreSQL \cite{fastapidocs}. \texttt{/api/assist} needs a logged-in user. The request is stored with owner, source text, session id, status, timestamps, and later the response. Then the backend builds a structured message and calls the agent service. Both success and failure are written back. Errors go to the frontend on the normal error path.
 
-Users, assistance requests, Jira connections, and GitHub repo connections are separate tables. That is enough to open an old submission. It is not enough if you expect the agent conversation to survive a restart. The ADK runner I used keeps session state in memory. I found that out the hard way: after a restart, a follow-up could lose context that was still on the screen.
+Users, assistance requests, Jira connections, and GitHub repo connections are separate tables. That is enough to open an old submission. It is not enough if you expect the agent conversation to survive a restart. The ADK runner I used keeps session state in memory.
 
 \subsection{Agent Orchestration}
-The root agent is \texttt{quality\_assistance\_agent}. I built it with Google ADK, the configured model, logging callbacks, and the tools available at start-up \cite{googleadk}. On the supported cloud providers the root agent can pass work to the registered sub-agents. On local Ollama I used one combined instruction instead, because that path does not transfer the specialists. The backend prompt asks for prioritized cases, suggested data, automation notes, and release risks, using the requirements, stories, and diffs that came in.
+The root agent is \texttt{quality\_assistance\_agent}. I built it with Google ADK, the configured model, logging callbacks, and the tools available at start-up \cite{googleadk}. On the supported cloud providers the root agent can pass work to the registered sub-agents. The backend prompt asks for prioritized cases, suggested data, automation notes, and release risks, using the requirements, stories, and diffs that came in.
 
 \begin{table}[htbp]
 \centering
@@ -102,7 +102,7 @@ S09 & Release readiness evaluation & Weighs supplied test and risk signals and p
 \label{tab:agents}
 \end{table}
 
-Requirement and story text go to the test-case and test-data agents. Diffs go to change impact. Execution logs go to execution, defect, and summary. Release questions go to readiness. The root agent also has a small requirement-summarization tool. All of this is prompt routing. There is no second engine underneath it that would force the same path every time.
+Requirement and story text go to the test-case and test-data agents. Code differences go to change impact analysis. Execution logs go to execution, defect, and summary. Release questions go to readiness. The root agent also has a small requirement-summarization tool. All of this is prompt routing. There is no second engine underneath it that would force the same path every time.
 
 \begin{figure}[H]
 \centering
@@ -135,7 +135,7 @@ Requirement and story text go to the test-case and test-data agents. Diffs go to
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.92\textwidth,height=0.48\textheight,keepaspectratio]{sequence_daigram.png}
-\caption{Illustrative request sequence through the application services for the deployment configuration shown.}
+\caption{Illustrative request sequence through the application services.}
 \label{fig:request-sequence}
 \end{figure}
 

@@ -138,6 +138,10 @@ ${guideStyles}
             Use only information that your organization permits you to share with this application
             and its configured AI provider.
           </li>
+          <li>
+            Requests must include software context and relate to testing or quality engineering.
+            Avoid passwords, access tokens, and unrelated personal or confidential data.
+          </li>
         </ul>
         <p>
           If you are new to the tool, you can skip integrations and use a sample or enter a

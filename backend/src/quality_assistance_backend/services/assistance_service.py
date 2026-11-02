@@ -5,6 +5,7 @@ from quality_assistance_backend.models import AssistanceRequest, User
 from quality_assistance_backend.schemas import AssistanceInput, AssistanceOutput
 from quality_assistance_backend.services.agent_client import agent_client
 from quality_assistance_backend.services.agent_errors import AgentServiceError
+from quality_assistance_backend.services.input_guardrails import validate_stlc_scope
 
 AGENT_LABELS = {
     "test_case_generation": "Test Case Generation",
@@ -53,6 +54,8 @@ async def run_assistance(
     current_user: User,
     payload: AssistanceInput,
 ) -> AssistanceOutput:
+    validate_stlc_scope(payload)
+
     record = AssistanceRequest(
         owner_id=current_user.id,
         session_id=payload.session_id,

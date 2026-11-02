@@ -254,7 +254,8 @@ ${guideStyles}
         <p>
           When Jira Cloud OAuth has been configured, you can connect your own Atlassian account and
           load issues assigned to you. The issue picker imports a story’s key, title, and
-          description into the user-story field.
+          description into the user-story field. Jira can also receive selected bug reports from
+          results when the OAuth app has issue-write access.
         </p>
         <ol className="guide-steps">
           <li>Open your profile menu and choose <strong>Settings</strong>.</li>
@@ -263,11 +264,14 @@ ${guideStyles}
           <li>Return to <strong>Workspace → Input</strong>, then choose <strong>Load my issues</strong>.</li>
           <li>Select an issue from the dropdown. Review its preview; the title and description are copied into <strong>User stories</strong>.</li>
           <li>Review or edit the imported text before submitting. Use <strong>Load more issues</strong> if the issue is not on the first page.</li>
+          <li>To create bugs from a result, select <strong>Create Jira tickets</strong>, choose the bug reports and project, and confirm creation. Open each returned issue link to review the ticket.</li>
         </ol>
         <p>
           The issue must be assigned to the Jira account you authorized and visible to that account.
           If the Jira section says it is not configured, contact your application or Atlassian
-          administrator; a Jira URL by itself does not connect the integration.
+          administrator; a Jira URL by itself does not connect the integration. Bug creation also
+          requires the OAuth scope <code>write:jira-work</code> and Jira Create Issues permission in
+          the selected project; reconnect after the administrator enables the scope.
         </p>
       </section>
 
@@ -306,6 +310,7 @@ ${guideStyles}
           <li>Use <strong>Markdown</strong> to save a portable Markdown copy or <strong>HTML</strong> to save a web page you can open or print.</li>
           <li>Under the result, enter human review instructions (for example, ask for more negative cases) and choose <strong>Rerun assistance</strong> to refine the analysis using the same requirements, story, and code context.</li>
           <li>Choose <strong>Full quality review</strong> to run the full workflow, or select one specialist to focus the rerun on test cases, test data, automation, execution, change impact, bug reports, summaries, or readiness.</li>
+          <li>When a result includes structured bug reports and Jira is connected, choose <strong>Create Jira tickets</strong>, select the bugs and destination project, then create them. The result lists each created issue with a direct Jira link. Jira OAuth must include <code>write:jira-work</code>; reconnect Jira after adding that scope in the Atlassian app.</li>
           <li>Choose <strong>New session</strong> to clear the current session context and begin a separate request. This does not delete a previously downloaded file.</li>
         </ul>
         <div className="guide-callout guide-callout-warn">

@@ -31,10 +31,11 @@ The separate Jira MCP settings are for agent-side MCP tools and do not enable th
    ```text
    read:jira-user
    read:jira-work
+   write:jira-work
    offline_access
    ```
 
-   The integration uses `read:jira-user` and `read:jira-work` to identify the authorized Jira user and read assigned issue details. `offline_access` is needed to refresh tokens without asking the user to sign in each time.
+   The integration uses `read:jira-user` and `read:jira-work` to identify the authorized Jira user and read assigned issue details. `write:jira-work` is needed to create bug tickets from results. `offline_access` is needed to refresh tokens without asking the user to sign in each time.
 4. Copy the OAuth client ID and client secret into the backend environment. Do not commit the secret, send it through chat, or expose it to frontend build variables.
 5. Confirm the Jira API is enabled for the app and that the permitted Jira site/users satisfy your organization's approval requirements. During consent, authorize only the intended office Jira site. The app currently requires exactly one accessible Jira site with the needed scopes to avoid selecting the wrong Jira by accident.
 
@@ -70,9 +71,11 @@ The redirect URI must match the value registered in the Atlassian developer cons
 2. Choose **Connect Jira** and authorize with the corporate Atlassian account.
 3. On the workspace, choose **Load my issues**. The app searches issues assigned to the current Jira user and sorts recently updated issues first.
 4. Select an issue key. The app fetches its description after checking it is still assigned to you, previews the title and description, and copies them into the **User stories** input. Review or edit the content before submitting.
-5. Disconnect Jira from Settings to remove the locally stored encrypted OAuth tokens.
+5. To create bugs from a result, choose **Create Jira tickets**, select the bug reports and destination project, and create the selected Jira Bug issues. The result shows links to the created tickets.
+6. Disconnect Jira from Settings to remove the locally stored encrypted OAuth tokens.
 
 The picker retrieves issue keys, summaries, issue types, and statuses in pages of up to 50. It fetches the description only for the selected issue and confirms that issue is still assigned to the signed-in user. Access remains limited by that user's Jira permissions and the scopes approved for the OAuth app.
+Creating bugs also requires the authorized Jira user to have the project's **Create Issues** permission and the project to allow the **Bug** issue type. If you already connected Jira before granting `write:jira-work`, reconnect and approve the additional scope.
 
 ## Troubleshooting
 

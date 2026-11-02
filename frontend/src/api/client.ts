@@ -49,6 +49,19 @@ export type JiraIssuePage = {
   next_page_token: string | null
 }
 
+export type JiraProject = {
+  id: string
+  key: string
+  name: string
+}
+
+export type JiraCreatedIssue = {
+  id: string
+  key: string
+  summary: string
+  url: string
+}
+
 export type AssistanceResult = {
   id: string
   session_id: string
@@ -279,6 +292,19 @@ export const api = {
     request<JiraIssue>(
       `/api/settings/jira/issues/${encodeURIComponent(issueKey)}`,
       {},
+      token,
+    ),
+
+  getJiraProjects: (token: string) =>
+    request<{ projects: JiraProject[] }>('/api/settings/jira/projects', {}, token),
+
+  createJiraIssue: (
+    token: string,
+    data: { project_key: string; summary: string; description: string },
+  ) =>
+    request<JiraCreatedIssue>(
+      '/api/settings/jira/issues',
+      { method: 'POST', body: JSON.stringify(data) },
       token,
     ),
 }

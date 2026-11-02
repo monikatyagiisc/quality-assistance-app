@@ -1,11 +1,13 @@
-import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { Link } from 'react-router-dom'
 import {
   api,
   type AssistanceAgent,
   type AssistanceResult,
+  type JiraCreatedIssue,
   type JiraConnectionStatus,
   type JiraIssue,
+  type JiraProject,
   type RepositoryConnection,
 } from '../api/client'
 import { getUserFriendlyError } from '../utils/errorMessages'
@@ -14,6 +16,7 @@ import { useAuth } from '../context/useAuth'
 import { SettingsInfoLink } from '../components/SettingsInfoLink'
 import { ThinkingIndicator } from '../components/ThinkingIndicator'
 import { MarkdownContent } from '../components/MarkdownContent'
+import { extractBugReports } from '../utils/bugReports'
 import './DashboardPage.css'
 
 const DIFF_SETTINGS_REQUIRED_MSG =
@@ -107,8 +110,21 @@ export function DashboardPage() {
   const [jiraIssues, setJiraIssues] = useState<JiraIssue[]>([])
   const [jiraNextPageToken, setJiraNextPageToken] = useState<string | null>(null)
   const [selectedJiraIssue, setSelectedJiraIssue] = useState<JiraIssue | null>(null)
+  const [jiraIssuesLoaded, setJiraIssuesLoaded] = useState(false)
+  const [jiraError, setJiraError] = useState<string | null>(null)
   const [jiraLoading, setJiraLoading] = useState(false)
   const [jiraDetailLoading, setJiraDetailLoading] = useState(false)
+  const [jiraBugPanelOpen, setJiraBugPanelOpen] = useState(false)
+  const [jiraProjects, setJiraProjects] = useState<JiraProject[]>([])
+  const [jiraProjectsLoading, setJiraProjectsLoading] = useState(false)
+  const [jiraProjectsError, setJiraProjectsError] = useState<string | null>(null)
+  const [jiraProjectKey, setJiraProjectKey] = useState('')
+  const [selectedBugIds, setSelectedBugIds] = useState<string[]>([])
+  const [jiraCreatingBugs, setJiraCreatingBugs] = useState(false)
+  const [jiraCreateError, setJiraCreateError] = useState<string | null>(null)
+  const [createdJiraBugs, setCreatedJiraBugs] = useState<
+    Array<{ bugId: string; issue: JiraCreatedIssue }>
+  >([])
   const [diffMode, setDiffMode] = useState<'paste' | 'fetch'>('paste')
   const [pullNumber, setPullNumber] = useState('')
   const [compareHead, setCompareHead] = useState('')
@@ -118,6 +134,10 @@ export function DashboardPage() {
   const jiraSelectionRef = useRef(0)
 
   const selectedSample = ASSISTANCE_SAMPLES.find((s) => s.id === selectedSampleId)
+  const bugReports = useMemo(
+    () => (result ? extractBugReports(result.response) : []),
+    [result],
+  )
 
   useEffect(() => {
     if (!token) return
@@ -130,13 +150,14 @@ export function DashboardPage() {
   const loadJiraIssues = async (nextPageToken?: string | null) => {
     if (!token) return
     setJiraLoading(true)
-    setError(null)
+    setJiraError(null)
     try {
       const page = await api.getAssignedJiraIssues(token, nextPageToken)
       setJiraIssues((current) => (nextPageToken ? [...current, ...page.issues] : page.issues))
       setJiraNextPageToken(page.next_page_token)
+      setJiraIssuesLoaded(true)
     } catch (err) {
-      setError(getUserFriendlyError(err))
+      setJiraError(getUserFriendlyError(err))
     } finally {
       setJiraLoading(false)
     }
@@ -153,6 +174,7 @@ export function DashboardPage() {
 
     setSelectedJiraIssue(issue)
     setJiraDetailLoading(true)
+    setJiraError(null)
     setUserStories(`${issue.key}: ${issue.summary}`)
     setSelectedSampleId(null)
     try {
@@ -163,10 +185,80 @@ export function DashboardPage() {
         `${details.key}: ${details.summary}${details.description ? `\n\n${details.description}` : ''}`,
       )
     } catch (err) {
-      if (selection === jiraSelectionRef.current) setError(getUserFriendlyError(err))
+      if (selection === jiraSelectionRef.current) setJiraError(getUserFriendlyError(err))
     } finally {
       if (selection === jiraSelectionRef.current) setJiraDetailLoading(false)
     }
+  }
+
+  const loadJiraProjects = async () => {
+    if (!token) return
+    setJiraProjectsLoading(true)
+    setJiraProjectsError(null)
+    try {
+      const response = await api.getJiraProjects(token)
+      setJiraProjects(response.projects)
+      setJiraProjectKey((current) =>
+        response.projects.some((project) => project.key === current)
+          ? current
+          : '',
+      )
+    } catch (err) {
+      setJiraProjectsError(getUserFriendlyError(err))
+    } finally {
+      setJiraProjectsLoading(false)
+    }
+  }
+
+  const toggleJiraBugPanel = () => {
+    const opening = !jiraBugPanelOpen
+    setJiraBugPanelOpen(opening)
+    setJiraCreateError(null)
+    if (opening && jiraConnection?.connected && jiraProjects.length === 0) {
+      void loadJiraProjects()
+    }
+  }
+
+  const createJiraBugs = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    if (!token || !jiraProjectKey || selectedBugIds.length === 0) return
+    const selectedBugs = bugReports.filter((bug) => selectedBugIds.includes(bug.id))
+    setJiraCreatingBugs(true)
+    setJiraCreateError(null)
+    const outcomes = await Promise.allSettled(
+      selectedBugs.map((bug) =>
+        api.createJiraIssue(token, {
+          project_key: jiraProjectKey,
+          summary: bug.title,
+          description: bug.description,
+        }),
+      ),
+    )
+    const created = outcomes.flatMap((outcome, index) =>
+      outcome.status === 'fulfilled'
+        ? [{ bugId: selectedBugs[index].id, issue: outcome.value }]
+        : [],
+    )
+    const failures = outcomes.flatMap((outcome, index) =>
+      outcome.status === 'rejected'
+        ? [`${selectedBugs[index].title}: ${getUserFriendlyError(outcome.reason)}`]
+        : [],
+    )
+    setCreatedJiraBugs((current) => [...current, ...created])
+    setSelectedBugIds((current) => current.filter((id) => !created.some((bug) => bug.bugId === id)))
+    if (failures.length) {
+      setJiraCreateError(
+        `${created.length} Jira bug${created.length === 1 ? '' : 's'} created. ${failures.join(' ')}`,
+      )
+    }
+    setJiraCreatingBugs(false)
+  }
+
+  const resetJiraBugCreation = () => {
+    setJiraBugPanelOpen(false)
+    setSelectedBugIds([])
+    setJiraCreateError(null)
+    setCreatedJiraBugs([])
   }
 
   const applyCodeDiffs = (nextValue: string): boolean => {
@@ -200,6 +292,7 @@ export function DashboardPage() {
       setError(null)
     }
     if (!sample.requiresSession) {
+      resetJiraBugCreation()
       setResult(null)
     }
   }
@@ -212,6 +305,7 @@ export function DashboardPage() {
     setHumanGuidance('')
     setTargetAgent('all')
     setError(null)
+    resetJiraBugCreation()
     setResult(null)
   }
 
@@ -240,7 +334,10 @@ export function DashboardPage() {
       }
     }
 
-    if (!preservePreviousResult) setResult(null)
+    if (!preservePreviousResult) {
+      resetJiraBugCreation()
+      setResult(null)
+    }
     setLoading(true)
     setActiveTab('results')
     setLoadingStartedAt(Date.now())
@@ -255,6 +352,7 @@ export function DashboardPage() {
         human_guidance: guidance?.trim() || null,
         target_agent: specialist ?? null,
       })
+      resetJiraBugCreation()
       setResult(data)
       setSessionId(data.session_id)
     } catch (err) {
@@ -281,6 +379,7 @@ export function DashboardPage() {
 
   const startNewSession = () => {
     setSessionId(null)
+    resetJiraBugCreation()
     setResult(null)
     setHumanGuidance('')
     setTargetAgent('all')
@@ -474,7 +573,11 @@ export function DashboardPage() {
                   onClick={() => void loadJiraIssues()}
                   disabled={jiraLoading}
                 >
-                  {jiraLoading ? 'Loading issues…' : jiraIssues.length ? 'Refresh list' : 'Load my issues'}
+                  {jiraLoading
+                    ? 'Loading issues…'
+                    : jiraIssuesLoaded
+                      ? 'Refresh assigned issues'
+                      : 'Load assigned issues'}
                 </button>
               ) : (
                 <Link to="/settings">Connect Jira in Settings</Link>
@@ -482,6 +585,7 @@ export function DashboardPage() {
             </div>
             {jiraConnection?.connected && (
               <>
+                {jiraError && <div className="banner banner-error" role="alert">{jiraError}</div>}
                 <label className="jira-issue-select-label">
                   Assigned issue
                   <select
@@ -490,7 +594,11 @@ export function DashboardPage() {
                     disabled={jiraLoading || jiraIssues.length === 0}
                   >
                     <option value="">
-                      {jiraIssues.length ? 'Select an issue…' : 'Load your assigned issues first'}
+                      {jiraIssues.length
+                        ? 'Select an issue…'
+                        : jiraIssuesLoaded
+                          ? 'No assigned issues available'
+                          : 'Load assigned issues first'}
                     </option>
                     {jiraIssues.map((issue) => (
                       <option key={issue.id} value={issue.key}>
@@ -499,6 +607,9 @@ export function DashboardPage() {
                     ))}
                   </select>
                 </label>
+                {jiraIssuesLoaded && jiraIssues.length === 0 && !jiraError && (
+                  <p className="muted">Jira did not return any issues assigned to your account.</p>
+                )}
                 {jiraNextPageToken && (
                   <button
                     type="button"
@@ -731,6 +842,122 @@ export function DashboardPage() {
               <div ref={resultContentRef}>
                 <MarkdownContent content={result.response} />
               </div>
+              {bugReports.length > 0 && (
+                <section className="jira-bug-creation" aria-labelledby="jira-bug-creation-title">
+                  <div className="jira-bug-creation-header">
+                    <div>
+                      <h3 id="jira-bug-creation-title">Create Jira tickets for bugs</h3>
+                      <p className="muted">
+                        Select the bug reports to create as Bug issues in one Jira project.
+                      </p>
+                    </div>
+                    {jiraConnection?.connected ? (
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        onClick={toggleJiraBugPanel}
+                      >
+                        {jiraBugPanelOpen ? 'Close' : 'Create Jira tickets'}
+                      </button>
+                    ) : (
+                      <Link to="/settings">Connect Jira in Settings</Link>
+                    )}
+                  </div>
+                  {jiraBugPanelOpen && jiraConnection?.connected && (
+                    <form className="jira-bug-form" onSubmit={(event) => void createJiraBugs(event)}>
+                      {jiraProjectsError && (
+                        <div className="banner banner-error" role="alert">{jiraProjectsError}</div>
+                      )}
+                      {jiraCreateError && (
+                        <div className="banner banner-error" role="alert">{jiraCreateError}</div>
+                      )}
+                      <label className="jira-issue-select-label">
+                        Jira project
+                        <select
+                          value={jiraProjectKey}
+                          onChange={(event) => setJiraProjectKey(event.target.value)}
+                          disabled={jiraProjectsLoading || jiraProjects.length === 0}
+                          required
+                        >
+                          <option value="">
+                            {jiraProjectsLoading
+                              ? 'Loading projects…'
+                              : jiraProjects.length
+                                ? 'Select a project…'
+                                : 'No projects available'}
+                          </option>
+                          {jiraProjects.map((project) => (
+                            <option key={project.id} value={project.key}>
+                              {project.name} ({project.key})
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      {jiraProjects.length === 0 && !jiraProjectsLoading && (
+                        <button
+                          type="button"
+                          className="btn btn-ghost btn-sm"
+                          onClick={() => void loadJiraProjects()}
+                        >
+                          Retry loading projects
+                        </button>
+                      )}
+                      <fieldset className="jira-bug-options">
+                        <legend>Select bug reports</legend>
+                        {bugReports.map((bug) => {
+                          const alreadyCreated = createdJiraBugs.some((entry) => entry.bugId === bug.id)
+                          return (
+                            <label key={bug.id} className="jira-bug-option">
+                              <input
+                                type="checkbox"
+                                checked={selectedBugIds.includes(bug.id)}
+                                disabled={alreadyCreated || jiraCreatingBugs}
+                                onChange={(event) => {
+                                  setSelectedBugIds((current) =>
+                                    event.target.checked
+                                      ? [...current, bug.id]
+                                      : current.filter((id) => id !== bug.id),
+                                  )
+                                }}
+                              />
+                              <span>
+                                <strong>{bug.title}</strong>
+                                {alreadyCreated && <span className="muted"> · created</span>}
+                              </span>
+                            </label>
+                          )
+                        })}
+                      </fieldset>
+                      <button
+                        type="submit"
+                        className="btn btn-primary"
+                        disabled={
+                          jiraCreatingBugs ||
+                          jiraProjectsLoading ||
+                          !jiraProjectKey ||
+                          selectedBugIds.length === 0
+                        }
+                      >
+                        {jiraCreatingBugs ? 'Creating Jira bugs…' : 'Create selected bugs'}
+                      </button>
+                    </form>
+                  )}
+                  {createdJiraBugs.length > 0 && (
+                    <div className="jira-created-bugs" aria-live="polite">
+                      <h4>Created Jira bugs</h4>
+                      <ul>
+                        {createdJiraBugs.map(({ issue }) => (
+                          <li key={issue.id}>
+                            <a href={issue.url} target="_blank" rel="noreferrer">
+                              {issue.key}: {issue.summary}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </section>
+              )}
             </article>
           )}
           {result && (

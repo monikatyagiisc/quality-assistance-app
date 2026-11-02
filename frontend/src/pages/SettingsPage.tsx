@@ -12,6 +12,76 @@ const EMPTY_FORM = {
   access_token: '',
 }
 
+function getJiraCallbackToast(): { type: 'success' | 'error' | 'info'; text: string } | null {
+  const search = new URLSearchParams(window.location.search)
+  const result = search.get('jira')
+  const reason = search.get('jira_error')
+
+  if (result === 'connected') {
+    return { type: 'success', text: 'Jira Cloud connected successfully.' }
+  }
+  if (result === 'cancelled') {
+    return { type: 'info', text: 'Jira connection was cancelled.' }
+  }
+  if (result === 'site-selection' || reason === 'multiple_jira_sites') {
+    return {
+      type: 'error',
+      text: 'Multiple Jira sites were authorized. Reconnect and authorize only the intended Jira site.',
+    }
+  }
+  if (result !== 'error') return null
+
+  const errorMessages: Record<string, string> = {
+    invalid_client:
+      'Atlassian rejected the OAuth credentials. Confirm the Client ID and Secret are from the same OAuth 2.0 app, then restart the backend.',
+    invalid_grant:
+      'Atlassian rejected the authorization code. Check the exact callback URL and start a fresh connection.',
+    missing_offline_access:
+      'Jira connected, but Atlassian did not issue a refresh token. Enable offline_access and reconnect.',
+    no_jira_site:
+      'The authorized Atlassian account has no accessible Jira sites. Confirm Jira product access is enabled for this account.',
+    missing_jira_scopes:
+      'The Jira site did not grant read:jira-user, read:jira-work, and write:jira-work. Update the OAuth app permissions and reconnect.',
+    invalid_state:
+      'The Jira authorization request could not be matched or has expired. Start a new connection from Settings and finish it in the same browser session.',
+    missing_authorization_code:
+      'Atlassian returned without an authorization code. Start a new Jira connection and accept the requested access.',
+    provider_error:
+      'Atlassian could not complete authorization. Start a new connection; if it continues, check the OAuth app configuration.',
+    token_exchange_failed:
+      'Atlassian could not exchange the authorization code for Jira tokens. Verify the OAuth app settings and exact callback URL, then reconnect.',
+    unauthorized_client:
+      'Atlassian does not allow this OAuth app to exchange authorization codes. Check the app’s OAuth 2.0 (3LO) configuration.',
+    unsupported_grant_type:
+      'Atlassian rejected the OAuth grant type. Check the OAuth app configuration and reconnect.',
+    provider_invalid_request:
+      'Atlassian rejected the OAuth request. Verify the exact callback URL and OAuth app configuration.',
+    provider_invalid_scope:
+      'Atlassian rejected the requested Jira scopes. Verify read:jira-user, read:jira-work, write:jira-work, and offline_access are configured.',
+    provider_access_denied:
+      'Atlassian denied the OAuth request. Confirm the app is enabled and authorized for this account.',
+    provider_server_error:
+      'Atlassian encountered an error while authorizing the app. Try connecting again later.',
+    provider_unavailable:
+      'Atlassian is temporarily unavailable. Try connecting again later.',
+    provider_unreachable:
+      'The backend could not reach Atlassian. Check the backend network connection and try again.',
+    site_lookup_failed:
+      'Atlassian issued tokens, but the backend could not retrieve the Jira sites for this account. Confirm Jira access and reconnect.',
+    invalid_provider_response:
+      'Atlassian returned an invalid OAuth response. Check the OAuth app configuration and try again.',
+    invalid_site_response:
+      'Atlassian returned invalid Jira site information. Confirm Jira product access for this account.',
+    callback_failed:
+      'Jira authorization failed during the callback. Check the backend log for jira.oauth_callback_failed, then verify the OAuth credentials and callback URL.',
+  }
+
+  return {
+    type: 'error',
+    text: errorMessages[reason ?? ''] ?? errorMessages.callback_failed,
+  }
+}
+
 export function SettingsPage() {
   const { token, loading: authLoading } = useAuth()
   const [, setSearchParams] = useSearchParams()
@@ -21,6 +91,7 @@ export function SettingsPage() {
   const [entraCallbackResult] = useState(() =>
     new URLSearchParams(window.location.search).get('entra'),
   )
+  const [toast, setToast] = useState(getJiraCallbackToast)
   const [connection, setConnection] = useState<RepositoryConnection | null>(null)
   const [jiraConnection, setJiraConnection] = useState<JiraConnectionStatus | null>(null)
   const [entraAccount, setEntraAccount] = useState<{ enabled: boolean; linked: boolean } | null>(null)
@@ -31,6 +102,12 @@ export function SettingsPage() {
   const [entraSaving, setEntraSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!toast) return
+    const timeout = window.setTimeout(() => setToast(null), 9000)
+    return () => window.clearTimeout(timeout)
+  }, [toast])
 
   useEffect(() => {
     if (authLoading || !token) return
@@ -74,6 +151,7 @@ export function SettingsPage() {
 
     const nextParams = new URLSearchParams(window.location.search)
     nextParams.delete('jira')
+    nextParams.delete('jira_error')
     setSearchParams(nextParams, { replace: true })
   }, [jiraCallbackResult, setSearchParams, token])
 
@@ -112,7 +190,7 @@ export function SettingsPage() {
       const { authorization_url } = await api.startJiraConnection(token)
       window.location.assign(authorization_url)
     } catch (err) {
-      setError(getUserFriendlyError(err))
+      setToast({ type: 'error', text: getUserFriendlyError(err) })
       setJiraSaving(false)
     }
   }
@@ -304,22 +382,6 @@ export function SettingsPage() {
 
       {error && <div className="banner banner-error">{error}</div>}
       {message && <div className="banner banner-success">{message}</div>}
-      {jiraCallbackResult === 'connected' && (
-        <div className="banner banner-success">Jira Cloud connected successfully.</div>
-      )}
-      {jiraCallbackResult === 'cancelled' && (
-        <div className="banner banner-success">Jira connection was cancelled.</div>
-      )}
-      {jiraCallbackResult === 'error' && (
-        <div className="banner banner-error">
-          Could not connect Jira. Check the OAuth app configuration and try again.
-        </div>
-      )}
-      {jiraCallbackResult === 'site-selection' && (
-        <div className="banner banner-error">
-          Multiple Jira sites were authorized. Reconnect and select only your office Jira site.
-        </div>
-      )}
       {entraCallbackResult === 'linked' && (
         <div className="banner banner-success">Microsoft account linked successfully.</div>
       )}
@@ -412,6 +474,19 @@ export function SettingsPage() {
           </div>
         </form>
       </section>
+      {toast && (
+        <div className={`settings-toast settings-toast-${toast.type}`} role={toast.type === 'error' ? 'alert' : 'status'}>
+          <p>{toast.text}</p>
+          <button
+            type="button"
+            className="settings-toast-close"
+            aria-label="Dismiss notification"
+            onClick={() => setToast(null)}
+          >
+            ×
+          </button>
+        </div>
+      )}
     </div>
   )
 }

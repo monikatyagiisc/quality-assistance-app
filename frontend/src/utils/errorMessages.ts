@@ -89,6 +89,9 @@ export function getUserFriendlyError(error: unknown): string {
     }
 
     if (error.status === 401) {
+      if (/\bjira\b/i.test(raw)) {
+        return raw
+      }
       return 'Your session expired. Please sign in again.'
     }
 

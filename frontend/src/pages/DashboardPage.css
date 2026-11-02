@@ -295,6 +295,92 @@
 
 .jira-more-button { align-self: flex-start; }
 
+.jira-bug-creation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: 0.75rem;
+  background: rgba(15, 23, 42, 0.35);
+}
+
+.jira-bug-creation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.jira-bug-creation-header h3,
+.jira-created-bugs h4 {
+  margin: 0;
+  color: #e2e8f0;
+  font-size: 0.95rem;
+}
+
+.jira-bug-creation-header p {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+}
+
+.jira-bug-creation-header a,
+.jira-created-bugs a {
+  color: #a5b4fc;
+}
+
+.jira-bug-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.jira-bug-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 0.55rem;
+}
+
+.jira-bug-options legend {
+  padding: 0 0.3rem;
+  color: #cbd5e1;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.jira-bug-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  color: #cbd5e1;
+  font-size: 0.84rem;
+}
+
+.jira-bug-option input {
+  margin-top: 0.2rem;
+  accent-color: #818cf8;
+}
+
+.jira-created-bugs {
+  padding: 0.75rem;
+  border-radius: 0.55rem;
+  background: rgba(30, 41, 59, 0.62);
+}
+
+.jira-created-bugs ul {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+  font-size: 0.84rem;
+}
+
 .panel {
   padding: 1.25rem;
   border-radius: 1rem;
@@ -304,7 +390,8 @@
 
 @media (max-width: 520px) {
   .jira-issue-picker-header,
-  .jira-issue-preview-heading {
+  .jira-issue-preview-heading,
+  .jira-bug-creation-header {
     align-items: flex-start;
     flex-direction: column;
   }

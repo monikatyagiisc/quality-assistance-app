@@ -50,6 +50,43 @@ As an admin, I want to void an order within 1 hour of placement so that mistaken
      return cart`,
   },
   {
+    id: 'all-agents',
+    title: 'All agents demo',
+    description:
+      'Requirements, stories, a code diff, a test run log, and a selector change — asks for every specialist.',
+    focus: 'S01–S09 · all specialists',
+    requirements: `E-commerce checkout service (REST API + React UI).
+- Cart supports coupons (percentage and fixed amount)
+- Payment via card only; 3-D Secure for orders over ₹5000
+- Order confirmation email within 60 seconds
+- Inventory reserved for 15 minutes during checkout
+
+Latest test run — suite: checkout-smoke (staging-v2.4.1, build 1842)
+- TC-101 Apply valid coupon ........ PASS (2.1s)
+- TC-102 Apply expired coupon ...... FAIL — expected 400, got 200
+- TC-103 Payment 3DS challenge ..... SKIP — sandbox cert expired
+- TC-104 Order confirmation email .. FAIL — timeout after 90s
+- TC-105 Inventory release job ..... PASS (0.8s)
+
+UI change: the Playwright locator for the coupon field changed from #coupon-input to [data-testid="coupon-code"], and the payment iframe selector is flaky.
+
+Please cover every STLC area and name the specialist for each part of the answer:
+1. test cases, 2. test data, 3. test automation approach, 4. analysis of the test run above, 5. self-healing for the broken locators, 6. impact of the code difference, 7. a bug report for each failed test, 8. a short test summary for stakeholders, 9. a release-readiness verdict.`,
+    userStories: `As a shopper, I want to apply a coupon at checkout so that I get a discount on my order.
+As a shopper, I want to see why my coupon was rejected so that I can fix the code or choose another.`,
+    codeDiffs: `diff --git a/src/payment/coupon.py b/src/payment/coupon.py
+--- a/src/payment/coupon.py
++++ b/src/payment/coupon.py
+@@ -42,7 +42,12 @@ def apply_coupon(cart, code: str) -> Cart:
+-    discount = coupon.percent_off * cart.subtotal
++    if coupon.max_discount and discount > coupon.max_discount:
++        discount = coupon.max_discount
++    if cart.subtotal - discount < 0:
++        raise CouponError("Discount exceeds subtotal")
+     cart.total = cart.subtotal - discount
+     return cart`,
+  },
+  {
     id: 'change-impact',
     title: 'Change impact',
     description: 'Diff-heavy input to stress regression and impact analysis.',

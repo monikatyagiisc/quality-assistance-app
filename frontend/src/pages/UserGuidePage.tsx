@@ -155,7 +155,7 @@ ${guideStyles}
         </ol>
         <p>
           If your organization has enabled Microsoft Entra ID, you can use <strong>Sign in with
-          Microsoft</strong>. Existing app accounts may need to sign in once with their current
+            Microsoft</strong>. Existing app accounts may need to sign in once with their current
           method and link the same-email Microsoft account in <strong>Settings</strong> first.
           Otherwise, use your app email and password. Select <strong>Sign out</strong> from your
           profile menu when you finish on a shared device.
@@ -228,6 +228,7 @@ ${guideStyles}
         <ul className="guide-list">
           <li><strong>Smoke test:</strong> a small example for trying requirement analysis.</li>
           <li><strong>Full E2E demo:</strong> a sample with requirements, user stories, and a sample code diff.</li>
+          <li><strong>All agents demo:</strong> a sample with requirements, a test run log, a locator change, user stories, and a code diff, written to ask for all nine specialists.</li>
           <li><strong>Change impact:</strong> an example focused on reviewing a code change.</li>
           <li><strong>Execution &amp; reporting:</strong> sample test-run results to analyze and summarize.</li>
           <li><strong>Automation &amp; self-healing:</strong> example automation context and selector changes.</li>

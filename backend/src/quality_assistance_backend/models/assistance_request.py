@@ -23,6 +23,8 @@ class AssistanceRequest(Base):
     requirements: Mapped[str] = mapped_column(Text)
     user_stories: Mapped[str | None] = mapped_column(Text, nullable=True)
     code_diffs: Mapped[str | None] = mapped_column(Text, nullable=True)
+    human_guidance: Mapped[str | None] = mapped_column(Text, nullable=True)
+    target_agent: Mapped[str | None] = mapped_column(String(64), nullable=True)
     agent_response: Mapped[str | None] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(String(32), default="pending")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())

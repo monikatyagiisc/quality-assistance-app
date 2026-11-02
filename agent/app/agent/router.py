@@ -2,7 +2,8 @@ STLC_ROUTING_INSTRUCTION_FRAGMENT = """Route work to the right specialist based 
 - Requirements or user stories → test case and test data agents
 - Code diffs → change impact analysis agent
 - Execution logs → test execution, bug report, and summary agents
-- Release questions → release readiness agent"""
+- Release questions → release readiness agent
+- If a request explicitly selects one specialist, delegate only to that specialist unless the user also asks for a full review."""
 
 
 def build_sub_agent_names_fragment(agent_names: list[str]) -> str:

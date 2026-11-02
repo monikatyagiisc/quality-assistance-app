@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 
 import { Link } from 'react-router-dom'
 import {
   api,
+  type AssistanceAgent,
   type AssistanceResult,
   type JiraConnectionStatus,
   type JiraIssue,
@@ -17,6 +18,18 @@ import './DashboardPage.css'
 
 const DIFF_SETTINGS_REQUIRED_MSG =
   'Code diffs require a saved GitHub repository and PAT. Add them in Settings before pasting.'
+
+const SPECIALIST_OPTIONS: { value: AssistanceAgent; label: string }[] = [
+  { value: 'test_case_generation', label: 'Test Case Generation' },
+  { value: 'test_data_generation', label: 'Test Data Generation' },
+  { value: 'test_script_automation', label: 'Test Script Automation' },
+  { value: 'test_execution', label: 'Test Execution' },
+  { value: 'self_healing_test_scripts', label: 'Self-Healing Test Scripts' },
+  { value: 'change_impact_analysis', label: 'Change Impact Analysis' },
+  { value: 'bug_report_generation', label: 'Bug Report Generation' },
+  { value: 'test_summary_reporting', label: 'Test Summary Reporting' },
+  { value: 'release_readiness_evaluation', label: 'Release Readiness Evaluation' },
+]
 
 function isGithubFetchReady(
   connection: RepositoryConnection | null,
@@ -87,6 +100,8 @@ export function DashboardPage() {
   const [loadingStartedAt, setLoadingStartedAt] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [result, setResult] = useState<AssistanceResult | null>(null)
+  const [humanGuidance, setHumanGuidance] = useState('')
+  const [targetAgent, setTargetAgent] = useState<AssistanceAgent | 'all'>('all')
   const [repoConnection, setRepoConnection] = useState<RepositoryConnection | null>(null)
   const [jiraConnection, setJiraConnection] = useState<JiraConnectionStatus | null>(null)
   const [jiraIssues, setJiraIssues] = useState<JiraIssue[]>([])
@@ -194,12 +209,17 @@ export function DashboardPage() {
     setRequirements('')
     setUserStories('')
     setCodeDiffs('')
+    setHumanGuidance('')
+    setTargetAgent('all')
     setError(null)
     setResult(null)
   }
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault()
+  const runAssistance = async (
+    guidance?: string,
+    specialist?: AssistanceAgent,
+    preservePreviousResult = true,
+  ) => {
     if (!token) return
 
     if (codeDiffs.trim() && !isGithubFetchReady(repoConnection)) {
@@ -220,11 +240,11 @@ export function DashboardPage() {
       }
     }
 
+    if (!preservePreviousResult) setResult(null)
     setLoading(true)
     setActiveTab('results')
     setLoadingStartedAt(Date.now())
     setError(null)
-    setResult(null)
 
     try {
       const data = await api.assist(token, {
@@ -232,6 +252,8 @@ export function DashboardPage() {
         user_stories: userStories || null,
         code_diffs: codeDiffs || null,
         session_id: sessionId,
+        human_guidance: guidance?.trim() || null,
+        target_agent: specialist ?? null,
       })
       setResult(data)
       setSessionId(data.session_id)
@@ -243,9 +265,25 @@ export function DashboardPage() {
     }
   }
 
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault()
+    await runAssistance(
+      undefined,
+      targetAgent === 'all' ? undefined : targetAgent,
+      false,
+    )
+  }
+
+  const handleRerun = async (event: FormEvent) => {
+    event.preventDefault()
+    await runAssistance(humanGuidance, targetAgent === 'all' ? undefined : targetAgent)
+  }
+
   const startNewSession = () => {
     setSessionId(null)
     setResult(null)
+    setHumanGuidance('')
+    setTargetAgent('all')
     setError(null)
     setSelectedSampleId(null)
     setActiveTab('input')
@@ -613,6 +651,32 @@ export function DashboardPage() {
               </div>
             )}
           </div>
+          <label>
+            Analysis scope
+            <select
+              value={targetAgent}
+              onChange={(event) => {
+                const selected = event.target.value
+                setTargetAgent(
+                  selected === 'all'
+                    ? 'all'
+                    : SPECIALIST_OPTIONS.find((specialist) => specialist.value === selected)
+                        ?.value ?? 'all',
+                )
+              }}
+              disabled={loading}
+            >
+              <option value="all">Full quality review</option>
+              {SPECIALIST_OPTIONS.map((specialist) => (
+                <option key={specialist.value} value={specialist.value}>
+                  {specialist.label}
+                </option>
+              ))}
+            </select>
+            <span className="muted">
+              Choose a specialist to focus this run, or leave the full review selected.
+            </span>
+          </label>
           <button
             type="submit"
             className="btn btn-primary btn-block"
@@ -668,6 +732,56 @@ export function DashboardPage() {
                 <MarkdownContent content={result.response} />
               </div>
             </article>
+          )}
+          {result && (
+            <form className="result-refinement" onSubmit={handleRerun}>
+              <h3>Refine and rerun</h3>
+              <p className="muted">
+                Keep the current requirements, story, and code context. Add review instructions
+                or focus the rerun on one specialist.
+              </p>
+              <label>
+                Human review instructions (optional)
+                <textarea
+                  value={humanGuidance}
+                  onChange={(event) => setHumanGuidance(event.target.value)}
+                  rows={4}
+                  maxLength={5000}
+                  placeholder="For example: Add negative cases for expired sessions and prioritize high-risk scenarios."
+                  disabled={loading}
+                />
+              </label>
+              <label>
+                Rerun scope
+                <select
+                  value={targetAgent}
+                  onChange={(event) => {
+                    const selected = event.target.value
+                    setTargetAgent(
+                      selected === 'all'
+                        ? 'all'
+                        : SPECIALIST_OPTIONS.find((specialist) => specialist.value === selected)
+                            ?.value ?? 'all',
+                    )
+                  }}
+                  disabled={loading}
+                >
+                  <option value="all">Full quality review</option>
+                  {SPECIALIST_OPTIONS.map((specialist) => (
+                    <option key={specialist.value} value={specialist.value}>
+                      {specialist.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={loading || !requirements.trim()}
+              >
+                {loading ? 'Rerunning…' : 'Rerun assistance'}
+              </button>
+            </form>
           )}
           </section>
         )}

@@ -6,6 +6,18 @@ from quality_assistance_backend.schemas import AssistanceInput, AssistanceOutput
 from quality_assistance_backend.services.agent_client import agent_client
 from quality_assistance_backend.services.agent_errors import AgentServiceError
 
+AGENT_LABELS = {
+    "test_case_generation": "Test Case Generation",
+    "test_data_generation": "Test Data Generation",
+    "test_script_automation": "Test Script Automation",
+    "test_execution": "Test Execution",
+    "self_healing_test_scripts": "Self-Healing Test Scripts",
+    "change_impact_analysis": "Change Impact Analysis",
+    "bug_report_generation": "Bug Report Generation",
+    "test_summary_reporting": "Test Summary Reporting",
+    "release_readiness_evaluation": "Release Readiness Evaluation",
+}
+
 
 def build_agent_message(payload: AssistanceInput) -> str:
     sections = [f"## Requirements\n{payload.requirements}"]
@@ -13,10 +25,25 @@ def build_agent_message(payload: AssistanceInput) -> str:
         sections.append(f"## User Stories\n{payload.user_stories}")
     if payload.code_diffs:
         sections.append(f"## Code Diffs\n{payload.code_diffs}")
-    sections.append(
-        "\nProvide: (1) prioritized test cases, (2) suggested test data, "
-        "(3) automation notes, (4) release risks."
-    )
+    if payload.human_guidance:
+        sections.append(
+            "## Human review instructions\n"
+            "Apply the user's requested refinements to this analysis:\n"
+            f"{payload.human_guidance}"
+        )
+    if payload.target_agent:
+        agent_label = AGENT_LABELS[payload.target_agent]
+        sections.append(
+            "## Requested specialist focus\n"
+            f"The user selected the {agent_label} specialist. Route this request to that "
+            "specialist only; do not delegate to other specialists. Return a focused response "
+            "for this specialty using the supplied context."
+        )
+    else:
+        sections.append(
+            "Provide: (1) prioritized test cases, (2) suggested test data, "
+            "(3) automation notes, (4) release risks."
+        )
     return "\n\n".join(sections)
 
 
@@ -32,6 +59,8 @@ async def run_assistance(
         requirements=payload.requirements,
         user_stories=payload.user_stories,
         code_diffs=payload.code_diffs,
+        human_guidance=payload.human_guidance,
+        target_agent=payload.target_agent,
         status="processing",
     )
     db.add(record)

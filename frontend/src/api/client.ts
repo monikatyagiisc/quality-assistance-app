@@ -57,6 +57,17 @@ export type AssistanceResult = {
   created_at: string
 }
 
+export type AssistanceAgent =
+  | 'test_case_generation'
+  | 'test_data_generation'
+  | 'test_script_automation'
+  | 'test_execution'
+  | 'self_healing_test_scripts'
+  | 'change_impact_analysis'
+  | 'bug_report_generation'
+  | 'test_summary_reporting'
+  | 'release_readiness_evaluation'
+
 type ErrorDetailObject = {
   message?: string
   code?: string
@@ -199,6 +210,8 @@ export const api = {
       user_stories?: string | null
       code_diffs?: string | null
       session_id?: string | null
+      human_guidance?: string | null
+      target_agent?: AssistanceAgent | null
     },
   ) =>
     request<AssistanceResult>(

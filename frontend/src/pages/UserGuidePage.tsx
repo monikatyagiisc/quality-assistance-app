@@ -183,6 +183,10 @@ ${guideStyles}
             Optionally add a user story or code change. See <a href="#inputs">Understand the input fields</a>.
           </li>
           <li>
+            Under <strong>Analysis scope</strong>, keep <strong>Full quality review</strong> or
+            choose a specialist if you want the first run to focus on one area.
+          </li>
+          <li>
             Choose <strong>Get quality assistance</strong>. The Results tab opens and shows progress
             while the assistant works.
           </li>
@@ -296,7 +300,8 @@ ${guideStyles}
         <ul className="guide-list">
           <li>Open the <strong>Results</strong> tab if it is not already selected. Responses are rendered with headings, lists, tables, and code formatting.</li>
           <li>Use <strong>Markdown</strong> to save a portable Markdown copy or <strong>HTML</strong> to save a web page you can open or print.</li>
-          <li>Use the current result and its session context to ask for a refinement, such as prioritizing critical cases or adding negative tests.</li>
+          <li>Under the result, enter human review instructions (for example, ask for more negative cases) and choose <strong>Rerun assistance</strong> to refine the analysis using the same requirements, story, and code context.</li>
+          <li>Choose <strong>Full quality review</strong> to run the full workflow, or select one specialist to focus the rerun on test cases, test data, automation, execution, change impact, bug reports, summaries, or readiness.</li>
           <li>Choose <strong>New session</strong> to clear the current session context and begin a separate request. This does not delete a previously downloaded file.</li>
         </ul>
         <div className="guide-callout guide-callout-warn">

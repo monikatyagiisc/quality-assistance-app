@@ -1,4 +1,12 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+} from 'react'
 import { Link } from 'react-router-dom'
 import {
   api,
@@ -119,6 +127,7 @@ export function DashboardPage() {
   const [jiraProjectsLoading, setJiraProjectsLoading] = useState(false)
   const [jiraProjectsError, setJiraProjectsError] = useState<string | null>(null)
   const [jiraProjectKey, setJiraProjectKey] = useState('')
+  const [jiraIssueProjectKey, setJiraIssueProjectKey] = useState('')
   const [selectedBugIds, setSelectedBugIds] = useState<string[]>([])
   const [jiraCreatingBugs, setJiraCreatingBugs] = useState(false)
   const [jiraCreateError, setJiraCreateError] = useState<string | null>(null)
@@ -132,6 +141,7 @@ export function DashboardPage() {
   const [diffImportNote, setDiffImportNote] = useState<string | null>(null)
   const resultContentRef = useRef<HTMLDivElement>(null)
   const jiraSelectionRef = useRef(0)
+  const jiraIssuesRequestRef = useRef(0)
 
   const selectedSample = ASSISTANCE_SAMPLES.find((s) => s.id === selectedSampleId)
   const bugReports = useMemo(
@@ -139,27 +149,58 @@ export function DashboardPage() {
     [result],
   )
 
+  const loadJiraProjects = useCallback(async () => {
+    if (!token) return
+    setJiraProjectsLoading(true)
+    setJiraProjectsError(null)
+    try {
+      const response = await api.getJiraProjects(token)
+      setJiraProjects(response.projects)
+      setJiraProjectKey((current) =>
+        response.projects.some((project) => project.key === current)
+          ? current
+          : '',
+      )
+    } catch (err) {
+      setJiraProjectsError(getUserFriendlyError(err))
+    } finally {
+      setJiraProjectsLoading(false)
+    }
+  }, [token])
+
   useEffect(() => {
     if (!token) return
     void api.getRepositorySettings(token).then(setRepoConnection).catch(() => setRepoConnection(null))
-    void api.getJiraStatus(token).then(setJiraConnection).catch((err) => {
+    void api.getJiraStatus(token).then((status) => {
+      setJiraConnection(status)
+      if (status.connected) void loadJiraProjects()
+    }).catch((err) => {
       setError(getUserFriendlyError(err))
     })
-  }, [token])
+  }, [token, loadJiraProjects])
 
-  const loadJiraIssues = async (nextPageToken?: string | null) => {
+  const loadJiraIssues = async (
+    nextPageToken?: string | null,
+    projectKey = jiraIssueProjectKey,
+  ) => {
     if (!token) return
+    const requestId = nextPageToken
+      ? jiraIssuesRequestRef.current
+      : ++jiraIssuesRequestRef.current
     setJiraLoading(true)
     setJiraError(null)
     try {
-      const page = await api.getAssignedJiraIssues(token, nextPageToken)
+      const page = await api.getAssignedJiraIssues(token, nextPageToken, projectKey || null)
+      if (requestId !== jiraIssuesRequestRef.current) return
       setJiraIssues((current) => (nextPageToken ? [...current, ...page.issues] : page.issues))
       setJiraNextPageToken(page.next_page_token)
       setJiraIssuesLoaded(true)
     } catch (err) {
-      setJiraError(getUserFriendlyError(err))
+      if (requestId === jiraIssuesRequestRef.current) {
+        setJiraError(getUserFriendlyError(err))
+      }
     } finally {
-      setJiraLoading(false)
+      if (requestId === jiraIssuesRequestRef.current) setJiraLoading(false)
     }
   }
 
@@ -191,30 +232,16 @@ export function DashboardPage() {
     }
   }
 
-  const loadJiraProjects = async () => {
-    if (!token) return
-    setJiraProjectsLoading(true)
-    setJiraProjectsError(null)
-    try {
-      const response = await api.getJiraProjects(token)
-      setJiraProjects(response.projects)
-      setJiraProjectKey((current) =>
-        response.projects.some((project) => project.key === current)
-          ? current
-          : '',
-      )
-    } catch (err) {
-      setJiraProjectsError(getUserFriendlyError(err))
-    } finally {
-      setJiraProjectsLoading(false)
-    }
-  }
-
   const toggleJiraBugPanel = () => {
     const opening = !jiraBugPanelOpen
     setJiraBugPanelOpen(opening)
     setJiraCreateError(null)
-    if (opening && jiraConnection?.connected && jiraProjects.length === 0) {
+    if (
+      opening
+      && jiraConnection?.connected
+      && jiraProjects.length === 0
+      && !jiraProjectsLoading
+    ) {
       void loadJiraProjects()
     }
   }
@@ -565,7 +592,7 @@ export function DashboardPage() {
           </label>
           <div className="jira-issue-picker">
             <div className="jira-issue-picker-header">
-              <span>Import an assigned Jira issue</span>
+              <span>Import a Jira issue</span>
               {jiraConnection?.connected ? (
                 <button
                   type="button"
@@ -576,8 +603,8 @@ export function DashboardPage() {
                   {jiraLoading
                     ? 'Loading issues…'
                     : jiraIssuesLoaded
-                      ? 'Refresh assigned issues'
-                      : 'Load assigned issues'}
+                      ? 'Refresh issues'
+                      : 'Load issues'}
                 </button>
               ) : (
                 <Link to="/settings">Connect Jira in Settings</Link>
@@ -586,8 +613,51 @@ export function DashboardPage() {
             {jiraConnection?.connected && (
               <>
                 {jiraError && <div className="banner banner-error" role="alert">{jiraError}</div>}
+                {jiraProjectsError && (
+                  <div className="banner banner-error" role="alert">{jiraProjectsError}</div>
+                )}
                 <label className="jira-issue-select-label">
-                  Assigned issue
+                  Project
+                  <select
+                    value={jiraIssueProjectKey}
+                    onChange={(event) => {
+                      const projectKey = event.target.value
+                      setJiraIssueProjectKey(projectKey)
+                      setJiraIssues([])
+                      setJiraNextPageToken(null)
+                      setJiraIssuesLoaded(false)
+                      jiraSelectionRef.current += 1
+                      setSelectedJiraIssue(null)
+                      setJiraDetailLoading(false)
+                      void loadJiraIssues(null, projectKey)
+                    }}
+                    disabled={jiraProjectsLoading || jiraProjects.length === 0}
+                  >
+                    <option value="">
+                      {jiraProjectsLoading
+                        ? 'Loading projects…'
+                        : jiraProjects.length
+                          ? 'All projects (assigned to me)'
+                          : 'No projects available'}
+                    </option>
+                    {jiraProjects.map((project) => (
+                      <option key={project.id} value={project.key}>
+                        {project.name} ({project.key})
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                {jiraProjects.length === 0 && !jiraProjectsLoading && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => void loadJiraProjects()}
+                  >
+                    Retry loading projects
+                  </button>
+                )}
+                <label className="jira-issue-select-label">
+                  Jira issue
                   <select
                     value={selectedJiraIssue?.key ?? ''}
                     onChange={(event) => void selectJiraIssue(event.target.value)}
@@ -597,18 +667,23 @@ export function DashboardPage() {
                       {jiraIssues.length
                         ? 'Select an issue…'
                         : jiraIssuesLoaded
-                          ? 'No assigned issues available'
-                          : 'Load assigned issues first'}
+                          ? 'No issues available'
+                          : 'Load issues first'}
                     </option>
                     {jiraIssues.map((issue) => (
                       <option key={issue.id} value={issue.key}>
-                        {issue.key} — {issue.summary}
+                        {issue.issue_type ? `${issue.issue_type} · ` : ''}{issue.key} — {issue.summary}
                       </option>
                     ))}
                   </select>
                 </label>
                 {jiraIssuesLoaded && jiraIssues.length === 0 && !jiraError && (
-                  <p className="muted">Jira did not return any issues assigned to your account.</p>
+                  <p className="muted">
+                    Jira did not return any issues available to your connected account
+                    {jiraIssueProjectKey
+                      ? ` in ${jiraProjects.find((project) => project.key === jiraIssueProjectKey)?.name ?? jiraIssueProjectKey}`
+                      : ' that are assigned to you'}.
+                  </p>
                 )}
                 {jiraNextPageToken && (
                   <button

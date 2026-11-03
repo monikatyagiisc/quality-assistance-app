@@ -116,6 +116,11 @@ async def disconnect_jira(
 @router.get("/issues", response_model=JiraIssuePage)
 async def get_assigned_jira_issues(
     next_page_token: str | None = Query(default=None, max_length=4096),
+    project_key: str | None = Query(
+        default=None,
+        max_length=64,
+        pattern=r"^[A-Za-z][A-Za-z0-9_]*$",
+    ),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> JiraIssuePage:
@@ -124,6 +129,7 @@ async def get_assigned_jira_issues(
             db,
             user_id=current_user.id,
             next_page_token=next_page_token,
+            project_key=project_key,
         )
     except JiraCloudError as exc:
         raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc

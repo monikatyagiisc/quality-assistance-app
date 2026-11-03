@@ -281,11 +281,20 @@ export const api = {
   disconnectJira: (token: string) =>
     request<void>('/api/settings/jira', { method: 'DELETE' }, token),
 
-  getAssignedJiraIssues: (token: string, nextPageToken?: string | null) => {
-    const query = nextPageToken
-      ? `?next_page_token=${encodeURIComponent(nextPageToken)}`
-      : ''
-    return request<JiraIssuePage>(`/api/settings/jira/issues${query}`, {}, token)
+  getAssignedJiraIssues: (
+    token: string,
+    nextPageToken?: string | null,
+    projectKey?: string | null,
+  ) => {
+    const query = new URLSearchParams()
+    if (nextPageToken) query.set('next_page_token', nextPageToken)
+    if (projectKey) query.set('project_key', projectKey)
+    const queryString = query.toString()
+    return request<JiraIssuePage>(
+      `/api/settings/jira/issues${queryString ? `?${queryString}` : ''}`,
+      {},
+      token,
+    )
   },
 
   getJiraIssue: (token: string, issueKey: string) =>

@@ -558,18 +558,51 @@ def _issue_from_payload(payload: object) -> JiraIssue:
     )
 
 
+async def _jira_account_id(client: httpx.AsyncClient, cloud_id: str, access_token: str) -> str:
+    response = await client.get(
+        f"{ATLASSIAN_API_ROOT}/{cloud_id}/rest/api/3/myself",
+        params={},
+        headers={
+            "Authorization": f"Bearer {access_token}",
+            "Accept": "application/json",
+        },
+    )
+    if response.status_code == 401:
+        raise JiraCloudError(401, "Jira authorization expired. Reconnect Jira in Settings.")
+    if response.status_code == 403:
+        raise JiraCloudError(
+            403,
+            "Jira denied access. Ask your Jira administrator to approve the app scopes.",
+        )
+    if response.is_error:
+        raise JiraCloudError(502, "Could not identify your Jira account.")
+    try:
+        myself = response.json()
+    except ValueError as exc:
+        raise JiraCloudError(502, "Jira returned invalid account information.") from exc
+    if (
+        not isinstance(myself, dict)
+        or not isinstance(myself.get("accountId"), str)
+        or not myself["accountId"]
+    ):
+        raise JiraCloudError(502, "Jira returned invalid account information.")
+    return myself["accountId"]
+
+
 async def list_assigned_issues(
     db: AsyncSession,
     *,
     user_id: UUID,
     next_page_token: str | None = None,
+    project_key: str | None = None,
 ) -> JiraIssuePage:
+    if project_key is not None and not re.fullmatch(r"[A-Za-z][A-Za-z0-9_]{0,63}", project_key):
+        raise JiraCloudError(422, "Select a valid Jira project.")
     connection = await get_connection(db, user_id)
     if connection is None:
-        raise JiraCloudError(409, "Connect your Jira account in Settings to view assigned issues.")
+        raise JiraCloudError(409, "Connect your Jira account in Settings to view issues.")
     access_token = await _access_token(db, connection)
     params: dict[str, str | int] = {
-        "jql": "assignee = currentUser() ORDER BY updated DESC",
         "maxResults": 50,
         "fields": "summary,issuetype,status",
     }
@@ -578,6 +611,12 @@ async def list_assigned_issues(
     url = f"{ATLASSIAN_API_ROOT}/{connection.cloud_id}/rest/api/3/search/jql"
     try:
         async with httpx.AsyncClient(timeout=20.0, verify=_ssl_context) as client:
+            if project_key:
+                params["jql"] = f'project = "{project_key}" ORDER BY updated DESC'
+            else:
+                account_id = await _jira_account_id(client, connection.cloud_id, access_token)
+                account_id = account_id.replace("\\", "\\\\").replace('"', '\\"')
+                params["jql"] = f'assignee = "{account_id}" ORDER BY updated DESC'
             response = await client.get(
                 url,
                 params=params,
@@ -588,7 +627,7 @@ async def list_assigned_issues(
         if response.status_code == 403:
             raise JiraCloudError(403, "Jira denied access. Ask your Jira administrator to approve the app scopes.")
         if response.is_error:
-            raise JiraCloudError(502, "Could not retrieve assigned issues from Jira.")
+            raise JiraCloudError(502, "Could not retrieve Jira issues.")
         try:
             result = response.json()
         except ValueError as exc:
@@ -614,7 +653,7 @@ async def get_issue_details(
 ) -> JiraIssue:
     connection = await get_connection(db, user_id)
     if connection is None:
-        raise JiraCloudError(409, "Connect your Jira account in Settings to view assigned issues.")
+        raise JiraCloudError(409, "Connect your Jira account in Settings to view issues.")
     access_token = await _access_token(db, connection)
     url = f"{ATLASSIAN_API_ROOT}/{connection.cloud_id}/rest/api/3/search/jql"
     try:
@@ -622,7 +661,7 @@ async def get_issue_details(
             response = await client.get(
                 url,
                 params={
-                    "jql": f'key = "{issue_key}" AND assignee = currentUser()',
+                    "jql": f'key = "{issue_key}"',
                     "maxResults": 1,
                     "fields": "summary,description,issuetype,status",
                 },
@@ -643,7 +682,7 @@ async def get_issue_details(
     if not isinstance(result, dict) or not isinstance(result.get("issues"), list):
         raise JiraCloudError(502, "Jira returned invalid issue details.")
     if not result["issues"]:
-        raise JiraCloudError(404, "The issue is no longer assigned to you or is not accessible.")
+        raise JiraCloudError(404, "The issue is not accessible to your connected Jira account.")
     return _issue_from_payload(result["issues"][0])
 
 

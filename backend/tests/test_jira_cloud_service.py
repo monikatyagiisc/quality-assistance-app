@@ -185,6 +185,8 @@ class JiraIssueRequestTests(unittest.IsolatedAsyncioTestCase):
             headers: dict[str, str],
         ) -> httpx.Response:
             self.request = (url, params)
+            if url.endswith("/rest/api/3/myself"):
+                return httpx.Response(200, json={"accountId": "jira-account-id"})
             return self.response
 
         async def post(
@@ -206,7 +208,7 @@ class JiraIssueRequestTests(unittest.IsolatedAsyncioTestCase):
             access_token_encrypted=encryptor.encrypt("access-token"),
         )
 
-    async def test_assigned_issue_search_uses_current_user_and_small_field_set(self) -> None:
+    async def test_assigned_issue_search_includes_all_types_for_connected_account(self) -> None:
         response = httpx.Response(
             200,
             json={
@@ -219,7 +221,25 @@ class JiraIssueRequestTests(unittest.IsolatedAsyncioTestCase):
                             "issuetype": {"name": "Story"},
                             "status": {"name": "Open"},
                         },
-                    }
+                    },
+                    {
+                        "id": "2",
+                        "key": "HD11-11327",
+                        "fields": {
+                            "summary": "Example task",
+                            "issuetype": {"name": "Task"},
+                            "status": {"name": "In Progress"},
+                        },
+                    },
+                    {
+                        "id": "3",
+                        "key": "HD11-11328",
+                        "fields": {
+                            "summary": "Example bug",
+                            "issuetype": {"name": "Bug"},
+                            "status": {"name": "Open"},
+                        },
+                    },
                 ],
                 "nextPageToken": "next-page",
             },
@@ -233,13 +253,81 @@ class JiraIssueRequestTests(unittest.IsolatedAsyncioTestCase):
             page = await list_assigned_issues(database, user_id=self.user_id)  # type: ignore[arg-type]
 
         self.assertEqual(page.issues[0].key, "HD11-11326")
+        self.assertEqual([issue.issue_type for issue in page.issues], ["Story", "Task", "Bug"])
         self.assertEqual(page.next_page_token, "next-page")
         self.assertIsNotNone(client.request)
         _, params = client.request
-        self.assertIn("assignee = currentUser()", str(params["jql"]))
+        self.assertEqual(
+            params["jql"],
+            'assignee = "jira-account-id" ORDER BY updated DESC',
+        )
+        self.assertNotIn("issuetype", str(params["jql"]))
         self.assertNotIn("description", str(params["fields"]))
 
-    async def test_detail_request_rechecks_assignment(self) -> None:
+    async def test_project_issue_search_includes_all_visible_issue_types(self) -> None:
+        client = self.FakeHttpClient(
+            httpx.Response(
+                200,
+                json={
+                    "issues": [
+                        {
+                            "id": "1",
+                            "key": "ALPHA1-1",
+                            "fields": {
+                                "summary": "Visible project story",
+                                "issuetype": {"name": "Story"},
+                                "status": {"name": "Open"},
+                            },
+                        },
+                        {
+                            "id": "2",
+                            "key": "ALPHA1-2",
+                            "fields": {
+                                "summary": "Visible project task",
+                                "issuetype": {"name": "Task"},
+                                "status": {"name": "Open"},
+                            },
+                        },
+                        {
+                            "id": "3",
+                            "key": "ALPHA1-3",
+                            "fields": {
+                                "summary": "Visible project bug",
+                                "issuetype": {"name": "Bug"},
+                                "status": {"name": "Open"},
+                            },
+                        },
+                    ]
+                },
+            )
+        )
+        database = self.FakeDatabase(self.make_connection())
+        with patch(
+            "quality_assistance_backend.services.jira_cloud_service.httpx.AsyncClient",
+            return_value=client,
+        ):
+            page = await list_assigned_issues(
+                database,  # type: ignore[arg-type]
+                user_id=self.user_id,
+                project_key="ALPHA1",
+            )
+
+        self.assertEqual([issue.issue_type for issue in page.issues], ["Story", "Task", "Bug"])
+        self.assertIsNotNone(client.request)
+        _, params = client.request
+        self.assertEqual(params["jql"], 'project = "ALPHA1" ORDER BY updated DESC')
+
+    async def test_assigned_issue_search_rejects_invalid_project_key(self) -> None:
+        with self.assertRaises(JiraCloudError) as raised:
+            await list_assigned_issues(
+                self.FakeDatabase(None),  # type: ignore[arg-type]
+                user_id=self.user_id,
+                project_key='ALPHA1" OR assignee is not EMPTY',
+            )
+
+        self.assertEqual(raised.exception.status_code, 422)
+
+    async def test_detail_request_allows_any_issue_visible_to_connected_account(self) -> None:
         response = httpx.Response(
             200,
             json={
@@ -278,8 +366,7 @@ class JiraIssueRequestTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(issue.description, "Story details.")
         self.assertIsNotNone(client.request)
         _, params = client.request
-        self.assertIn("HD11-11326", str(params["jql"]))
-        self.assertIn("assignee = currentUser()", str(params["jql"]))
+        self.assertEqual(params["jql"], 'key = "HD11-11326"')
 
     async def test_lists_jira_projects_for_picker(self) -> None:
         response = httpx.Response(

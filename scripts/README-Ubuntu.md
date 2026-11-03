@@ -44,6 +44,8 @@ Set `GOOGLE_API_KEY` in `agent/.env` (or configure the provider selected by `AGE
 
 The launcher starts the agent, backend, and frontend, and attempts to open the web app in your default browser when running in a graphical Ubuntu session. If no browser opens, visit <http://localhost:5173> manually. API documentation is available at <http://localhost:8000/docs> and <http://localhost:8001/docs>. Press **Ctrl+C** to stop. Logs are written to `.logs/`.
 
+To reuse the app tab, install the window-control tools with `sudo apt install wmctrl xdotool`. On rerun, the launcher detects an open browser window titled **Quality Assistance**, activates it, and navigates that tab to `http://localhost:5173/dashboard` (reloading the dashboard if it is already there). If no matching app window exists, it opens the dashboard in the default browser. If the tools are missing, the launcher prints the install command and does not open another tab.
+
 The development secrets in `backend/.env` are for local use only. Keep `.env` files private and do not commit them.
 
 ## Install frontend packages through JFrog

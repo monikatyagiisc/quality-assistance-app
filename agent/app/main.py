@@ -11,6 +11,7 @@ from app.errors import classify_agent_error
 from app.config.settings import settings
 from app.middleware.logging_middleware import RequestLoggingMiddleware
 from app.schemas import AssistRequest, AssistResponse
+from app.services.aws_sso import start_aws_sso_login
 from app.services.runner_service import runner_service
 
 load_dotenv()
@@ -101,7 +102,11 @@ async def assist(request: AssistRequest) -> AssistResponse:
             request.user_id,
             request.session_id or "<new>",
         )
-        user_error = classify_agent_error(exc)
+        aws_sso_login_started = start_aws_sso_login(exc)
+        user_error = classify_agent_error(
+            exc,
+            aws_sso_login_started=aws_sso_login_started,
+        )
         raise HTTPException(
             status_code=user_error.status_code,
             detail={"message": user_error.message, "code": user_error.code},

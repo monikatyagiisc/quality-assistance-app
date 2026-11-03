@@ -159,7 +159,12 @@ export function DashboardPage() {
       setJiraProjectKey((current) =>
         response.projects.some((project) => project.key === current)
           ? current
-          : '',
+          : response.projects[0]?.key ?? '',
+      )
+      setJiraIssueProjectKey((current) =>
+        response.projects.some((project) => project.key === current)
+          ? current
+          : response.projects[0]?.key ?? '',
       )
     } catch (err) {
       setJiraProjectsError(getUserFriendlyError(err))

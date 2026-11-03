@@ -79,6 +79,24 @@
   color: #f1f5f9;
 }
 
+.theme-select-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  max-width: 20rem;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
+.theme-select-label select {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 0.5rem;
+  background: #111b2c;
+  color: #f1f5f9;
+  font: inherit;
+}
+
 .field-hint {
   margin: -0.35rem 0 0;
   font-size: 0.82rem;

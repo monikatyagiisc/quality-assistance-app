@@ -85,6 +85,9 @@ function getJiraCallbackToast(): { type: 'success' | 'error' | 'info'; text: str
 export function SettingsPage() {
   const { token, loading: authLoading } = useAuth()
   const [, setSearchParams] = useSearchParams()
+  const [theme, setTheme] = useState<'dark' | 'light'>(() =>
+    localStorage.getItem('quality-assistance-theme') === 'light' ? 'light' : 'dark',
+  )
   const [jiraCallbackResult] = useState(() =>
     new URLSearchParams(window.location.search).get('jira'),
   )
@@ -102,6 +105,11 @@ export function SettingsPage() {
   const [entraSaving, setEntraSaving] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    localStorage.setItem('quality-assistance-theme', theme)
+  }, [theme])
 
   useEffect(() => {
     if (!toast) return
@@ -281,6 +289,24 @@ export function SettingsPage() {
           OAuth tokens are encrypted at rest and used only by the backend.
         </p>
       </header>
+
+      <section className="panel settings-panel theme-settings-panel">
+        <div className="settings-panel-title">
+          <h2>Appearance</h2>
+        </div>
+        <label className="theme-select-label" htmlFor="appearance-theme">
+          Theme
+          <select
+            id="appearance-theme"
+            value={theme}
+            onChange={(event) => setTheme(event.target.value === 'light' ? 'light' : 'dark')}
+          >
+            <option value="dark">Dark (default)</option>
+            <option value="light">Light</option>
+          </select>
+        </label>
+        <p className="field-hint">Your theme preference is saved in this browser.</p>
+      </section>
 
       <section className="panel settings-panel jira-settings-panel">
         <div className="settings-panel-title">

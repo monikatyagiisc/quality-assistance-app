@@ -124,3 +124,216 @@ a {
     transform: rotate(360deg);
   }
 }
+
+:root[data-theme='light'] {
+  color-scheme: light;
+  color: #1e293b;
+  background-color: #f8fafc;
+  --surface: #fff;
+  --border: rgba(100, 116, 139, 0.22);
+}
+
+:root[data-theme='light'] body {
+  color: #1e293b;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 0%, rgba(168, 85, 247, 0.08), transparent),
+    #f8fafc;
+}
+
+:root[data-theme='light'] :is(h1, h2, h3, h4, p, label, li, span, strong, legend, th, td, .muted) {
+  color: #334155;
+}
+
+:root[data-theme='light'] :is(.topbar, .user-menu-panel) {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: rgba(100, 116, 139, 0.2);
+}
+
+:root[data-theme='light'] :is(.brand, .brand-text, .brand-mark) {
+  color: #fff;
+}
+
+:root[data-theme='light'] .nav-link {
+  color: #475569;
+}
+
+:root[data-theme='light'] .nav-link:hover {
+  color: #1e293b;
+  background: rgba(15, 23, 42, 0.06);
+}
+
+:root[data-theme='light'] .nav-link.active {
+  color: #4338ca;
+  background: rgba(99, 102, 241, 0.12);
+}
+
+:root[data-theme='light'] :is(
+  .panel,
+  .auth-card,
+  .markdown-content,
+  .guide-toc,
+  .guide-card,
+  .flow-card,
+  .agent-card,
+  .stack-card,
+  .about-hero-note,
+  .contact-card,
+  .user-menu-trigger,
+  .jira-issue-picker,
+  .jira-issue-preview,
+  .jira-bug-creation,
+  .jira-created-bugs,
+  .thinking-indicator,
+  .diff-fetch-panel,
+  .samples-section,
+  .sample-card,
+  .result-refinement,
+  .result-downloads
+) {
+  color: #334155;
+  background: #fff;
+  border-color: rgba(100, 116, 139, 0.2);
+}
+
+:root[data-theme='light'] :is(.about-hero, .hero-panel) {
+  background: linear-gradient(145deg, #eef2ff, #f8fafc);
+  border-color: rgba(99, 102, 241, 0.2);
+}
+
+:root[data-theme='light'] :is(.flow-card, .agent-card, .stack-card, .sample-card):hover {
+  background: #f8fafc;
+}
+
+:root[data-theme='light'] :is(
+  .input-panel textarea,
+  .input-panel select,
+  .diff-fetch-panel input,
+  .result-refinement textarea,
+  .result-refinement select,
+  .auth-form input,
+  .settings-form input,
+  .theme-select-label select,
+  .jira-issue-select-label select
+) {
+  color: #1e293b;
+  background: #fff;
+  border-color: rgba(100, 116, 139, 0.3);
+}
+
+:root[data-theme='light'] .settings-toast {
+  color: #1e293b;
+  background: #fff;
+  border-color: rgba(100, 116, 139, 0.25);
+}
+
+:root[data-theme='light'] :is(.settings, .dashboard, .about, .contact-page, .user-guide, .landing) {
+  color: #334155;
+}
+
+:root[data-theme='light'] :is(
+  .settings-lead,
+  .hero-text,
+  .about-lead,
+  .section-desc,
+  .contact-role,
+  .guide-lead,
+  .landing-lead,
+  .settings-steps,
+  .connection-status,
+  .settings-form label,
+  .input-panel label,
+  .jira-issue-picker-header,
+  .jira-issue-select-label,
+  .jira-issue-preview p,
+  .diff-section-header,
+  .diff-fetch-panel label,
+  .result-refinement label,
+  .sample-intro,
+  .sample-card-desc,
+  .auth-form label,
+  .auth-subtitle,
+  .auth-footer
+) {
+  color: #475569;
+}
+
+:root[data-theme='light'] :is(.eyebrow, .sample-card-focus, .contact-email, .guide-toc a, .user-guide a:not(.btn), .jira-issue-picker-header a, .jira-bug-creation-header a, .jira-created-bugs a) {
+  color: #4f46e5;
+}
+
+:root[data-theme='light'] :is(.dashboard-tab, .diff-mode-toggle button, .btn-ghost, .user-menu-item) {
+  color: #475569;
+}
+
+:root[data-theme='light'] :is(.dashboard-tab:hover, .user-menu-item:hover) {
+  color: #1e293b;
+}
+
+:root[data-theme='light'] .btn-ghost:hover:not(:disabled) {
+  color: #1e293b;
+  background: rgba(15, 23, 42, 0.06);
+}
+
+:root[data-theme='light'] :is(.dashboard-tab.active, .diff-mode-toggle button.active, .sample-card-active) {
+  color: #3730a3;
+  background: rgba(99, 102, 241, 0.12);
+}
+
+:root[data-theme='light'] .markdown-content :is(h1, h2, h3, h4, strong, th) {
+  color: #1e293b;
+}
+
+:root[data-theme='light'] .markdown-content :is(code, blockquote) {
+  color: #334155;
+  background: #eef2ff;
+}
+
+:root[data-theme='light'] .markdown-content a {
+  color: #4f46e5;
+}
+
+:root[data-theme='light'] .guide-callout {
+  color: #334155;
+  background: #eef2ff;
+}
+
+:root[data-theme='light'] :is(.user-menu-fullname, .user-menu-item-danger) {
+  color: #334155;
+}
+
+:root[data-theme='light'] .guide-section code {
+  color: #3730a3;
+  background: #eef2ff;
+}
+
+:root[data-theme='light'] :is(.badge-completed, .banner-success) {
+  color: #166534;
+  background: #dcfce7;
+}
+
+:root[data-theme='light'] :is(.badge-failed, .banner-error, .auth-error) {
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+:root[data-theme='light'] :is(.badge-processing, .badge-pending, .connection-status-badge) {
+  color: #3730a3;
+  background: #e0e7ff;
+}
+
+:root[data-theme='light'] .banner-warn {
+  color: #854d0e;
+  background: #fef3c7;
+}
+
+:root[data-theme='light'] .banner-warn a {
+  color: #713f12;
+}
+
+:root[data-theme='light'] .gradient-text {
+  background-image: linear-gradient(135deg, #4f46e5, #7e22ce, #a21caf);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}

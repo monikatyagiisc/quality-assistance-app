@@ -30,12 +30,14 @@ Operational configuration & Supports provider/model selection, containerized loc
 \label{tab:functional-requirements}
 \end{table}
 
+\clearpage
 \section{Technology Stack}
 \Cref{tab:technology-stack} lists the technologies used in the prototype and the role each one plays.
 
-\begin{table}[htbp]
+\begin{table}[H]
 \centering
 \small
+\setstretch{1.15}
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.27\textwidth}>{\raggedright\arraybackslash}X}
 \toprule
 \textbf{Layer} & \textbf{Technology} & \textbf{Role} \\
@@ -63,34 +65,7 @@ Configuration & Environment variables (\texttt{.env}) & Provider selection, cred
 \section{System Architecture}
 There are four pieces: the browser UI, the API, the database, and the agent process. The React and TypeScript frontend calls the FastAPI backend. After the user is authenticated, the backend stores the request, builds the agent message, and later stores the reply. A separate service runs the root agent and the specialists through Google ADK. PostgreSQL holds users, requests, and the integration records.
 
-\begin{figure}[htbp]
-\centering
-\resizebox{0.98\textwidth}{!}{%
-\begin{tikzpicture}[
-  component/.style={draw,rounded corners,align=center,minimum width=3.0cm,minimum height=1.05cm,fill=gray!10},
-  external/.style={draw,rounded corners,align=center,minimum width=2.7cm,minimum height=0.9cm,fill=blue!7},
-  arrow/.style={-{Stealth[length=2.4mm]},thick},
-  elabel/.style={font=\footnotesize,align=center,above=2pt,inner sep=1pt}
-]
-\node[component] (browser) {User\\Browser};
-\node[component,right=1.5cm of browser] (frontend) {React + TypeScript\\Web application};
-\node[component,right=3.4cm of frontend] (backend) {FastAPI backend\\Auth, API, orchestration};
-\node[component,below=1.3cm of backend] (db) {PostgreSQL\\Requests and connections};
-\node[component,right=3.0cm of backend] (agent) {ADK agent service\\Root + STLC specialists};
-\node[external,right=1.5cm of agent] (models) {Configured model\\Gemini, LiteLLM,\\Bedrock, Ollama};
-\node[external,below=1.3cm of agent] (integrations) {Optional context\\Jira Cloud / GitHub};
-\draw[arrow] (browser) -- (frontend);
-\draw[arrow] (frontend) -- node[elabel]{HTTPS / REST\\JWT-authenticated} (backend);
-\draw[arrow] (backend) -- (db);
-\draw[arrow] (backend) -- node[elabel]{agent\\request} (agent);
-\draw[arrow] (agent) -- (models);
-\draw[arrow] (backend) -- (integrations);
-\end{tikzpicture}}
-\caption{Logical application architecture. Optional external integrations and model providers are enabled by configuration.}
-\label{fig:system-architecture}
-\end{figure}
-
-Figure~\ref{fig:system-architecture} matches what is in the code repository \cite{qaapprepo}. Figure~\ref{fig:system-architecture-deployment} describes the high-level design of the web application on AWS.
+Figure~\ref{fig:system-architecture-deployment} describes the high-level design of the web application on AWS.
 
 \begin{figure}[H]
 \centering
@@ -109,6 +84,13 @@ Users, assistance requests, Jira connections, and GitHub repository connections 
 
 \subsection{Agent Orchestration}
 The root agent is \texttt{quality\_assistance\_agent}. I built it with Google ADK, the configured model, logging callbacks, and the tools available at start-up \cite{googleadk}. On the supported cloud providers the root agent can pass work to the registered sub-agents. The backend prompt asks for prioritized cases, suggested data, automation notes, and release risks, using the requirements, stories, and code differences that came in.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.72\textwidth,height=0.45\textheight,keepaspectratio]{agentic_flow.jpg}
+\caption{Illustrative agentic workflow showing orchestration among the root agent and specialist agents.}
+\label{fig:agentic-flow}
+\end{figure}
 
 \begin{table}[htbp]
 \centering
@@ -134,14 +116,10 @@ S09 & Release readiness evaluation & Weighs supplied test and risk signals and p
 
 Requirement and story text go to the test-case and test-data agents. Code differences go to change impact analysis. Execution logs go to execution, defect, and summary. Release questions go to readiness. The root agent also has a small requirement-summarization tool. All of this is prompt routing. There is no second engine underneath it that would force the same path every time.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.72\textwidth,height=0.45\textheight,keepaspectratio]{agentic_flow.jpg}
-\caption{Illustrative agentic workflow showing orchestration among the root agent and specialist agents.}
-\label{fig:agentic-flow}
-\end{figure}
-
+\clearpage
+\subsection{Assistance Request Processing}
 The steps for processing an assistance request are:
+\begingroup\setstretch{1.15}
 \begin{enumerate}
   \item Validate the request and associate it with the authenticated user.
   \item Persist the request inputs (requirements, optional stories, and code differences) with status \texttt{processing}.
@@ -153,10 +131,11 @@ The steps for processing an assistance request are:
   \item If the agent call succeeds, persist the session identifier, response, and status \texttt{completed}; otherwise persist the failure status and return an explicit service error.
   \item Return the request identifier, session, response, and status.
 \end{enumerate}
+\endgroup
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.92\textwidth,height=0.48\textheight,keepaspectratio]{sequence_daigram.png}
+\includegraphics[width=0.92\textwidth,height=0.40\textheight,keepaspectratio]{sequence_daigram.png}
 \caption{Sample sequence of requests via the application services.}
 \label{fig:request-sequence}
 \end{figure}
@@ -169,6 +148,7 @@ Assistance records are scoped to the signed-in user. JWT tokens are issued after
 
 Requirements, stories, code differences, and test results are often confidential. The application stores them with the request and sends them to the configured model provider. Anyone who deploys this has to pick a provider and a retention policy the organisation will accept, limit who can see stored data, rotate credentials, and keep secrets out of the prompt. The checks I added reduce accidental leaks. They are not a privacy assessment, a threat model, or an internal security sign-off.
 
+\clearpage
 \section{Deployment and Operations}
 For local use there is a Docker Compose file with PostgreSQL, frontend, backend, and agent. There are also scripts if you want the UI and Python services on the host, with the database local or in a container. The AWS ECS Fargate note is a pilot layout: separate containers, RDS PostgreSQL, an Application Load Balancer, and a chosen model. It is a checklist. It is not Terraform or CloudFormation, and I am not claiming that an AWS production stack has been brought up.
 

@@ -123,11 +123,6 @@ For numbers I would report sample size, the shape of the data, confidence interv
 
 The threats I worry about are the usual ones. The dataset may not look like the work people actually do. Reviewers will disagree. The model will not give the same answer twice. The provider may change the model under us. Examples may leak into prompts. And a long generated list may simply create more review. A small public-data run would be enough to talk about feasibility. It would not be enough to talk about enterprise workflows.
 
-\section{Results and Discussion}
-The evidence in this chapter is that the software exists and can be exercised. It takes quality context, stores a request, calls the orchestrated agent, and returns a response. The specialist list and the dashboard samples cover several STLC jobs. The Jira and GitHub code is a starting point for systems a team already has.
-
-I do not have experiment results to put next to that. No benchmark set, no time-saved numbers, no coverage figures, no defect-detection rates, no user study. So I am not claiming the system improves quality or reduces effort. What this stage produced is the application and a way to test those claims later. A generated case can look complete and still be wrong, incomplete, or useless for finding defects.
-
 \section{Limitations}
 \begin{itemize}
   \item If the user gives thin or wrong context, or if the chosen model is weak, the recommendations follow that.

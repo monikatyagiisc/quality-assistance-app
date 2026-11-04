@@ -24,11 +24,37 @@ Specialized analysis & Routes suitable requests to registered STLC agents for te
 User separation & Associates assistance requests with the authenticated user and persists request inputs and responses in PostgreSQL. \\
 Engineering context & Offers Jira Cloud story retrieval and GitHub pull-request or branch code-difference retrieval when configured. \\
 Operational configuration & Supports provider/model selection, containerized local startup, health checks, and production configuration checks. \\
+Human-in-the-loop refinement & Once a result is generated, the user can add instructions, optionally focus the rerun on a single specialist, and rerun in the same session, repeating this until the result is acceptable. \\
 \bottomrule
 \end{tabularx}
 \caption{Selected functional requirements and corresponding implemented behavior.}
 \label{tab:functional-requirements}
 \end{table}
+
+\section{Data and Inputs}
+The application does not train or fine-tune any model, so there is no training dataset to describe. The models are used as the provider supplies them, and every answer is produced from the context that comes with the request. \Cref{tab:inputs} lists what a request can carry.
+
+\begin{table}[htbp]
+\centering
+\small
+\setstretch{1.15}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.24\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.17\textwidth}}
+\toprule
+\textbf{Input} & \textbf{Where it comes from} & \textbf{Size limit} \\
+\midrule
+Requirements (required) & Typed or pasted by the user. Test-run logs and notes are also pasted here. & 20,000 characters \\
+User stories (optional) & Typed, or imported from Jira Cloud issues assigned to the user. & 20,000 characters \\
+Code differences (optional) & A pasted git difference, or fetched from a GitHub pull request or branch comparison. & 50,000 characters \\
+Review guidance (optional) & Instructions the user types to refine an earlier result. & 5,000 characters \\
+Target specialist (optional) & One of the nine specialists, chosen by the user. & not applicable \\
+Session identifier & Returned by the agent service and reused for follow-up turns. & not applicable \\
+\bottomrule
+\end{tabularx}
+\caption{Inputs to an assistance request. The combined text is limited to 70,000 characters.}
+\label{tab:inputs}
+\end{table}
+
+Preprocessing is kept light on purpose. The backend trims the text, drops empty optional fields, rejects control characters, applies the size limits, and runs a keyword check that turns away submissions with no software or testing context. It then builds one message with sections for the requirements, user stories, code differences, and any review guidance. That is followed either by the specialist the user asked for or by a request for prioritised test cases, test data, automation notes, and release risks. There is no chunking, embedding, or retrieval step.
 
 \clearpage
 \section{Technology Stack}
@@ -75,7 +101,7 @@ Figure~\ref{fig:system-architecture-deployment} describes the high-level design 
 \end{figure}
 
 \subsection{Frontend}
-The UI has login, a dashboard for requests, a settings page, and a short user guide. On the dashboard the user can type requirements and stories, paste a change, or start from the samples I added: smoke planning, an end-to-end example, change impact, execution and reporting, automation, and a follow-up. If Jira is connected, assigned issues can fill the story field. If GitHub is connected, a pull-request or compare code difference can be fetched. The reply is rendered in the browser. It can also be downloaded as Markdown or HTML.
+The UI has login, a dashboard for requests, a settings page, and a short user guide. On the dashboard the user can type requirements and stories, paste a change, or start from the samples I added: smoke planning, an end-to-end example, change impact, execution and reporting, automation, and a follow-up. If Jira is connected, assigned issues can fill the story field. If GitHub is connected, a pull-request or compare code difference can be fetched. The reply is rendered in the browser. It can also be downloaded as Markdown or HTML. Under each result there is a refine-and-rerun panel, where the user can type further instructions, pick one specialist to focus on, and run the request again in the same session.
 
 \subsection{Backend and Persistence}
 The backend is FastAPI, with asynchronous SQLAlchemy on PostgreSQL \cite{fastapidocs}. \texttt{/api/assist} needs a logged-in user. The request is stored with owner, source text, session id, status, timestamps, and later the response. Then the backend builds a structured message and calls the agent service. Both success and failure are written back. Errors go to the frontend on the normal error path.
@@ -123,7 +149,7 @@ The steps for processing an assistance request are:
 \begin{enumerate}
   \item Validate the request and associate it with the authenticated user.
   \item Persist the request inputs (requirements, optional stories, and code differences) with status \texttt{processing}.
-  \item Construct a message from the requirements, stories, and code differences.
+  \item Construct a message from the requirements, stories, and code differences, adding any review guidance or the specialist the user chose.
   \item Resolve or create an agent session for the user.
   \item Invoke the root agent with the message and session.
   \item Route to one or more specialists according to the request context.
@@ -139,6 +165,9 @@ The steps for processing an assistance request are:
 \caption{Sample sequence of requests via the application services.}
 \label{fig:request-sequence}
 \end{figure}
+
+\subsection{Human-in-the-Loop Refinement}
+I designed the application to treat every response as a draft. After a result comes back, the engineer reads it and can add more input or instructions, for example to add negative cases, shorten a verdict, or change how a table is laid out. The backend appends those instructions to the original context as a review section. If the user picks a specialist, the request is limited to that one agent. The session identifier is reused, so the agent still has the earlier turns in front of it. This cycle of generate, review, instruct, and rerun can be repeated as often as needed, and every decision to accept a result stays with the engineer.
 
 \subsection{External Integrations and Model Providers}
 Jira Cloud is OAuth 2.0, a short-lived state record, and Jira APIs to list assigned issues and fetch detail. GitHub settings store a repository and an encrypted personal access token. From there the backend can pull pull-request code differences or compare two references. Microsoft Entra SSO is optional. The agent service can also act as a Model Context Protocol (MCP) client and attach optional Jira and GitHub tools from an MCP server, when one is configured \cite{mcpdocs}. The import flow described above does not use MCP. The agent side can use Gemini, LiteLLM, Amazon Bedrock, or Ollama if the credentials and models are there. I put those options in so the same code can run in more than one place. I did not benchmark every provider on the same tasks.

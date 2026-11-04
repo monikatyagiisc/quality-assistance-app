@@ -92,10 +92,10 @@ The screenshots are one ordinary path: open the workspace, check settings, type 
 \end{figure}
 
 \section{Evaluation Plan}
-When I do the study, I want three conditions on the same tasks: a person doing the work by hand, whatever point automation the team already has, and this assistant. The first round should stay on public requirements and open-source repositories or trackers, which is what the project plan already said. If we later use organisational material, it has to be anonymized, and it has to wait for the data-governance approval that organisation needs.
+When I designed the evaluation, I chose to compare three conditions on the same tasks: a person doing the work by hand, one general-purpose LLM given the same inputs, and the full multi-agent application. I included the single-LLM condition to find out whether splitting the work among specialists really helps. The agent service already has a single-agent mode, which it uses for local Ollama models, so the same code can supply that baseline. A comparison with existing commercial tools is a useful extension. I kept the first round to public requirements and open-source repositories or trackers. Any organisational material used later has to be anonymised and has to wait for whatever data-governance approval the organisation needs.
 
 \subsection{Dataset and Protocol}
-For each project I would pick a small, closed set of requirements, stories, code changes, and any test-run or defect records that already exist. Expected requirement-to-test links and expert-reviewed reference outputs should be written down before the assistant is run. Model, model version, prompt revision, and app config stay fixed for a comparison. Because the model does not always give the same answer, I would repeat tasks where I can and keep both the raw output and the review decision. If it is practical, the person scoring the artifacts should not know which workflow produced them.
+In the protocol I defined, each project gets a small, closed set of requirements, stories, code changes, and any test-run or defect records that already exist. Expected requirement-to-test links and expert-reviewed reference outputs are written down before the assistant is run. The model, model version, prompt revision, and app configuration stay fixed for a comparison. Because the model does not always give the same answer, each task is repeated where possible, and both the raw output and the review decision are kept. Where practical, the person scoring the artifacts is not told which workflow produced them.
 
 \subsection{Measures}
 \begin{table}[htbp]
@@ -118,15 +118,118 @@ User acceptance & Structured ratings of usefulness, clarity, and trust from repr
 \label{tab:evaluation-metrics}
 \end{table}
 
-\subsection{Analysis and Validity}
-For numbers I would report sample size, the shape of the data, confidence intervals, and which tests I used. I would also look at error types, not only averages. On the qualitative side I would look for missing cases, claims with no support, unclear requirements, and places where the model and an expert disagree. Model and prompt versions have to be written down, otherwise a rerun later is hard to explain.
+\subsection{End-to-End Time: One Week to One Hour}
+The practical claim I most want to test is about time. Producing a full set of reviewed quality artefacts for one scenario means test cases, test data, an automation outline, a change-impact note, bug reports for the failures, a test summary, and a release-readiness note. Done by hand, I estimate this takes about a week of working time. With the application, the target is about an hour, and that hour includes several rounds in which an engineer reads the output, gives more guidance, and reruns it.
 
-The threats I worry about are the usual ones. The dataset may not look like the work people actually do. Reviewers will disagree. The model will not give the same answer twice. The provider may change the model under us. Examples may leak into prompts. And a long generated list may simply create more review. A small public-data run would be enough to talk about feasibility. It would not be enough to talk about enterprise workflows.
+These two figures are my planning estimate and my target. They are not measured results. \Cref{tab:one-week-one-hour} gives the matrix I defined to confirm or reject them.
+
+\begin{table}[H]
+\centering
+\small
+\setstretch{1.15}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}X c c c}
+\toprule
+\textbf{Metric} & \textbf{Definition} & \textbf{Manual} & \textbf{Assisted} & \textbf{Measured} \\
+\midrule
+Cycle time $T$ & Wall-clock time from receiving the requirements to an accepted set of artefacts. & about 1 week & about 1 hour & TBD \\
+Active human effort $E$ & Time a person spends preparing inputs, reading output, and giving instructions. & TBD & TBD & TBD \\
+Rounds $N$ & Number of review-and-rerun rounds before the set is accepted. & --- & TBD & TBD \\
+First-draft latency $L_1$ & Time from submitting the request to the first complete response. & --- & TBD & TBD \\
+Acceptance rate $A$ & Share of artefacts accepted unchanged or after minor edits. & TBD & TBD & TBD \\
+Time reduction & $(T_{\text{manual}} - T_{\text{assisted}}) / T_{\text{manual}} \times 100$, reported only when the accepted artefacts are comparable. & --- & target: large & TBD \\
+\bottomrule
+\end{tabularx}
+\caption{Matrix for the one-week to one-hour claim. Manual and assisted entries are estimates or targets; the measured column is to be filled in after the evaluation runs.}
+\label{tab:one-week-one-hour}
+\end{table}
+
+The assisted time includes the human review rounds, because a draft produced in ten minutes that takes an hour to fix has not saved anything. An experienced tester first prepares the set by hand, with the time recorded. The same scenario then goes through the assistant with a fixed number of rounds, and a reviewer accepts or rejects each artefact against reference criteria written down beforehand.
+
+\subsection{Metrics for Each Specialist}
+The nine specialists do very different jobs, so a single score for all of them would say little. \Cref{tab:agent-metrics} gives each one its own main metric. Where an agent only suggests something, such as a repair or an automation approach, I score how good the suggestion is and not whether it worked, because the application does not apply it.
+
+\begin{table}[H]
+\centering
+\small
+\setstretch{1.15}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}p{0.25\textwidth}>{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Specialist} & \textbf{Main metric} & \textbf{How it is calculated} \\
+\midrule
+S01 Test case generation & Requirement coverage and validity & Requirements covered by at least one accepted case divided by all requirements; valid cases divided by generated cases. The duplicate rate is reported too. \\
+S02 Test data generation & Data validity & Records that satisfy the stated constraints divided by records generated; scenarios supported by the data divided by scenarios required. \\
+S03 Test script automation & Recommendation precision & Recommendations an expert judges appropriate divided by recommendations made. \\
+S04 Test execution & Root-cause accuracy & Failures given the correct cause divided by failures with a known cause (application defect, environment, test script, data, or configuration). \\
+S05 Self-healing scripts & Repair-suggestion accuracy & Suggestions an expert judges correct divided by suggestions made. \\
+S06 Change impact analysis & Precision, recall, and F1 & Checked against the tests that are really affected by the change. Precision is correct impacted tests over tests flagged; recall is correct impacted tests over all impacted tests. \\
+S07 Bug report generation & Completeness and acceptance & Reports with all required fields divided by all reports; reports a reviewer accepts divided by all reports; classification accuracy against the known defect type. \\
+S08 Test summary reporting & Factual accuracy & Statements that match the execution data divided by verifiable statements. A finding the data does not support counts as an error. \\
+S09 Release readiness & Decision agreement & Scenarios where the recommendation matches the decision of experienced testers divided by all scenarios. This is decision support, not an approval. \\
+\bottomrule
+\end{tabularx}
+\caption{Proposed main metric for each specialist. No values are reported because the evaluation has not been carried out.}
+\label{tab:agent-metrics}
+\end{table}
+
+\subsection{Orchestration and Workflow Metrics}
+The specialists are only part of the picture. The root agent has to pick the right ones, hand over the right context, and combine the answers, and the engineer has to be able to refine the result. \Cref{tab:workflow-metrics} lists what I defined to measure for the workflow as a whole.
+
+\begin{table}[H]
+\centering
+\small
+\setstretch{1.15}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Metric} & \textbf{Definition} \\
+\midrule
+Specialist selection accuracy & Requests where the root agent called the expected specialists divided by all requests, checked in the agent logs. \\
+Unnecessary calls & Specialist calls that were not needed divided by all specialist calls. \\
+Workflow completion rate & Requests that ended with a usable response divided by requests started. \\
+Human correction rate & Artefacts the reviewer had to change divided by all artefacts produced. \\
+Repeat consistency & Share of repeated runs that give the same decision or classification. \\
+Cost per workflow & Model usage and cost for one completed request, including the reruns. \\
+\bottomrule
+\end{tabularx}
+\caption{Proposed orchestration and workflow metrics.}
+\label{tab:workflow-metrics}
+\end{table}
+
+\subsection{Human Evaluation}
+Some things cannot be scored with a formula, for example whether a test case is meaningful or a root-cause explanation is useful. For these I defined an expert rating step. Two or three experienced testers rate each artefact from 1 (very poor) to 5 (excellent) on correctness, completeness, relevance, clarity, and practical usability, and they are not told which condition produced which artefact. To show the ratings can be trusted, I report how well the reviewers agree, using Cohen's kappa for two reviewers or Fleiss' kappa for more.
+
+\subsection{Benchmark Dataset}
+Every comparison needs inputs whose right answers are already known. \Cref{tab:benchmark} lists the pilot set I designed. The sizes are a starting point and can grow if time allows.
+
+\begin{table}[H]
+\centering
+\small
+\setstretch{1.15}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.30\textwidth}c>{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Component} & \textbf{Pilot size} & \textbf{Ground truth prepared in advance} \\
+\midrule
+Requirements and user stories & 10 & Expected requirement-to-test links and reviewed reference cases. \\
+Code-change scenarios & 10 & Source before and after, a description of the change, and the tests that are really affected. \\
+Execution logs & 10 & The true root cause of each failure. \\
+Defect scenarios & 10 & Expected type, severity, and required report fields. \\
+Release scenarios & 10 & Release or no-release decisions made independently by experienced testers. \\
+Test-data scenarios & 10 & The constraints and boundary values the data must meet. \\
+\bottomrule
+\end{tabularx}
+\caption{Proposed pilot benchmark. The sizes are planning figures.}
+\label{tab:benchmark}
+\end{table}
+
+\subsection{Analysis and Validity}
+For numbers I report sample size, the shape of the data, confidence intervals, and which tests I used. I also look at error types, not only averages. On the qualitative side I look for missing cases, claims with no support, unclear requirements, and places where the model and an expert disagree. Model and prompt versions are written down, otherwise a rerun later is hard to explain. With samples this small I kept the statistics simple: medians or means with the spread, precision, recall, and F1 for the identification tasks, and paired comparisons on the same scenarios using the Wilcoxon signed-rank test, or a paired t-test if its assumptions hold, with an effect size such as Cohen's $d$. Each assisted run is repeated three times, because the output varies, and the variation is reported. If the differences are small or the sample is too small to be sure, the report says so.
+
+The threats I considered are the usual ones. The dataset may not look like the work people actually do. Reviewers will disagree. The model will not give the same answer twice. The provider may change the model under us. Examples may leak into prompts. And a long generated list may simply create more review. A small public-data run would be enough to talk about feasibility. It would not be enough to talk about enterprise workflows.
 
 \section{Limitations}
 \begin{itemize}
   \item If the user gives thin or wrong context, or if the chosen model is weak, the recommendations follow that.
   \item Routing between agents is still mostly the prompt. I did not add formal schemas or independent quality gates between stages.
+  \item Refinement works by adding instructions and rerunning. A user cannot yet edit or approve individual cases one at a time.
   \item Session state is in memory. Restart the agent process and the conversation is gone.
   \item The system does not run external suites, edit scripts, or block a release.
   \item Retrieval over requirements, test assets, and old defects, and a Jenkins or similar CI hook, are still to be done.

@@ -6,14 +6,14 @@ Running tests is just one of the aspects of software quality. Within the Softwar
 
 The step which used to cause delays, in my experience, was not any particular step. It was the dispersion among tools. There is a story reported as a ticket. There is a change made as a code difference. There is a run which produced a defect logged in the log. One has to take the ticket and convert it to test cases, define what to regress against the code difference, and produce some information about the run that is understandable to the release manager. It is an ordinary step for one ticket. It is the repetition of the same interpretation process across a sprint, and the wording varies from ticket to ticket.
 
-Large language models (LLMs) handle the linguistic aspect of the process quite well. They can summarise the ticket, suggest a few boundary cases, and even take the messy log and fill the defect template. They have problems when there is no one to look at them. I have seen models skipping a rule in the second paragraph, adding a field which never existed, and still being confident. For the quality team, this is a problem. An assistant is good only when it uses the context provided by the user, concentrates on its task, shows the draft, and waits for confirmation or rejection by the user.
+Large language models (LLMs) handle the linguistic aspect of the process quite well. They can summarise the ticket, suggest a few boundary cases, and even take the messy log and fill the defect template. There is already a sizeable body of work on using them for testing \cite{wang2024testingllm}. They have problems when there is no one to look at them. I have seen models skipping a rule in the second paragraph, adding a field which never existed, and still being confident. For the quality team, this is a problem. An assistant is good only when it uses the context provided by the user, concentrates on its task, shows the draft, and waits for confirmation or rejection by the user.
 
 \section{Problem Statement and Motivation}
 The major rationale for undertaking this project is the need for an intelligent and connected approach to handle various tasks during the Software Testing Life Cycle (STLC). Most of the time, the quality-related activities are done independently, and the information often has to be looked at and interpreted once again. While there has been a lot of improvement in automation and simplifying of individual testing tasks, the processes of requirement analysis, defect identification, and release readiness are still quite manual. Such fragmentation may cause certain scenarios to be overlooked, efforts to be duplicated, and possible risks to be identified much later in the development cycle.
 
 To resolve such issues, this project proposes an AI-assisted approach that brings the STLC activities together in one place using a centralised orchestrator. Users submit the requirements and user stories, and either the source code modifications or the test execution results, depending on the activity. The root agent evaluates the request and distributes the task among the specialist agents accordingly. The results obtained by these agents are consolidated into one response for the quality team to make a decision.
 
-The system is developed to help engineers and not to make decisions for them. It assists in the preparation and organisation of testing-related data and gives suggestions which can be taken after their analysis. The validation of test cases, execution of tests in the proper environment, validation of defects, and release decisions would be made by the concerned engineers themselves.
+The system is developed to help engineers and not to make decisions for them. It assists in the preparation and organisation of testing-related data and gives suggestions which can be taken after their analysis. The validation of test cases, execution of tests in the proper environment, validation of defects, and release decisions remain with the concerned engineers themselves.
 
 \clearpage
 \section{Research Questions}
@@ -31,12 +31,24 @@ The main objectives of this project are to:
   \item build a central agent that can understand user requests and delegate tasks to specialised agents covering different activities of the STLC;
   \item provide secure, authenticated access to the application and maintain user-specific records of submitted requests and their results;
   \item integrate with engineering tools such as Jira for accessing user stories and GitHub for retrieving source-code changes;
-  \item allow users to configure different AI model providers and application deployment settings; and
+  \item allow users to configure different AI model providers and application deployment settings;
+  \item support human-in-the-loop refinement, so that a user can review a generated result, add further instructions, and rerun it until it is acceptable; and
   \item establish a practical and reproducible evaluation approach in which the generated results are reviewed by humans, without making claims about improvements that have not yet been measured.
 \end{itemize}
 
 \section{Scope and Contributions}
 This report deals with the code of the project repository \cite{qaapprepo} as of November 2026. It should be noted that what is submitted here is a prototype. In no way am I proposing a new theory of agents. The browser interface, the API and the agent service work together. Users are able to copy and paste requirements and stories, attach git code differences or the link to the GitHub pull request with the changes, add the test log, continue the conversation in a later turn and export the response. If Jira Cloud and GitHub are set up, issue text and pull-request or branch code differences can be fetched instead of typed. The root agent then works with nine STLC specialists.
+
+Compared with the existing practices in \Cref{chap:literature_review}, the contributions of this work are:
+\begin{itemize}
+  \item one orchestrated workflow, in which a root agent routes a request to nine STLC specialists and combines what they return into a single response;
+  \item shared context across activities, since requirements, stories, code differences, and test results are handled together and a session identifier lets later turns build on earlier answers;
+  \item connections to the engineers' own tools, with Jira Cloud for user stories and GitHub for code differences;
+  \item human-in-the-loop operation, where the user can refine a result with further guidance or send a request to one specialist only, while every decision stays with the engineer;
+  \item a configurable design with several model providers, authentication, and records kept per user; and
+  \item an evaluation protocol with effort-based measures for the assisted workflow.
+\end{itemize}
+These are engineering contributions. The report does not claim a new algorithm or a measured improvement.
 
 There are, of course, limitations that I do not wish to omit. The prototype will not execute the tests of another software suite. It will not transform scripts in a git repository. It cannot confirm that the tests produced are exhaustive, nor can it sign off on the release. Execution, self-healing, and readiness responses are only suggestions based on the text received. I also did not incorporate retrieval from a test repository, CI/CD execution, output schema enforcement, or a comparative study; these remain future work.
 

@@ -10,15 +10,15 @@ The prototype shows how multiple testing-related activities can be brought toget
 It is also important to understand the limitations of the current implementation. The execution analysis agent reviews available test results but does not run test suites on its own. Similarly, the self-healing agent suggests possible changes to automation scripts but does not apply those changes automatically. The release-readiness assessment provides supporting information for decision-making; the final decision to approve or reject a release remains with the responsible team.
 
 \section{Future Work}
-What I would do next, in order:
+The next steps I have identified, in order:
 \begin{enumerate}
-  \item structured outputs and checks between specialist stages;
-  \item a place for a person to approve or edit test cases, and anything that could affect a release;
-  \item an evaluation of traceability, correctness, review effort, latency, and cost against a baseline written down in advance;
-  \item trials on public projects and, after approval, on anonymized organisational artifacts;
-  \item retrieval over approved requirements, test repositories, and historical defects;
-  \item a careful CI/CD hook for test execution, and session history that survives a restart and can be audited; and
-  \item load, reliability, accessibility, privacy, and security reviews before this is treated as a wider deployment.
+  \item Structured outputs and checks between specialist stages;
+  \item An explicit approval step and editing of individual cases, building on the refine-and-rerun loop that already exists;
+  \item An evaluation of traceability, correctness, review effort, latency, and cost against a baseline written down in advance;
+  \item Trials on public projects and, after approval, on anonymized organisational artifacts;
+  \item Retrieval over approved requirements, test repositories, and historical defects;
+  \item A careful CI/CD hook for test execution, and session history that survives a restart and can be audited; and
+  \item Load, reliability, accessibility, privacy, and security reviews before this is treated as a wider deployment.
 \end{enumerate}
 
 I already know an LLM can write something that looks like a test case. The question I still cannot answer is whether this orchestrated assistant produces work that people can trace and use, often enough that the review it creates is still cheaper than doing the task without it. The prototype is the place to run that comparison. Screenshots of a working demo are not the comparison.

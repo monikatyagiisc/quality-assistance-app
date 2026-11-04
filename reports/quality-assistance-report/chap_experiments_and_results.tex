@@ -2,7 +2,7 @@
 \label{chap:experiments_and_results}
 
 \section{Prototype Implementation Status}
-What I have at this point is a running full-stack prototype. It is more than a slide architecture. A user can register, sign in, send context through the authenticated API, and read a reply on the dashboard. Requests are stored. Nine specialists are registered, and the root agent picks among them from its routing instructions. GitHub code-difference retrieval, Jira Cloud OAuth and issue fetch, and optional Microsoft Entra login are in the same GitHub repository \cite{qaapprepo}.
+What I have at this point is a running full-stack application. It is more than what I mentioned in the architecture. A user can register, sign in, send context through the authenticated API, and read a reply on the dashboard. Requests are stored. Nine specialists are registered, and the root agent picks among them from its routing instructions. GitHub code-difference retrieval, Jira Cloud OAuth and issue fetch, and optional Microsoft Entra login are in the same GitHub repository \cite{qaapprepo}.
 
 \begin{table}[htbp]
 \centering
@@ -13,30 +13,41 @@ What I have at this point is a running full-stack prototype. It is more than a s
 \midrule
 Problem analysis and architecture & Implemented & Research framing is documented in the proposal and presentation; current services are separated into frontend, backend, and agent. \\
 Core quality-assistance flow & Implemented & Authenticated request persistence, prompt construction, agent call, and response persistence are present. \\
-Specialist STLC capabilities & Implemented & Nine task-focused agents are registered; orchestration is controlled by ADK and agent instructions. \\
-Jira and GitHub context & Implemented, configuration-dependent & OAuth and issue retrieval are available for Jira; GitHub repository settings support code-difference retrieval. \\
-Authentication and deployment controls & Implemented in part & Password/JWT authentication, optional Entra SSO, encrypted integration credentials, and production settings validation are present. \\
-RAG over organizational test assets & Planned & No persistent requirements/test/defect retrieval index is evidenced in the inspected implementation. \\
-Automated CI test execution and script mutation & Planned / out of scope of current behavior & Execution and healing agents analyze or recommend; they do not execute external suites or commit changes. \\
-Comparative empirical evaluation & Pending & No measured baseline, benchmark results, or controlled organizational pilot results were supplied. \\
 \bottomrule
 \end{tabularx}
 \caption{Implementation status as of November 2026, distinguishing current behavior from planned work.}
 \label{tab:implementation-status}
 \end{table}
 
-\section{Existing Automated Test Assets}
-I wrote focused tests for Bedrock credentials, backend production settings, Jira Cloud behaviour, and Microsoft Entra SSO. Those files show that a few paths mattered enough to get checks. They do not tell you the suite is green today, and they do not cover the UI, the model, the database, and the agents end to end. If a later version of this report is going to claim test evidence, it should include the command, the environment, the commit, the test count, and the actual result of a run.
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{p{0.30\textwidth}p{0.20\textwidth}X}
+\toprule
+\textbf{Project area} & \textbf{Status in inspected repository} & \textbf{Evidence or qualification} \\
+\midrule
+Specialist STLC capabilities & Implemented & Nine task-focused agents are registered; orchestration is controlled by ADK and agent instructions. \\
+Jira and GitHub context & Implemented, configuration-dependent & OAuth and issue retrieval are available for Jira; GitHub repository settings support code-difference retrieval. \\  
+Authentication & Implemented & Password/JWT authentication, optional Entra SSO, encrypted integration credentials. \\
+RAG over organizational test assets & Planned & No persistent requirements/test/defect retrieval index is evidenced in the inspected implementation. \\
+Automated CI test execution and script mutation & Planned / out of scope of current behavior & Execution and healing agents analyze or recommend; they do not execute external suites or commit changes. \\
+Comparative empirical evaluation & Pending & No measured baseline, benchmark results, or controlled organizational pilot results were supplied. \\
+Cloud deployment & Planned & No evidence of deployment to a cloud environment is present in the inspected implementation. \\
+\bottomrule
+\end{tabularx}
+\caption{Implementation status as of November 2026, distinguishing current behavior from planned work.}
+\label{tab:implementation-status}
+\end{table}
 
 \section{Demonstration Scenarios}
 The dashboard includes samples I used while building, so I could hit several agent routes without inventing a ticket every time:
 \begin{enumerate}
-  \item a password-reset requirement, for planning and summarising;
-  \item an e-commerce checkout with requirements, stories, and code differences;
-  \item an authentication change with large code differences, for regression impact;
-  \item a test-run log with pass, fail, and skipped cases, for execution analysis and reporting;
-  \item a Playwright selector change, for automation and self-healing notes; and
-  \item a follow-up that reuses the previous session id.
+  \item A password-reset requirement, for planning and summarising.
+  \item An e-commerce checkout with requirements, stories, and code differences.
+  \item An authentication change with large code differences, for regression impact.
+  \item A test-run log with pass, fail, and skipped cases, for execution analysis and reporting.
+  \item A Playwright selector change, for automation and self-healing notes.
+  \item A follow-up that reuses the previous session id.
 \end{enumerate}
 
 \subsection{Interface Walkthrough and Illustrative Outputs}

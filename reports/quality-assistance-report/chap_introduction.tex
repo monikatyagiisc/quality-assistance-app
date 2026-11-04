@@ -27,13 +27,13 @@ The project is guided by the following research questions:
 \section{Objectives}
 The main objectives of this project are to:
 \begin{itemize}
-  \item design and develop a full-stack application where users can submit software-testing information and review the results generated with AI assistance;
-  \item build a central agent that can understand user requests and delegate tasks to specialised agents covering different activities of the STLC;
-  \item provide secure, authenticated access to the application and maintain user-specific records of submitted requests and their results;
-  \item integrate with engineering tools such as Jira for accessing user stories and GitHub for retrieving source-code changes;
-  \item allow users to configure different AI model providers and application deployment settings;
-  \item support human-in-the-loop refinement, so that a user can review a generated result, add further instructions, and rerun it until it is acceptable; and
-  \item establish a practical and reproducible evaluation approach in which the generated results are reviewed by humans, without making claims about improvements that have not yet been measured.
+  \item Design and develop a full-stack application where users can submit software-testing information and review the results generated with AI assistance.
+  \item Build a central agent that can understand user requests and delegate tasks to specialised agents covering different activities of the STLC.
+  \item Provide secure, authenticated access to the application and maintain user-specific records of submitted requests and their results.
+  \item Integrate with engineering tools such as Jira for accessing user stories and GitHub for retrieving source-code changes.
+  \item Allow users to configure different AI model providers and application deployment settings.
+  \item Support human-in-the-loop refinement, so that a user can review a generated result, add further instructions, and rerun it until it is acceptable.
+  \item Establish a practical and reproducible evaluation approach in which the generated results are reviewed by humans, without making claims about improvements that have not yet been measured.
 \end{itemize}
 
 \section{Scope and Contributions}
@@ -41,12 +41,12 @@ This report deals with the code of the project repository \cite{qaapprepo} as of
 
 Compared with the existing practices in \Cref{chap:literature_review}, the contributions of this work are:
 \begin{itemize}
-  \item one orchestrated workflow, in which a root agent routes a request to nine STLC specialists and combines what they return into a single response;
-  \item shared context across activities, since requirements, stories, code differences, and test results are handled together and a session identifier lets later turns build on earlier answers;
-  \item connections to the engineers' own tools, with Jira Cloud for user stories and GitHub for code differences;
-  \item human-in-the-loop operation, where the user can refine a result with further guidance or send a request to one specialist only, while every decision stays with the engineer;
-  \item a configurable design with several model providers, authentication, and records kept per user; and
-  \item an evaluation protocol with effort-based measures for the assisted workflow.
+  \item One orchestrated workflow, in which a root agent routes a request to nine STLC specialists and combines what they return into a single response.
+  \item Shared context across activities, since requirements, stories, code differences, and test results are handled together and a session identifier lets later turns build on earlier answers.
+  \item Connections to the engineers' own tools, with Jira Cloud for user stories and GitHub for code differences.
+  \item Human-in-the-loop operation, where the user can refine a result with further guidance or send a request to one specialist only, while every decision stays with the engineer.
+  \item A configurable design with several model providers, authentication, and records kept per user.
+  \item An evaluation protocol with effort-based measures for the assisted workflow.
 \end{itemize}
 These are engineering contributions. The report does not claim a new algorithm or a measured improvement.
 

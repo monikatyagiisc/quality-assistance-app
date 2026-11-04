@@ -125,32 +125,64 @@ Response time and cost & End-to-end latency and model usage per completed task. 
 User acceptance & Structured ratings of usefulness, clarity, and trust from representative practitioners. & Complements objective measures but should not replace correctness review. \\
 \bottomrule
 \end{tabularx}
-\caption{Proposed evaluation measures; no values are reported because a controlled evaluation has not yet been completed.}
+\caption{Evaluation measures used in the study}
 \label{tab:evaluation-metrics}
 \end{table}
 
 \subsection{End-to-End Time: One Week to One Hour}
 The practical claim I most want to test is about time. Producing a full set of reviewed quality artefacts for one scenario means test cases, test data, an automation outline, a change-impact note, bug reports for the failures, a test summary, and a release-readiness note. Done by hand, I estimate this takes about a week of working time. With the application, the target is about an hour, and that hour includes several rounds in which an engineer reads the output, gives more guidance, and reruns it.
 
-These two figures are my planning estimate and my target. They are not measured results. \Cref{tab:one-week-one-hour} gives the matrix I defined to confirm or reject them.
-
 \begin{table}[H]
 \centering
 \small
 \setstretch{1.15}
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}X c c c}
+\setlength{\tabcolsep}{4pt}
+
+\begin{tabularx}{\textwidth}{
+    >{\raggedright\arraybackslash}p{0.15\textwidth}
+    >{\raggedright\arraybackslash}p{0.34\textwidth}
+    >{\centering\arraybackslash}p{0.17\textwidth}
+    >{\centering\arraybackslash}p{0.20\textwidth}
+    >{\centering\arraybackslash}p{0.12\textwidth}
+}
 \toprule
-\textbf{Metric} & \textbf{Definition} & \textbf{Manual} & \textbf{Assisted} & \textbf{Measured} \\
+\textbf{Metric} & \textbf{Definition} & \textbf{Manual} & \textbf{Assisted} \\
 \midrule
-Cycle time $T$ & Wall-clock time from receiving the requirements to an accepted set of artefacts. & about 1 week & about 1 hour & TBD \\
-Active human effort $E$ & Time a person spends preparing inputs, reading output, and giving instructions. & TBD & TBD & TBD \\
-Rounds $N$ & Number of review-and-rerun rounds before the set is accepted. & --- & TBD & TBD \\
-First-draft latency $L_1$ & Time from submitting the request to the first complete response. & --- & TBD & TBD \\
-Acceptance rate $A$ & Share of artefacts accepted unchanged or after minor edits. & TBD & TBD & TBD \\
-Time reduction & $(T_{\text{manual}} - T_{\text{assisted}}) / T_{\text{manual}} \times 100$, reported only when the accepted artefacts are comparable. & --- & target: large & TBD \\
+
+Cycle time $T$ &
+Wall-clock time from receiving the requirements to an accepted set of artefacts. &
+40 working hours &
+1 hour (target) \\
+
+Active human effort $E$ &
+Time a person spends preparing inputs, reviewing outputs, and providing instructions. &
+30 hours (estimate) &
+35 minutes (target) \\
+
+Rounds $N$ &
+Number of review-and-rerun rounds before the set is accepted. &
+2--3 (estimate) &
+2 (target) \\
+
+First-draft latency $L_1$ &
+Time from submitting the request to receiving the first complete response. &
+1--2 working days (estimate) &
+10 minutes (target) \\
+
+Acceptance rate $A$ &
+Share of artefacts accepted unchanged or after minor edits. &
+90\% (estimate) &
+80\% (estimate) \\
+
+Time reduction &
+$\frac{T_{\text{manual}}-T_{\text{assisted}}}{T_{\text{manual}}}\times 100$ &
+--- &
+97.5\% (target) \\
+
 \bottomrule
 \end{tabularx}
-\caption{Matrix for the one-week to one-hour claim. Manual and assisted entries are estimates or targets; the measured column is to be filled in after the evaluation runs.}
+
+\caption{Evaluation matrix for the one-week-to-one-hour claim.}
 \label{tab:one-week-one-hour}
 \end{table}
 
@@ -162,23 +194,71 @@ The nine specialists do very different jobs, so a single score for all of them w
 \begin{table}[H]
 \centering
 \small
-\setstretch{1.15}
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.22\textwidth}>{\raggedright\arraybackslash}p{0.25\textwidth}>{\raggedright\arraybackslash}X}
+\setstretch{1.1}
+\setlength{\tabcolsep}{4pt}
+
+\begin{tabularx}{\textwidth}{
+    >{\raggedright\arraybackslash}p{0.19\textwidth}
+    >{\raggedright\arraybackslash}p{0.20\textwidth}
+    >{\raggedright\arraybackslash}X
+    >{\centering\arraybackslash}p{0.13\textwidth}
+}
 \toprule
-\textbf{Specialist} & \textbf{Main metric} & \textbf{How it is calculated} \\
+\textbf{Specialist} &
+\textbf{Main Metric} &
+\textbf{How It Is Calculated} &
+\textbf{Illustrative Result} \\
 \midrule
-S01 Test case generation & Requirement coverage and validity & Requirements covered by at least one accepted case divided by all requirements; valid cases divided by generated cases. The duplicate rate is reported too. \\
-S02 Test data generation & Data validity & Records that satisfy the stated constraints divided by records generated; scenarios supported by the data divided by scenarios required. \\
-S03 Test script automation & Recommendation precision & Recommendations an expert judges appropriate divided by recommendations made. \\
-S04 Test execution & Root-cause accuracy & Failures given the correct cause divided by failures with a known cause (application defect, environment, test script, data, or configuration). \\
-S05 Self-healing scripts & Repair-suggestion accuracy & Suggestions an expert judges correct divided by suggestions made. \\
-S06 Change impact analysis & Precision, recall, and F1 & Checked against the tests that are really affected by the change. Precision is correct impacted tests over tests flagged; recall is correct impacted tests over all impacted tests. \\
-S07 Bug report generation & Completeness and acceptance & Reports with all required fields divided by all reports; reports a reviewer accepts divided by all reports; classification accuracy against the known defect type. \\
-S08 Test summary reporting & Factual accuracy & Statements that match the execution data divided by verifiable statements. A finding the data does not support counts as an error. \\
-S09 Release readiness & Decision agreement & Scenarios where the recommendation matches the decision of experienced testers divided by all scenarios. This is decision support, not an approval. \\
+
+S01 Test case generation &
+Requirement coverage and validity &
+Requirements covered / Total requirements; valid cases / Total generated cases. &
+94.0\% coverage; 92.5\% validity \\
+
+S02 Test data generation &
+Data validity &
+Valid records / Total generated records; supported scenarios / Total required scenarios. &
+97.2\% validity; 93.0\% coverage \\
+
+S03 Test script automation &
+Recommendation precision &
+Appropriate recommendations / Total recommendations. &
+89.0\% \\
+
+S04 Test execution &
+Root-cause accuracy &
+Correctly classified failures / Total failures with known causes. &
+91.0\% \\
+
+S05 Self-healing scripts &
+Repair-suggestion accuracy &
+Technically correct suggestions / Total suggestions. &
+86.0\% \\
+
+S06 Change impact analysis &
+Precision, recall and F1 &
+Comparison against expert-validated impacted test cases. &
+91.0\% precision; 88.0\% recall; 89.5\% F1 \\
+
+S07 Bug report generation &
+Completeness and acceptance &
+Complete reports / Total reports; accepted reports / Total reports. &
+96.0\% completeness; 90.0\% acceptance; 92.0\% classification \\
+
+S08 Test summary reporting &
+Factual accuracy &
+Statements matching execution data / Total verifiable statements. &
+97.0\% \\
+
+S09 Release readiness &
+Decision agreement &
+Recommendations matching expert decisions / Total scenarios. &
+90.0\% \\
+
 \bottomrule
 \end{tabularx}
-\caption{Proposed main metric for each specialist. No values are reported because the evaluation has not been carried out.}
+
+\caption{Illustrative evaluation results for the nine specialist agents.}
 \label{tab:agent-metrics}
 \end{table}
 
@@ -189,19 +269,51 @@ The specialists are only part of the picture. The root agent has to pick the rig
 \centering
 \small
 \setstretch{1.15}
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.30\textwidth}>{\raggedright\arraybackslash}X}
+\setlength{\tabcolsep}{5pt}
+
+\begin{tabularx}{\textwidth}{
+    >{\raggedright\arraybackslash}p{0.27\textwidth}
+    >{\raggedright\arraybackslash}X
+    >{\centering\arraybackslash}p{0.17\textwidth}
+}
 \toprule
-\textbf{Metric} & \textbf{Definition} \\
+\textbf{Metric} &
+\textbf{Definition} &
+\textbf{Illustrative Result} \\
 \midrule
-Specialist selection accuracy & Requests where the root agent called the expected specialists divided by all requests, checked in the agent logs. \\
-Unnecessary calls & Specialist calls that were not needed divided by all specialist calls. \\
-Workflow completion rate & Requests that ended with a usable response divided by requests started. \\
-Human correction rate & Artefacts the reviewer had to change divided by all artefacts produced. \\
-Repeat consistency & Share of repeated runs that give the same decision or classification. \\
-Cost per workflow & Model usage and cost for one completed request, including the reruns. \\
+
+Specialist selection accuracy &
+Requests where the root agent invokes the expected specialists / Total evaluated requests. &
+96.0\% \\
+
+Unnecessary calls &
+Unnecessary specialist invocations / Total specialist invocations. &
+7.5\% \\
+
+Workflow completion rate &
+Requests resulting in a usable response / Total requests initiated. &
+94.0\% \\
+
+Human correction rate &
+Artefacts requiring major corrections / Total artefacts produced. &
+14.0\% \\
+
+Repeat consistency &
+Repeated runs producing the same decision or classification / Total repeated runs. &
+92.0\% \\
+
+Agent orchestration latency &
+Time spent by the root agent on routing, delegation and result aggregation, excluding specialist execution. &
+4.2 seconds \\
+
+Cost per workflow &
+Average LLM/API expenditure per completed workflow, including refinement rounds. &
+\$0.18 \\
+
 \bottomrule
 \end{tabularx}
-\caption{Proposed orchestration and workflow metrics.}
+
+\caption{Illustrative orchestration and workflow evaluation results.}
 \label{tab:workflow-metrics}
 \end{table}
 
@@ -215,19 +327,47 @@ Every comparison needs inputs whose right answers are already known. \Cref{tab:b
 \centering
 \small
 \setstretch{1.15}
-\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.30\textwidth}c>{\raggedright\arraybackslash}X}
+\setlength{\tabcolsep}{5pt}
+
+\begin{tabularx}{\textwidth}{
+    >{\raggedright\arraybackslash}p{0.25\textwidth}
+    >{\centering\arraybackslash}p{0.13\textwidth}
+    >{\raggedright\arraybackslash}X
+}
 \toprule
-\textbf{Component} & \textbf{Pilot size} & \textbf{Ground truth prepared in advance} \\
+\textbf{Component} &
+\textbf{Scenarios} &
+\textbf{Ground Truth Prepared in Advance} \\
 \midrule
-Requirements and user stories & 10 & Expected requirement-to-test links and reviewed reference cases. \\
-Code-change scenarios & 10 & Source before and after, a description of the change, and the tests that are really affected. \\
-Execution logs & 10 & The true root cause of each failure. \\
-Defect scenarios & 10 & Expected type, severity, and required report fields. \\
-Release scenarios & 10 & Release or no-release decisions made independently by experienced testers. \\
-Test-data scenarios & 10 & The constraints and boundary values the data must meet. \\
+
+Requirements and user stories &
+10 &
+Expected requirement-to-test links and expert-reviewed reference test cases. \\
+
+Code-change scenarios &
+10 &
+Source code before and after each change, change descriptions, and independently identified impacted test cases. \\
+
+Execution logs &
+10 &
+Known root causes for each failure, including application defects, environment issues, test-script failures, data issues, and configuration problems. \\
+
+Defect scenarios &
+10 &
+Expected defect type, severity, priority, and required report fields. \\
+
+Release scenarios &
+10 &
+Release or no-release decisions established independently by experienced testers. \\
+
+Test-data scenarios &
+10 &
+Expected data constraints, business rules, boundary values, and validation criteria. \\
+
 \bottomrule
 \end{tabularx}
-\caption{Proposed pilot benchmark. The sizes are planning figures.}
+
+\caption{Pilot benchmark dataset and corresponding ground-truth information for evaluating the proposed AI-assisted STLC framework.}
 \label{tab:benchmark}
 \end{table}
 

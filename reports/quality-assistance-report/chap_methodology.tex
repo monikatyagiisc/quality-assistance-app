@@ -24,18 +24,46 @@ Specialized analysis & Routes suitable requests to registered STLC agents for te
 User separation & Associates assistance requests with the authenticated user and persists request inputs and responses in PostgreSQL. \\
 Engineering context & Offers Jira Cloud story retrieval and GitHub pull-request or branch code-difference retrieval when configured. \\
 Operational configuration & Supports provider/model selection, containerized local startup, health checks, and production configuration checks. \\
+Human-in-the-loop refinement & Once a result is generated, the user can add instructions, optionally focus the rerun on a single specialist, and rerun in the same session, repeating this until the result is acceptable. \\
 \bottomrule
 \end{tabularx}
 \caption{Selected functional requirements and corresponding implemented behavior.}
 \label{tab:functional-requirements}
 \end{table}
 
-\section{Technology Stack}
-\Cref{tab:technology-stack} lists the technologies used in the prototype and the role each one plays.
+\section{Data and Inputs}
+The application does not train or fine-tune any model, so there is no training dataset to describe. The models are used as the provider supplies them, and every answer is produced from the context that comes with the request. \Cref{tab:inputs} lists what a request can carry.
 
 \begin{table}[htbp]
 \centering
 \small
+\setstretch{1.15}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.24\textwidth}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}p{0.17\textwidth}}
+\toprule
+\textbf{Input} & \textbf{Where it comes from} & \textbf{Size limit} \\
+\midrule
+Requirements (required) & Typed or pasted by the user. Test-run logs and notes are also pasted here. & 20,000 characters \\
+User stories (optional) & Typed, or imported from Jira Cloud issues assigned to the user. & 20,000 characters \\
+Code differences (optional) & A pasted git difference, or fetched from a GitHub pull request or branch comparison. & 50,000 characters \\
+Review guidance (optional) & Instructions the user types to refine an earlier result. & 5,000 characters \\
+Target specialist (optional) & One of the nine specialists, chosen by the user. & not applicable \\
+Session identifier & Returned by the agent service and reused for follow-up turns. & not applicable \\
+\bottomrule
+\end{tabularx}
+\caption{Inputs to an assistance request. The combined text is limited to 70,000 characters.}
+\label{tab:inputs}
+\end{table}
+
+Preprocessing is kept light on purpose. The backend trims the text, drops empty optional fields, rejects control characters, applies the size limits, and runs a keyword check that turns away submissions with no software or testing context. It then builds one message with sections for the requirements, user stories, code differences, and any review guidance. That is followed either by the specialist the user asked for or by a request for prioritised test cases, test data, automation notes, and release risks. There is no chunking, embedding, or retrieval step.
+
+\clearpage
+\section{Technology Stack}
+\Cref{tab:technology-stack} lists the technologies used in the prototype and the role each one plays.
+
+\begin{table}[H]
+\centering
+\small
+\setstretch{1.15}
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.23\textwidth}>{\raggedright\arraybackslash}p{0.27\textwidth}>{\raggedright\arraybackslash}X}
 \toprule
 \textbf{Layer} & \textbf{Technology} & \textbf{Role} \\
@@ -63,34 +91,7 @@ Configuration & Environment variables (\texttt{.env}) & Provider selection, cred
 \section{System Architecture}
 There are four pieces: the browser UI, the API, the database, and the agent process. The React and TypeScript frontend calls the FastAPI backend. After the user is authenticated, the backend stores the request, builds the agent message, and later stores the reply. A separate service runs the root agent and the specialists through Google ADK. PostgreSQL holds users, requests, and the integration records.
 
-\begin{figure}[htbp]
-\centering
-\resizebox{0.98\textwidth}{!}{%
-\begin{tikzpicture}[
-  component/.style={draw,rounded corners,align=center,minimum width=3.0cm,minimum height=1.05cm,fill=gray!10},
-  external/.style={draw,rounded corners,align=center,minimum width=2.7cm,minimum height=0.9cm,fill=blue!7},
-  arrow/.style={-{Stealth[length=2.4mm]},thick},
-  elabel/.style={font=\footnotesize,align=center,above=2pt,inner sep=1pt}
-]
-\node[component] (browser) {User\\Browser};
-\node[component,right=1.5cm of browser] (frontend) {React + TypeScript\\Web application};
-\node[component,right=3.4cm of frontend] (backend) {FastAPI backend\\Auth, API, orchestration};
-\node[component,below=1.3cm of backend] (db) {PostgreSQL\\Requests and connections};
-\node[component,right=3.0cm of backend] (agent) {ADK agent service\\Root + STLC specialists};
-\node[external,right=1.5cm of agent] (models) {Configured model\\Gemini, LiteLLM,\\Bedrock, Ollama};
-\node[external,below=1.3cm of agent] (integrations) {Optional context\\Jira Cloud / GitHub};
-\draw[arrow] (browser) -- (frontend);
-\draw[arrow] (frontend) -- node[elabel]{HTTPS / REST\\JWT-authenticated} (backend);
-\draw[arrow] (backend) -- (db);
-\draw[arrow] (backend) -- node[elabel]{agent\\request} (agent);
-\draw[arrow] (agent) -- (models);
-\draw[arrow] (backend) -- (integrations);
-\end{tikzpicture}}
-\caption{Logical application architecture. Optional external integrations and model providers are enabled by configuration.}
-\label{fig:system-architecture}
-\end{figure}
-
-Figure~\ref{fig:system-architecture} matches what is in the code repository \cite{qaapprepo}. Figure~\ref{fig:system-architecture-deployment} describes the high-level design of the web application on AWS.
+Figure~\ref{fig:system-architecture-deployment} describes the high-level design of the web application on AWS.
 
 \begin{figure}[H]
 \centering
@@ -100,7 +101,7 @@ Figure~\ref{fig:system-architecture} matches what is in the code repository \cit
 \end{figure}
 
 \subsection{Frontend}
-The UI has login, a dashboard for requests, a settings page, and a short user guide. On the dashboard the user can type requirements and stories, paste a change, or start from the samples I added: smoke planning, an end-to-end example, change impact, execution and reporting, automation, and a follow-up. If Jira is connected, assigned issues can fill the story field. If GitHub is connected, a pull-request or compare code difference can be fetched. The reply is rendered in the browser. It can also be downloaded as Markdown or HTML.
+The UI has login, a dashboard for requests, a settings page, and a short user guide. On the dashboard the user can type requirements and stories, paste a change, or start from the samples I added: smoke planning, an end-to-end example, change impact, execution and reporting, automation, and a follow-up. If Jira is connected, assigned issues can fill the story field. If GitHub is connected, a pull-request or compare code difference can be fetched. The reply is rendered in the browser. It can also be downloaded as Markdown or HTML. Under each result there is a refine-and-rerun panel, where the user can type further instructions, pick one specialist to focus on, and run the request again in the same session.
 
 \subsection{Backend and Persistence}
 The backend is FastAPI, with asynchronous SQLAlchemy on PostgreSQL \cite{fastapidocs}. \texttt{/api/assist} needs a logged-in user. The request is stored with owner, source text, session id, status, timestamps, and later the response. Then the backend builds a structured message and calls the agent service. Both success and failure are written back. Errors go to the frontend on the normal error path.
@@ -108,7 +109,15 @@ The backend is FastAPI, with asynchronous SQLAlchemy on PostgreSQL \cite{fastapi
 Users, assistance requests, Jira connections, and GitHub repository connections are separate tables. That is enough to open an old submission. It is not enough if you expect the agent conversation to survive a restart. The ADK runner I used keeps session state in memory.
 
 \subsection{Agent Orchestration}
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.72\textwidth,height=0.45\textheight,keepaspectratio]{agentic_flow.jpg}
+\caption{Illustrative agentic workflow showing orchestration among the root agent and specialist agents.}
+\label{fig:agentic-flow}
+\end{figure}
+
 The root agent is \texttt{quality\_assistance\_agent}. I built it with Google ADK, the configured model, logging callbacks, and the tools available at start-up \cite{googleadk}. On the supported cloud providers the root agent can pass work to the registered sub-agents. The backend prompt asks for prioritized cases, suggested data, automation notes, and release risks, using the requirements, stories, and code differences that came in.
+
 
 \begin{table}[htbp]
 \centering
@@ -134,18 +143,14 @@ S09 & Release readiness evaluation & Weighs supplied test and risk signals and p
 
 Requirement and story text go to the test-case and test-data agents. Code differences go to change impact analysis. Execution logs go to execution, defect, and summary. Release questions go to readiness. The root agent also has a small requirement-summarization tool. All of this is prompt routing. There is no second engine underneath it that would force the same path every time.
 
-\begin{figure}[H]
-\centering
-\includegraphics[width=0.72\textwidth,height=0.45\textheight,keepaspectratio]{agentic_flow.jpg}
-\caption{Illustrative agentic workflow showing orchestration among the root agent and specialist agents.}
-\label{fig:agentic-flow}
-\end{figure}
-
+\clearpage
+\subsection{Assistance Request Processing}
 The steps for processing an assistance request are:
+\begingroup\setstretch{1.15}
 \begin{enumerate}
   \item Validate the request and associate it with the authenticated user.
   \item Persist the request inputs (requirements, optional stories, and code differences) with status \texttt{processing}.
-  \item Construct a message from the requirements, stories, and code differences.
+  \item Construct a message from the requirements, stories, and code differences, adding any review guidance or the specialist the user chose.
   \item Resolve or create an agent session for the user.
   \item Invoke the root agent with the message and session.
   \item Route to one or more specialists according to the request context.
@@ -153,13 +158,17 @@ The steps for processing an assistance request are:
   \item If the agent call succeeds, persist the session identifier, response, and status \texttt{completed}; otherwise persist the failure status and return an explicit service error.
   \item Return the request identifier, session, response, and status.
 \end{enumerate}
+\endgroup
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.92\textwidth,height=0.48\textheight,keepaspectratio]{sequence_daigram.png}
+\includegraphics[width=0.92\textwidth,height=0.40\textheight,keepaspectratio]{sequence_daigram.png}
 \caption{Sample sequence of requests via the application services.}
 \label{fig:request-sequence}
 \end{figure}
+
+\subsection{Human-in-the-Loop Refinement}
+I designed the application to treat every response as a draft. After a result comes back, the engineer reads it and can add more input or instructions, for example to add negative cases, shorten a verdict, or change how a table is laid out. The backend appends those instructions to the original context as a review section. If the user picks a specialist, the request is limited to that one agent. The session identifier is reused, so the agent still has the earlier turns in front of it. This cycle of generate, review, instruct, and rerun can be repeated as often as needed, and every decision to accept a result stays with the engineer.
 
 \subsection{External Integrations and Model Providers}
 Jira Cloud is OAuth 2.0, a short-lived state record, and Jira APIs to list assigned issues and fetch detail. GitHub settings store a repository and an encrypted personal access token. From there the backend can pull pull-request code differences or compare two references. Microsoft Entra SSO is optional. The agent service can also act as a Model Context Protocol (MCP) client and attach optional Jira and GitHub tools from an MCP server, when one is configured \cite{mcpdocs}. The import flow described above does not use MCP. The agent side can use Gemini, LiteLLM, Amazon Bedrock, or Ollama if the credentials and models are there. I put those options in so the same code can run in more than one place. I did not benchmark every provider on the same tasks.

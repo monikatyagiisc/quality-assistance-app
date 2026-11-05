@@ -6,15 +6,49 @@ Software testing is an important part of software development. It involves a ser
 
 In practice, the Software Testing Life Cycle (STLC) does not always follow a fixed sequence of steps. The outcome of one activity can influence what happens next. For example, testing may reveal gaps or unclear points in the requirements, while identifying a defect may require additional regression test cases. Similarly, changes in the source code can affect which parts of the application need to be tested again. Because of these dependencies, an effective system should be able to retain information from earlier stages and use it when supporting later activities. Rather than generating separate outputs for each testing task, an AI-assisted system should help maintain the connection between different stages and make it easier for engineers to understand how one activity relates to another.
 
+\section{Existing Practices and Tools}
+In most teams each STLC activity has its own tool, and people carry the information from one tool to the next. \Cref{tab:existing-practices} lists some examples. It is only a sample of what is out there, not a feature-by-feature comparison, and it does not say that any tool lacks a capability.
+
+\begin{table}[htbp]
+\centering
+\small
+\setstretch{1.15}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.27\textwidth}>{\raggedright\arraybackslash}X}
+\toprule
+\textbf{STLC activity} & \textbf{Example tools} & \textbf{What the tool offers} \\
+\midrule
+Requirements, stories, defects & Jira, Azure DevOps & Tracking of requirements, user stories, and defects. \\
+Test design & Katalon, testRigor, Diffblue & Katalon drafts test cases from a requirement, a Jira ticket, or a prompt and leaves them for the tester to review \cite{katalon2026}; testRigor lets teams write tests in plain English \cite{testrigor2026}; Diffblue creates unit tests automatically \cite{diffblue2026}. \\
+Test data & Tonic.ai & Synthetic and de-identified data for testing \cite{tonic2026}. \\
+Automation and execution & Selenium, Playwright, Cypress, Appium, mabl & Scripted browser and mobile automation; mabl uses agents to create, run, analyse, and maintain tests \cite{mabl2026}. \\
+Test maintenance & Katalon, Applitools & Self-healing tests and visual checks \cite{katalon2026,applitools2026}. \\
+Test management and reporting & TestRail, Zephyr, Xray, Katalon & Test-case management; Katalon keeps requirements, test cases, evidence, defects, and releases in one record \cite{katalon2026}. \\
+\bottomrule
+\end{tabularx}
+\caption{Examples of existing tools by STLC activity.}
+\label{tab:existing-practices}
+\end{table}
+
+Many of these products now have AI features, connect to trackers such as Jira, and keep a person in the review step. They are still mostly organised around one activity or one product, and the public descriptions do not show how context travels from requirements, through code changes and test results, to a release decision. Teams also use general-purpose AI assistants, usually in an ad hoc way, for example to draft a test case or to explain a failure.
+
+In my organisation also, test design, automation, and release reporting are handled through a combination of Jira for tracking requirements and defects, and automation scripts for test automation. The process involves drafting test cases from requirements, executing them, and reviewing the results before making release decisions. This workflow is largely manual, with team members responsible for ensuring that tests align with business requirements and that any issues are properly documented and addressed.
+
 \section{LLMs in Software Quality Engineering}
 LLMs can read a story and write scenarios. They can suggest data, classify a failure, or summarise a run. That is why people reach for them: the jobs are repetitive and mostly text. Reliability is a different matter. A model may ignore a constraint, invent a step, or write as if it is sure when the input is thin.
 
 Amershi et al.\ make a similar point for machine learning in software teams: the workflow has to stay with people, ownership has to be clear, data quality has to be watched, and the system has to be monitored after it ships \cite{amershi2019}. I treated that as something I had to design for. In this assistant the model output is a draft. A tester should be able to check the assumptions, edit the cases, and drop a recommendation that is not supported, before it goes into a plan or a release discussion.
 
+\section{Related Work on AI-Assisted Software Testing}
+A few recent surveys give a good picture of where AI in testing stands. Wang et al.\ went through 102 studies on LLMs in testing and found that preparing test cases and repairing programs are the tasks people tackle most. They also look at which models and prompting styles are used \cite{wang2024testingllm}. Faraji and Pombo take a tool-oriented view of AI-driven test automation, covering techniques, tools, and open challenges \cite{faraji2025aitestautomation}. Further back, Fontes and Gay mapped 124 publications on machine learning for test generation. The problems they list, such as training data, scalability, evaluation, and repeatability, are worth keeping in mind for LLM-based work too \cite{fontes2023mltestgen}.
+
+For test design from requirements, Hasan et al.\ built a dataset that pairs use cases with high-level test cases and tried GPT-4o, Gemini, LLaMA 3.1 8B, and Mistral 7B. Fine-tuning helped the two smaller models, and the people who rated the generated cases were positive about them. In their survey of practitioners, the hard part was rarely writing scripts. It was keeping the testing in line with the business requirements \cite{hasan2025highlevel}. That is why the test-case specialist in this work starts from requirements and user stories.
+
+On the architecture side, Lahami and Krichen review how GenAI-based testing systems are put together \cite{lahami2026genaitesting}, which is the closest work to the multi-agent design used here. Most of the studies above look at one task at a time, test generation above all. What this report adds is not a better generator. It is a way to connect several STLC activities in one application, with a person reviewing the output.
+
 \section{Agent-Orchestrated Workflows}
 The usual agent pattern is a set of specialists and a coordinator that decides who to call. ReAct is one way of mixing reasoning with actions. Broader surveys talk about planning, tools, memory, and how agents are coordinated \cite{yao2023react,wang2023agents}. Splitting the work made prompts easier for me to maintain. It did not make the answers correct. More calls also mean more latency and more cost, and the coordinator can pick the wrong specialist or call too many of them.
 
-My prototype has a root agent and a registry of STLC specialists. Routing depends on the request and the files or text attached to it. When I read the code for this report, that routing was still mostly the instructions plus whatever the model generated. The split helped me implement the thing. It is not a workflow engine, and nobody has verified it formally. The next hardening I would do is schemas between stages, some validation, and a place where a person has to approve.
+My prototype has a root agent and a registry of STLC specialists. Routing depends on the request and the files or text attached to it. When I read the code for this report, that routing was still mostly the instructions plus whatever the model generated. The split helped me implement the thing. It is not a workflow engine, and nobody has verified it formally. The next step I identified is schemas between stages, some validation, and a place where a person has to approve.
 
 \section{Grounding, Traceability, and Human Review}
 Retrieval-Augmented Generation (RAG) is the usual answer when a model needs facts it should not invent. Lewis et al.\ retrieve documents and then generate from them \cite{lewis2020rag}. In testing that would mean using approved requirements, policies, API specs, or old defects, instead of only the pasted prompt. Right now the prototype uses what the user attached, and whatever is still sitting in the in-memory session.
@@ -22,6 +56,18 @@ Retrieval-Augmented Generation (RAG) is the usual answer when a model needs fact
 Even with retrieval, an evaluation has to tell two things apart: whether a case can be traced to a requirement, and whether the case is actually right. People still have to catch gaps and unsupported claims. If the output could affect a release, the evidence should stay on screen, uncertainty should be visible, and someone should have to accept it.
 
 \section{Evaluation of AI-Assisted Testing}
-If I were running the study now, I would want a baseline, inputs that look like real tickets, a frozen model and prompt, and scores that can be repeated. The measures I care about are requirement-to-test links, scenario coverage, human-rated accuracy, time on the same tasks, defect classification where labels exist, and end-to-end latency. They are not interchangeable. A longer list of cases is not better coverage. A faster first draft is not less work if review and correction take the time back.
+When I designed the evaluation, I wanted a baseline, inputs that look like real tickets, a frozen model and prompt, and scores that can be repeated. The measures I chose are requirement-to-test links, scenario coverage, human-rated accuracy, time on the same tasks, defect classification where labels exist, and end-to-end latency. They are not interchangeable. A longer list of cases is not better coverage. A faster first draft is not less work if review and correction take the time back.
 
 NIST's AI Risk Management Framework organises this around governance, mapping, measurement, and management \cite{nistairmf}. For me that meant: record the model and config versions, write down how a reviewer should score an artifact, keep suggestions separate from verified results, and treat privacy and operational risk as part of the evaluation, not something to add later.
+
+\section{Research Gaps}
+Looking at the practices and tools above, I found several possible gaps. They are questions to investigate, not proven absences.
+\begin{itemize}
+  \item \textbf{Fragmented lifecycle.} Tools tend to specialise in one activity, so the same requirement, change, or failure can end up being re-entered and re-interpreted at each stage.
+  \item \textbf{Context across phases.} The public tool descriptions do not make clear how context is shared between requirements, test design, code changes, execution, and release assessment.
+  \item \textbf{Change-aware testing.} A code change can mean that existing tests need another look, and this is not always tied to test design and release decisions.
+  \item \textbf{Joined-up reporting.} Information sits in separate outputs, so a single summary and release view still takes manual effort.
+  \item \textbf{Human oversight.} AI-generated artefacts need review, and the review loop should be part of the workflow and not an afterthought.
+  \item \textbf{Thin evidence.} There is little measured evidence on effort and quality when AI help is applied across the whole STLC with human review. The surveys also point to open problems in evaluation and benchmarks \cite{fontes2023mltestgen}.
+\end{itemize}
+This work responds to the first five with one orchestrated application, specialised agents, and a refine-and-rerun step for the engineer. For the sixth it sets out an evaluation protocol. It does not claim that no other platform offers a similar workflow, and it does not claim better results than existing tools, because that comparison has not been done yet (\Cref{chap:experiments_and_results}).

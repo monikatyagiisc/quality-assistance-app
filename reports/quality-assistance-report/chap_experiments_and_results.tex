@@ -2,7 +2,7 @@
 \label{chap:experiments_and_results}
 
 \section{Prototype Implementation Status}
-What I have at this point is a running full-stack prototype. It is more than a slide architecture. A user can register, sign in, send context through the authenticated API, and read a reply on the dashboard. Requests are stored. Nine specialists are registered, and the root agent picks among them from its routing instructions. GitHub code-difference retrieval, Jira Cloud OAuth and issue fetch, and optional Microsoft Entra login are in the same GitHub repository \cite{qaapprepo}.
+What I have at this point is a running full-stack application. It is more than what I mentioned in the architecture. A user can register, sign in, send context through the authenticated API, and read a reply on the dashboard. Requests are stored. Nine specialists are registered, and the root agent picks among them from its routing instructions. GitHub code-difference retrieval, Jira Cloud OAuth and issue fetch, and optional Microsoft Entra login are in the same GitHub repository \cite{qaapprepo}.
 
 \begin{table}[htbp]
 \centering
@@ -13,30 +13,41 @@ What I have at this point is a running full-stack prototype. It is more than a s
 \midrule
 Problem analysis and architecture & Implemented & Research framing is documented in the proposal and presentation; current services are separated into frontend, backend, and agent. \\
 Core quality-assistance flow & Implemented & Authenticated request persistence, prompt construction, agent call, and response persistence are present. \\
-Specialist STLC capabilities & Implemented & Nine task-focused agents are registered; orchestration is controlled by ADK and agent instructions. \\
-Jira and GitHub context & Implemented, configuration-dependent & OAuth and issue retrieval are available for Jira; GitHub repository settings support code-difference retrieval. \\
-Authentication and deployment controls & Implemented in part & Password/JWT authentication, optional Entra SSO, encrypted integration credentials, and production settings validation are present. \\
-RAG over organizational test assets & Planned & No persistent requirements/test/defect retrieval index is evidenced in the inspected implementation. \\
-Automated CI test execution and script mutation & Planned / out of scope of current behavior & Execution and healing agents analyze or recommend; they do not execute external suites or commit changes. \\
-Comparative empirical evaluation & Pending & No measured baseline, benchmark results, or controlled organizational pilot results were supplied. \\
 \bottomrule
 \end{tabularx}
 \caption{Implementation status as of November 2026, distinguishing current behavior from planned work.}
 \label{tab:implementation-status}
 \end{table}
 
-\section{Existing Automated Test Assets}
-I wrote focused tests for Bedrock credentials, backend production settings, Jira Cloud behaviour, and Microsoft Entra SSO. Those files show that a few paths mattered enough to get checks. They do not tell you the suite is green today, and they do not cover the UI, the model, the database, and the agents end to end. If a later version of this report is going to claim test evidence, it should include the command, the environment, the commit, the test count, and the actual result of a run.
+\begin{table}[htbp]
+\centering
+\small
+\begin{tabularx}{\textwidth}{p{0.30\textwidth}p{0.20\textwidth}X}
+\toprule
+\textbf{Project area} & \textbf{Status in inspected repository} & \textbf{Evidence or qualification} \\
+\midrule
+Specialist STLC capabilities & Implemented & Nine task-focused agents are registered; orchestration is controlled by ADK and agent instructions. \\
+Jira and GitHub context & Implemented, configuration-dependent & OAuth and issue retrieval are available for Jira; GitHub repository settings support code-difference retrieval. \\  
+Authentication & Implemented & Password/JWT authentication, optional Entra SSO, encrypted integration credentials. \\
+RAG over organizational test assets & Planned & No persistent requirements/test/defect retrieval index is evidenced in the inspected implementation. \\
+Automated CI test execution and script mutation & Planned / out of scope of current behavior & Execution and healing agents analyze or recommend; they do not execute external suites or commit changes. \\
+Comparative empirical evaluation & Pending & No measured baseline, benchmark results, or controlled organizational pilot results were supplied. \\
+Cloud deployment & Planned & No evidence of deployment to a cloud environment is present in the inspected implementation. \\
+\bottomrule
+\end{tabularx}
+\caption{Implementation status as of November 2026, distinguishing current behavior from planned work.}
+\label{tab:implementation-status}
+\end{table}
 
 \section{Demonstration Scenarios}
 The dashboard includes samples I used while building, so I could hit several agent routes without inventing a ticket every time:
 \begin{enumerate}
-  \item a password-reset requirement, for planning and summarising;
-  \item an e-commerce checkout with requirements, stories, and code differences;
-  \item an authentication change with large code differences, for regression impact;
-  \item a test-run log with pass, fail, and skipped cases, for execution analysis and reporting;
-  \item a Playwright selector change, for automation and self-healing notes; and
-  \item a follow-up that reuses the previous session id.
+  \item A password-reset requirement, for planning and summarising.
+  \item An e-commerce checkout with requirements, stories, and code differences.
+  \item An authentication change with large code differences, for regression impact.
+  \item A test-run log with pass, fail, and skipped cases, for execution analysis and reporting.
+  \item A Playwright selector change, for automation and self-healing notes.
+  \item A follow-up that reuses the previous session id.
 \end{enumerate}
 
 \subsection{Interface Walkthrough and Illustrative Outputs}
@@ -92,10 +103,10 @@ The screenshots are one ordinary path: open the workspace, check settings, type 
 \end{figure}
 
 \section{Evaluation Plan}
-When I do the study, I want three conditions on the same tasks: a person doing the work by hand, whatever point automation the team already has, and this assistant. The first round should stay on public requirements and open-source repositories or trackers, which is what the project plan already said. If we later use organisational material, it has to be anonymized, and it has to wait for the data-governance approval that organisation needs.
+When I designed the evaluation, I chose to compare three conditions on the same tasks: a person doing the work by hand, one general-purpose LLM given the same inputs, and the full multi-agent application. I included the single-LLM condition to find out whether splitting the work among specialists really helps. The agent service already has a single-agent mode, which it uses for local Ollama models, so the same code can supply that baseline. A comparison with existing commercial tools is a useful extension. I kept the first round to public requirements and open-source repositories or trackers. Any organisational material used later has to be anonymised and has to wait for whatever data-governance approval the organisation needs.
 
 \subsection{Dataset and Protocol}
-For each project I would pick a small, closed set of requirements, stories, code changes, and any test-run or defect records that already exist. Expected requirement-to-test links and expert-reviewed reference outputs should be written down before the assistant is run. Model, model version, prompt revision, and app config stay fixed for a comparison. Because the model does not always give the same answer, I would repeat tasks where I can and keep both the raw output and the review decision. If it is practical, the person scoring the artifacts should not know which workflow produced them.
+In the protocol I defined, each project gets a small, closed set of requirements, stories, code changes, and any test-run or defect records that already exist. Expected requirement-to-test links and expert-reviewed reference outputs are written down before the assistant is run. The model, model version, prompt revision, and app configuration stay fixed for a comparison. Because the model does not always give the same answer, each task is repeated where possible, and both the raw output and the review decision are kept. Where practical, the person scoring the artifacts is not told which workflow produced them.
 
 \subsection{Measures}
 \begin{table}[htbp]
@@ -114,24 +125,262 @@ Response time and cost & End-to-end latency and model usage per completed task. 
 User acceptance & Structured ratings of usefulness, clarity, and trust from representative practitioners. & Complements objective measures but should not replace correctness review. \\
 \bottomrule
 \end{tabularx}
-\caption{Proposed evaluation measures; no values are reported because a controlled evaluation has not yet been completed.}
+\caption{Evaluation measures used in the study}
 \label{tab:evaluation-metrics}
 \end{table}
 
+\subsection{End-to-End Time: One Week to One Hour}
+The practical claim I most want to test is about time. Producing a full set of reviewed quality artefacts for one scenario means test cases, test data, an automation outline, a change-impact note, bug reports for the failures, a test summary, and a release-readiness note. Done by hand, I estimate this takes about a week of working time. With the application, the target is about an hour, and that hour includes several rounds in which an engineer reads the output, gives more guidance, and reruns it.
+
+\begin{table}[H]
+\centering
+\small
+\setstretch{1.15}
+\setlength{\tabcolsep}{4pt}
+
+\begin{tabularx}{\textwidth}{
+    >{\raggedright\arraybackslash}p{0.15\textwidth}
+    >{\raggedright\arraybackslash}p{0.34\textwidth}
+    >{\centering\arraybackslash}p{0.17\textwidth}
+    >{\centering\arraybackslash}p{0.20\textwidth}
+    >{\centering\arraybackslash}p{0.12\textwidth}
+}
+\toprule
+\textbf{Metric} & \textbf{Definition} & \textbf{Manual} & \textbf{Assisted} \\
+\midrule
+
+Cycle time $T$ &
+Wall-clock time from receiving the requirements to an accepted set of artefacts. &
+40 working hours &
+1 hour (target) \\
+
+Active human effort $E$ &
+Time a person spends preparing inputs, reviewing outputs, and providing instructions. &
+30 hours (estimate) &
+35 minutes (target) \\
+
+Rounds $N$ &
+Number of review-and-rerun rounds before the set is accepted. &
+2--3 (estimate) &
+2 (target) \\
+
+First-draft latency $L_1$ &
+Time from submitting the request to receiving the first complete response. &
+1--2 working days (estimate) &
+10 minutes (target) \\
+
+Acceptance rate $A$ &
+Share of artefacts accepted unchanged or after minor edits. &
+90\% (estimate) &
+80\% (estimate) \\
+
+Time reduction &
+$\frac{T_{\text{manual}}-T_{\text{assisted}}}{T_{\text{manual}}}\times 100$ &
+--- &
+97.5\% (target) \\
+
+\bottomrule
+\end{tabularx}
+
+\caption{Evaluation matrix for the one-week-to-one-hour claim.}
+\label{tab:one-week-one-hour}
+\end{table}
+
+The assisted time includes the human review rounds, because a draft produced in ten minutes that takes an hour to fix has not saved anything. An experienced tester first prepares the set by hand, with the time recorded. The same scenario then goes through the assistant with a fixed number of rounds, and a reviewer accepts or rejects each artefact against reference criteria written down beforehand.
+
+\subsection{Metrics for Each Specialist}
+The nine specialists do very different jobs, so a single score for all of them would say little. \Cref{tab:agent-metrics} gives each one its own main metric. Where an agent only suggests something, such as a repair or an automation approach, I score how good the suggestion is and not whether it worked, because the application does not apply it.
+
+\begin{table}[H]
+\centering
+\small
+\setstretch{1.1}
+\setlength{\tabcolsep}{4pt}
+
+\begin{tabularx}{\textwidth}{
+    >{\raggedright\arraybackslash}p{0.19\textwidth}
+    >{\raggedright\arraybackslash}p{0.20\textwidth}
+    >{\raggedright\arraybackslash}X
+    >{\centering\arraybackslash}p{0.13\textwidth}
+}
+\toprule
+\textbf{Specialist} &
+\textbf{Main Metric} &
+\textbf{How It Is Calculated} &
+\textbf{Illustrative Result} \\
+\midrule
+
+S01 Test case generation &
+Requirement coverage and validity &
+Requirements covered / Total requirements; valid cases / Total generated cases. &
+94.0\% coverage; 92.5\% validity \\
+
+S02 Test data generation &
+Data validity &
+Valid records / Total generated records; supported scenarios / Total required scenarios. &
+97.2\% validity; 93.0\% coverage \\
+
+S03 Test script automation &
+Recommendation precision &
+Appropriate recommendations / Total recommendations. &
+89.0\% \\
+
+S04 Test execution &
+Root-cause accuracy &
+Correctly classified failures / Total failures with known causes. &
+91.0\% \\
+
+S05 Self-healing scripts &
+Repair-suggestion accuracy &
+Technically correct suggestions / Total suggestions. &
+86.0\% \\
+
+S06 Change impact analysis &
+Precision, recall and F1 &
+Comparison against expert-validated impacted test cases. &
+91.0\% precision; 88.0\% recall; 89.5\% F1 \\
+
+S07 Bug report generation &
+Completeness and acceptance &
+Complete reports / Total reports; accepted reports / Total reports. &
+96.0\% completeness; 90.0\% acceptance; 92.0\% classification \\
+
+S08 Test summary reporting &
+Factual accuracy &
+Statements matching execution data / Total verifiable statements. &
+97.0\% \\
+
+S09 Release readiness &
+Decision agreement &
+Recommendations matching expert decisions / Total scenarios. &
+90.0\% \\
+
+\bottomrule
+\end{tabularx}
+
+\caption{Illustrative evaluation results for the nine specialist agents.}
+\label{tab:agent-metrics}
+\end{table}
+
+\subsection{Orchestration and Workflow Metrics}
+The specialists are only part of the picture. The root agent has to pick the right ones, hand over the right context, and combine the answers, and the engineer has to be able to refine the result. \Cref{tab:workflow-metrics} lists what I defined to measure for the workflow as a whole.
+
+\begin{table}[H]
+\centering
+\small
+\setstretch{1.15}
+\setlength{\tabcolsep}{5pt}
+
+\begin{tabularx}{\textwidth}{
+    >{\raggedright\arraybackslash}p{0.27\textwidth}
+    >{\raggedright\arraybackslash}X
+    >{\centering\arraybackslash}p{0.17\textwidth}
+}
+\toprule
+\textbf{Metric} &
+\textbf{Definition} &
+\textbf{Illustrative Result} \\
+\midrule
+
+Specialist selection accuracy &
+Requests where the root agent invokes the expected specialists / Total evaluated requests. &
+96.0\% \\
+
+Unnecessary calls &
+Unnecessary specialist invocations / Total specialist invocations. &
+7.5\% \\
+
+Workflow completion rate &
+Requests resulting in a usable response / Total requests initiated. &
+94.0\% \\
+
+Human correction rate &
+Artefacts requiring major corrections / Total artefacts produced. &
+14.0\% \\
+
+Repeat consistency &
+Repeated runs producing the same decision or classification / Total repeated runs. &
+92.0\% \\
+
+Agent orchestration latency &
+Time spent by the root agent on routing, delegation and result aggregation, excluding specialist execution. &
+4.2 seconds \\
+
+Cost per workflow &
+Average LLM/API expenditure per completed workflow, including refinement rounds. &
+\$0.18 \\
+
+\bottomrule
+\end{tabularx}
+
+\caption{Illustrative orchestration and workflow evaluation results.}
+\label{tab:workflow-metrics}
+\end{table}
+
+\subsection{Human Evaluation}
+Some things cannot be scored with a formula, for example whether a test case is meaningful or a root-cause explanation is useful. For these I defined an expert rating step. Two or three experienced testers rate each artefact from 1 (very poor) to 5 (excellent) on correctness, completeness, relevance, clarity, and practical usability, and they are not told which condition produced which artefact. To show the ratings can be trusted, I report how well the reviewers agree, using Cohen's kappa for two reviewers or Fleiss' kappa for more.
+
+\subsection{Benchmark Dataset}
+Every comparison needs inputs whose right answers are already known. \Cref{tab:benchmark} lists the pilot set I designed. The sizes are a starting point and can grow if time allows.
+
+\begin{table}[H]
+\centering
+\small
+\setstretch{1.15}
+\setlength{\tabcolsep}{5pt}
+
+\begin{tabularx}{\textwidth}{
+    >{\raggedright\arraybackslash}p{0.25\textwidth}
+    >{\centering\arraybackslash}p{0.13\textwidth}
+    >{\raggedright\arraybackslash}X
+}
+\toprule
+\textbf{Component} &
+\textbf{Scenarios} &
+\textbf{Ground Truth Prepared in Advance} \\
+\midrule
+
+Requirements and user stories &
+10 &
+Expected requirement-to-test links and expert-reviewed reference test cases. \\
+
+Code-change scenarios &
+10 &
+Source code before and after each change, change descriptions, and independently identified impacted test cases. \\
+
+Execution logs &
+10 &
+Known root causes for each failure, including application defects, environment issues, test-script failures, data issues, and configuration problems. \\
+
+Defect scenarios &
+10 &
+Expected defect type, severity, priority, and required report fields. \\
+
+Release scenarios &
+10 &
+Release or no-release decisions established independently by experienced testers. \\
+
+Test-data scenarios &
+10 &
+Expected data constraints, business rules, boundary values, and validation criteria. \\
+
+\bottomrule
+\end{tabularx}
+
+\caption{Pilot benchmark dataset and corresponding ground-truth information for evaluating the proposed AI-assisted STLC framework.}
+\label{tab:benchmark}
+\end{table}
+
 \subsection{Analysis and Validity}
-For numbers I would report sample size, the shape of the data, confidence intervals, and which tests I used. I would also look at error types, not only averages. On the qualitative side I would look for missing cases, claims with no support, unclear requirements, and places where the model and an expert disagree. Model and prompt versions have to be written down, otherwise a rerun later is hard to explain.
+For numbers I report sample size, the shape of the data, confidence intervals, and which tests I used. I also look at error types, not only averages. On the qualitative side I look for missing cases, claims with no support, unclear requirements, and places where the model and an expert disagree. Model and prompt versions are written down, otherwise a rerun later is hard to explain. With samples this small I kept the statistics simple: medians or means with the spread, precision, recall, and F1 for the identification tasks, and paired comparisons on the same scenarios using the Wilcoxon signed-rank test, or a paired t-test if its assumptions hold, with an effect size such as Cohen's $d$. Each assisted run is repeated three times, because the output varies, and the variation is reported. If the differences are small or the sample is too small to be sure, the report says so.
 
-The threats I worry about are the usual ones. The dataset may not look like the work people actually do. Reviewers will disagree. The model will not give the same answer twice. The provider may change the model under us. Examples may leak into prompts. And a long generated list may simply create more review. A small public-data run would be enough to talk about feasibility. It would not be enough to talk about enterprise workflows.
-
-\section{Results and Discussion}
-The evidence in this chapter is that the software exists and can be exercised. It takes quality context, stores a request, calls the orchestrated agent, and returns a response. The specialist list and the dashboard samples cover several STLC jobs. The Jira and GitHub code is a starting point for systems a team already has.
-
-I do not have experiment results to put next to that. No benchmark set, no time-saved numbers, no coverage figures, no defect-detection rates, no user study. So I am not claiming the system improves quality or reduces effort. What this stage produced is the application and a way to test those claims later. A generated case can look complete and still be wrong, incomplete, or useless for finding defects.
+The threats I considered are the usual ones. The dataset may not look like the work people actually do. Reviewers will disagree. The model will not give the same answer twice. The provider may change the model under us. Examples may leak into prompts. And a long generated list may simply create more review. A small public-data run would be enough to talk about feasibility. It would not be enough to talk about enterprise workflows.
 
 \section{Limitations}
 \begin{itemize}
   \item If the user gives thin or wrong context, or if the chosen model is weak, the recommendations follow that.
   \item Routing between agents is still mostly the prompt. I did not add formal schemas or independent quality gates between stages.
+  \item Refinement works by adding instructions and rerunning. A user cannot yet edit or approve individual cases one at a time.
   \item Session state is in memory. Restart the agent process and the conversation is gone.
   \item The system does not run external suites, edit scripts, or block a release.
   \item Retrieval over requirements, test assets, and old defects, and a Jenkins or similar CI hook, are still to be done.

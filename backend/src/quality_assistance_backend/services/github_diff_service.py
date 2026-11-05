@@ -1,11 +1,19 @@
 from __future__ import annotations
 
+import logging
+
 import httpx
 from fastapi import HTTPException, status
 
+from quality_assistance_backend.schemas.settings import GitHubPullRequest
+from quality_assistance_backend.services.tls import create_ssl_context
+
+logger = logging.getLogger(__name__)
+_ssl_context = create_ssl_context()
+
 
 class GitHubDiffService:
-    """Fetch unified diffs from GitHub using a user PAT (server-side only)."""
+    """Fetch pull requests and unified diffs using a user PAT."""
 
     def __init__(self, *, owner: str, repo: str, token: str | None = None) -> None:
         self.owner = owner
@@ -17,10 +25,99 @@ class GitHubDiffService:
         if token:
             self._headers["Authorization"] = f"Bearer {token}"
 
+    async def list_pull_requests(self) -> list[GitHubPullRequest]:
+        url = f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls"
+        try:
+            async with httpx.AsyncClient(timeout=30.0, verify=_ssl_context) as client:
+                response = await client.get(
+                    url,
+                    params={
+                        "state": "all",
+                        "sort": "updated",
+                        "direction": "desc",
+                        "per_page": 100,
+                    },
+                    headers=self._headers,
+                )
+        except httpx.HTTPError as exc:
+            logger.exception(
+                "github.pull_requests.request_failed repository=%s/%s",
+                self.owner,
+                self.repo,
+            )
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Could not reach GitHub to retrieve pull requests.",
+            ) from exc
+
+        if response.status_code == 401:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="GitHub rejected the access token. Update it in Settings.",
+            )
+        if response.status_code == 403:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="GitHub denied access to pull requests or the API rate limit was reached.",
+            )
+        if response.status_code == 404:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="GitHub repository not found. Check the repository settings.",
+            )
+        if response.is_error:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="Could not retrieve pull requests from GitHub.",
+            )
+
+        try:
+            payload = response.json()
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="GitHub returned an invalid pull request list.",
+            ) from exc
+
+        if not isinstance(payload, list):
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail="GitHub returned an invalid pull request list.",
+            )
+
+        pull_requests: list[GitHubPullRequest] = []
+        for item in payload:
+            if not isinstance(item, dict):
+                continue
+            head = item.get("head")
+            base = item.get("base")
+            if not isinstance(head, dict) or not isinstance(base, dict):
+                continue
+            number, title = item.get("number"), item.get("title")
+            head_ref, base_ref = head.get("ref"), base.get("ref")
+            state = item.get("state")
+            if (
+                isinstance(number, int)
+                and isinstance(title, str)
+                and isinstance(head_ref, str)
+                and isinstance(base_ref, str)
+                and isinstance(state, str)
+            ):
+                pull_requests.append(
+                    GitHubPullRequest(
+                        number=number,
+                        title=title,
+                        head_ref=head_ref,
+                        base_ref=base_ref,
+                        state=state,
+                    )
+                )
+        return pull_requests
+
     async def fetch_pull_diff(self, pull_number: int) -> tuple[str, str]:
         url = f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls/{pull_number}"
         headers = {**self._headers, "Accept": "application/vnd.github.v3.diff"}
-        async with httpx.AsyncClient(timeout=60.0) as client:
+        async with httpx.AsyncClient(timeout=60.0, verify=_ssl_context) as client:
             response = await client.get(url, headers=headers)
 
         if response.status_code == 404:
@@ -47,7 +144,7 @@ class GitHubDiffService:
             f"https://api.github.com/repos/{self.owner}/{self.repo}/compare/"
             f"{base}...{head}"
         )
-        async with httpx.AsyncClient(timeout=60.0) as client:
+        async with httpx.AsyncClient(timeout=60.0, verify=_ssl_context) as client:
             response = await client.get(url, headers=self._headers)
 
         if response.status_code == 404:

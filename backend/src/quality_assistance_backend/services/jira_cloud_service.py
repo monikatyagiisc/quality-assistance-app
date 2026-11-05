@@ -3,7 +3,6 @@ from __future__ import annotations
 import hashlib
 import re
 import secrets
-import ssl
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlencode, urlparse
 from uuid import UUID
@@ -24,6 +23,7 @@ from quality_assistance_backend.schemas.jira import (
     JiraProject,
     JiraProjectList,
 )
+from quality_assistance_backend.services.tls import create_ssl_context
 
 ATLASSIAN_AUTHORIZE_URL = "https://auth.atlassian.com/authorize"
 ATLASSIAN_TOKEN_URL = "https://auth.atlassian.com/oauth/token"
@@ -41,7 +41,7 @@ OAUTH_PROVIDER_ERROR_REASONS = {
 }
 
 _encryptor = FernetEncryption()
-_ssl_context = ssl.create_default_context()
+_ssl_context = create_ssl_context()
 
 
 class JiraCloudError(Exception):

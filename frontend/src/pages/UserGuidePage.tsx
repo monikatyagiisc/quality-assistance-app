@@ -287,7 +287,7 @@ ${guideStyles}
           <li>Enter the repository owner or organization, repository name, and base branch (usually <code>main</code>).</li>
           <li>Enter a GitHub personal access token with read access to repository contents and pull requests, then save the repository.</li>
           <li>Return to the workspace and enter your requirement and story context.</li>
-          <li>Under <strong>Code diffs</strong>, choose <strong>From GitHub</strong>, enter a pull request number or a head branch/commit SHA, then choose <strong>Import diff into form</strong>.</li>
+          <li>Under <strong>Code diffs</strong>, choose <strong>From GitHub</strong>, sync pull requests and select one (or enter its number), or enter a head branch/commit SHA; then choose <strong>Import diff into form</strong>.</li>
           <li>Review the imported diff and choose <strong>Get quality assistance</strong>.</li>
         </ol>
         <p>

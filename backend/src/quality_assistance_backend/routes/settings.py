@@ -8,6 +8,7 @@ from quality_assistance_backend.models import User
 from quality_assistance_backend.schemas.settings import (
     FetchDiffInput,
     FetchDiffOutput,
+    GitHubPullRequestList,
     RepositoryConnectionInput,
     RepositoryConnectionPublic,
 )
@@ -55,5 +56,16 @@ async def fetch_repository_diff(
 ) -> FetchDiffOutput:
     try:
         return await repo_service.fetch_diff(db=db, user=current_user, payload=payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc
+
+
+@router.get("/repository/pull-requests", response_model=GitHubPullRequestList)
+async def list_repository_pull_requests(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+) -> GitHubPullRequestList:
+    try:
+        return await repo_service.list_pull_requests(db=db, user=current_user)
     except ValueError as exc:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(exc)) from exc

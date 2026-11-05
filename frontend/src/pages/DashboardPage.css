@@ -189,12 +189,21 @@
   color: #cbd5e1;
 }
 
-.diff-fetch-panel input {
+.diff-fetch-panel input,
+.diff-fetch-panel select {
   padding: 0.45rem 0.6rem;
   border-radius: 0.45rem;
   border: 1px solid rgba(148, 163, 184, 0.25);
   background: rgba(15, 23, 42, 0.5);
   color: #f1f5f9;
+}
+
+.diff-fetch-panel select option {
+  color: #0f172a;
+}
+
+.diff-fetch-panel > .btn {
+  align-self: flex-start;
 }
 
 .diff-fetch-or {

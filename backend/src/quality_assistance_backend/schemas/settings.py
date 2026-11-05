@@ -59,3 +59,15 @@ class FetchDiffOutput(BaseModel):
     diff: str
     source: str
     summary: str
+
+
+class GitHubPullRequest(BaseModel):
+    number: int
+    title: str
+    head_ref: str
+    base_ref: str
+    state: str
+
+
+class GitHubPullRequestList(BaseModel):
+    pull_requests: list[GitHubPullRequest]

@@ -16,6 +16,7 @@ import {
   type JiraConnectionStatus,
   type JiraIssue,
   type JiraProject,
+  type GitHubPullRequest,
   type RepositoryConnection,
 } from '../api/client'
 import { getUserFriendlyError } from '../utils/errorMessages'
@@ -136,6 +137,10 @@ export function DashboardPage() {
   >([])
   const [diffMode, setDiffMode] = useState<'paste' | 'fetch'>('paste')
   const [pullNumber, setPullNumber] = useState('')
+  const [pullRequests, setPullRequests] = useState<GitHubPullRequest[]>([])
+  const [pullRequestsSynced, setPullRequestsSynced] = useState(false)
+  const [pullRequestsLoading, setPullRequestsLoading] = useState(false)
+  const [pullRequestsError, setPullRequestsError] = useState<string | null>(null)
   const [compareHead, setCompareHead] = useState('')
   const [diffImporting, setDiffImporting] = useState(false)
   const [diffImportNote, setDiffImportNote] = useState<string | null>(null)
@@ -481,6 +486,27 @@ export function DashboardPage() {
     }
   }
 
+  const syncPullRequests = async () => {
+    if (!token || !isGithubFetchReady(repoConnection)) return
+
+    setPullRequestsLoading(true)
+    setPullRequestsError(null)
+    try {
+      const response = await api.getRepositoryPullRequests(token)
+      setPullRequests(response.pull_requests)
+      setPullRequestsSynced(true)
+      setPullNumber((current) =>
+        response.pull_requests.some((pull) => String(pull.number) === current)
+          ? current
+          : '',
+      )
+    } catch (err) {
+      setPullRequestsError(getUserFriendlyError(err))
+    } finally {
+      setPullRequestsLoading(false)
+    }
+  }
+
   return (
     <div className="dashboard">
       <section className="hero-panel">
@@ -795,7 +821,37 @@ export function DashboardPage() {
                   <strong>{repoConnection!.default_branch}</strong>
                 </p>
                 <label>
-                  Pull request #
+                  Pull request
+                  <select
+                    value={pullRequests.some((pull) => String(pull.number) === pullNumber) ? pullNumber : ''}
+                    onChange={(event) => setPullNumber(event.target.value)}
+                    disabled={pullRequests.length === 0 || pullRequestsLoading}
+                  >
+                    <option value="">
+                      {pullRequestsSynced && pullRequests.length === 0
+                        ? 'No pull requests found'
+                        : 'Sync to load pull requests'}
+                    </option>
+                    {pullRequests.map((pull) => (
+                      <option key={pull.number} value={pull.number}>
+                        #{pull.number} {pull.title} ({pull.head_ref} → {pull.base_ref}; {pull.state})
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  type="button"
+                  className="btn btn-ghost btn-sm"
+                  onClick={() => void syncPullRequests()}
+                  disabled={pullRequestsLoading}
+                >
+                  {pullRequestsLoading ? 'Syncing pull requests…' : 'Sync pull requests'}
+                </button>
+                {pullRequestsError && (
+                  <div className="banner banner-error" role="alert">{pullRequestsError}</div>
+                )}
+                <label>
+                  Or enter pull request #
                   <input
                     type="number"
                     min={1}

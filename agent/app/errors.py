@@ -2,6 +2,7 @@ import re
 from typing import NamedTuple
 
 from app.config.settings import settings
+from app.services.aws_sso import is_expired_aws_sso_token
 
 # Shared markers across Gemini, OpenAI (LiteLLM), Anthropic, etc.
 _QUOTA_MARKERS = (
@@ -48,9 +49,33 @@ class UserFacingError(NamedTuple):
     code: str
 
 
-def classify_agent_error(exc: BaseException) -> UserFacingError:
+def classify_agent_error(
+    exc: BaseException,
+    *,
+    aws_sso_login_started: bool = False,
+) -> UserFacingError:
     text = str(exc)
     upper = text.upper()
+
+    if is_expired_aws_sso_token(exc):
+        if aws_sso_login_started:
+            message = (
+                f"The AWS SSO session for profile {settings.aws_profile} expired. "
+                "A browser login has been started; finish signing in, then retry."
+            )
+        elif settings.aws_profile:
+            message = (
+                f"The AWS SSO session for profile {settings.aws_profile} expired. "
+                f"Run `aws sso login --profile {settings.aws_profile}` in a terminal, "
+                "finish signing in, then retry."
+            )
+        else:
+            message = (
+                "The AWS SSO session expired. Set AWS_PROFILE in agent/.env to your "
+                "configured SSO profile, then run `aws sso login --profile <profile>` "
+                "in a terminal and retry."
+            )
+        return UserFacingError(503, message, "aws_sso_session_expired")
 
     if _matches_any(upper, _QUOTA_MARKERS):
         return UserFacingError(429, _quota_message(text), "quota_exceeded")

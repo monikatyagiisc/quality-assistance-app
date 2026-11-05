@@ -28,6 +28,14 @@ export type FetchDiffResult = {
   summary: string
 }
 
+export type GitHubPullRequest = {
+  number: number
+  title: string
+  head_ref: string
+  base_ref: string
+  state: string
+}
+
 export type JiraConnectionStatus = {
   configured: boolean
   connected: boolean
@@ -265,6 +273,13 @@ export const api = {
     request<FetchDiffResult>(
       '/api/settings/repository/fetch-diff',
       { method: 'POST', body: JSON.stringify(data) },
+      token,
+    ),
+
+  getRepositoryPullRequests: (token: string) =>
+    request<{ pull_requests: GitHubPullRequest[] }>(
+      '/api/settings/repository/pull-requests',
+      {},
       token,
     ),
 

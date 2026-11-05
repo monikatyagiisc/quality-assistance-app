@@ -8,6 +8,7 @@ from quality_assistance_backend.models import RepositoryConnection, User
 from quality_assistance_backend.schemas.settings import (
     FetchDiffInput,
     FetchDiffOutput,
+    GitHubPullRequestList,
     RepositoryConnectionInput,
     RepositoryConnectionPublic,
 )
@@ -110,3 +111,22 @@ async def fetch_diff(
         source = f"github:compare:{base}...{payload.head}"
 
     return FetchDiffOutput(diff=diff, source=source, summary=summary)
+
+
+async def list_pull_requests(
+    *,
+    db: AsyncSession,
+    user: User,
+) -> GitHubPullRequestList:
+    connection = await get_connection(db, user.id)
+    if connection is None:
+        raise ValueError("No repository configured. Add owner, repo, and PAT in Settings first.")
+
+    token = decrypt_token(connection)
+    if not token:
+        raise ValueError(
+            "A personal access token is required to fetch pull requests. Add a PAT in Settings."
+        )
+
+    client = GitHubDiffService(owner=connection.owner, repo=connection.repo, token=token)
+    return GitHubPullRequestList(pull_requests=await client.list_pull_requests())

@@ -126,6 +126,41 @@ wait_for_postgres() {
   return 1
 }
 
+open_or_refresh_frontend() {
+  local url="http://localhost:5173/dashboard"
+  local window_id=""
+  local browser_command="${BROWSER:-xdg-open}"
+
+  if [[ "$(uname -s)" == "Linux" ]] && [[ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]]; then
+    if ! command -v wmctrl >/dev/null 2>&1 || ! command -v xdotool >/dev/null 2>&1; then
+      log_line "system" "$COLOR_SYSTEM" \
+        "Cannot check for an existing browser tab. Install the required tools: sudo apt install wmctrl xdotool"
+      return 1
+    fi
+
+    window_id="$(wmctrl -l | awk 'tolower($0) ~ /quality assistance/ { print $1; exit }')"
+    if [[ -n "$window_id" ]]; then
+      if xdotool windowactivate --sync "$window_id" \
+        && xdotool key --clearmodifiers ctrl+l \
+        && xdotool type --clearmodifiers --delay 1 "$url" \
+        && xdotool key --clearmodifiers Return; then
+        log_line "system" "$COLOR_SYSTEM" "Opened /dashboard in the existing Quality Assistance tab."
+        return 0
+      fi
+      log_line "system" "$COLOR_SYSTEM" "Could not navigate the existing browser tab to $url."
+      return 1
+    fi
+  fi
+
+  if [[ "$(uname -s)" == "Darwin" ]] && command -v open >/dev/null 2>&1; then
+    open "$url" >/dev/null 2>&1
+  elif command -v "$browser_command" >/dev/null 2>&1; then
+    "$browser_command" "$url" >/dev/null 2>&1
+  else
+    return 1
+  fi
+}
+
 ensure_postgres() {
   load_pg_config
 
@@ -216,20 +251,9 @@ start_service "frontend" "$COLOR_FRONTEND" "$ROOT/frontend" yarn dev
 
 sleep 2
 
-if [[ "$(uname -s)" == "Darwin" ]] && command -v open >/dev/null 2>&1; then
-  open "http://localhost:5173" >/dev/null 2>&1 || \
-    log_line "system" "$COLOR_SYSTEM" "Could not open a browser automatically; visit http://localhost:5173"
-elif [[ "$(uname -s)" == "Linux" ]] \
-  && [[ -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]]; then
-  browser_command="${BROWSER:-xdg-open}"
-  if command -v "$browser_command" >/dev/null 2>&1; then
-    "$browser_command" "http://localhost:5173" >/dev/null 2>&1 || \
-      log_line "system" "$COLOR_SYSTEM" "Could not open a browser automatically; visit http://localhost:5173"
-  else
-    log_line "system" "$COLOR_SYSTEM" "Could not open a browser automatically; visit http://localhost:5173"
-  fi
-else
-  log_line "system" "$COLOR_SYSTEM" "Could not open a browser automatically; visit http://localhost:5173"
+if ! open_or_refresh_frontend; then
+  log_line "system" "$COLOR_SYSTEM" \
+    "Could not open or refresh the app automatically; visit http://localhost:5173/dashboard"
 fi
 
 load_pg_config

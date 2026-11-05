@@ -42,7 +42,11 @@ Set `GOOGLE_API_KEY` in `agent/.env` (or configure the provider selected by `AGE
 ./scripts/run-ubuntu.sh
 ```
 
+For Amazon Bedrock with AWS IAM Identity Center/SSO, install and configure the AWS CLI profile for the same OS user running the app, then set `AGENT_BACKEND=bedrock` and `AWS_PROFILE=<your-profile>` in `agent/.env`. If that profile's SSO session expires during a model request, the agent starts `aws sso login --profile <your-profile>`; complete the browser sign-in and retry the request. If the AWS CLI is unavailable or login cannot be started, the error response gives the manual command.
+
 The launcher starts the agent, backend, and frontend, and attempts to open the web app in your default browser when running in a graphical Ubuntu session. If no browser opens, visit <http://localhost:5173> manually. API documentation is available at <http://localhost:8000/docs> and <http://localhost:8001/docs>. Press **Ctrl+C** to stop. Logs are written to `.logs/`.
+
+To reuse the app tab, install the window-control tools with `sudo apt install wmctrl xdotool`. On rerun, the launcher detects an open browser window titled **Quality Assistance**, activates it, and navigates that tab to `http://localhost:5173/dashboard` (reloading the dashboard if it is already there). If no matching app window exists, it opens the dashboard in the default browser. If the tools are missing, the launcher prints the install command and does not open another tab.
 
 The development secrets in `backend/.env` are for local use only. Keep `.env` files private and do not commit them.
 

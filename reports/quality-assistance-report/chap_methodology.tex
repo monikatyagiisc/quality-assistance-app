@@ -106,7 +106,7 @@ The UI has login, a dashboard for requests, a settings page, and a short user gu
 \subsection{Backend and Persistence}
 The backend is FastAPI, with asynchronous SQLAlchemy on PostgreSQL \cite{fastapidocs}. \texttt{/api/assist} needs a logged-in user. The request is stored with owner, source text, session id, status, timestamps, and later the response. Then the backend builds a structured message and calls the agent service. Both success and failure are written back. Errors go to the frontend on the normal error path.
 
-Users, assistance requests, Jira connections, and GitHub repository connections are separate tables. That is enough to open an old submission. It is not enough if you expect the agent conversation to survive a restart. The ADK runner I used keeps session state in memory.
+Users, assistance requests, Jira connections, and GitHub repository connections are separate tables. That is enough to open an old submission. It is not enough if you expect the agent conversation to survive a restart. The ADK runner, I used keeps session state in memory.
 
 \subsection{Agent Orchestration}
 \begin{figure}[H]

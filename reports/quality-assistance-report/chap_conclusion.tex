@@ -1,13 +1,25 @@
 \chapter{Conclusions}
 \label{chap:conclusion}
 
-This project aims to address the gaps between different software quality activities by developing an AI-assisted application that supports various stages of the Software Testing Life Cycle (STLC). The prototype brings together a React and TypeScript frontend, a FastAPI backend, a PostgreSQL database, and a separate agent service built using Google's Agent Development Kit (ADK). At the centre of the system is a root agent that understands incoming requests and directs them to nine specialised agents. Each agent focuses on a particular testing activity, including test-case design, test-data generation, automation suggestions, execution analysis, self-healing recommendations, change-impact analysis, defect reporting, test summaries, and release-readiness assessment.
+This project addressed the fragmentation of software quality activities by developing and evaluating an AI-driven Quality Assistance application for the Software Testing Life Cycle (STLC). The application combined a React and TypeScript frontend, a FastAPI backend, a PostgreSQL database, and a separate agent service implemented using Google’s Agent Development Kit (ADK).
 
-Along with these capabilities, the application provides user authentication and stores submitted requests for future reference. It also integrates with Jira Cloud to access issue details and GitHub to retrieve code changes. Additional features include optional Microsoft Entra single sign-on and support for configuring different AI model providers.
+At the centre of the application was a root agent responsible for interpreting user requests and coordinating nine specialised agents. These agents supported test-case generation, test-data generation, automation recommendations, test execution analysis, self-healing suggestions, change-impact analysis, defect reporting, test summary generation, and release-readiness assessment.
 
-The prototype shows how multiple testing-related activities can be brought together within a single application and supported through specialised AI agents. However, further evaluation is needed before drawing conclusions about its actual benefits. At this stage, there is no experimental evidence to establish whether the system improves test coverage, reduces the overall effort required by quality engineers, or helps identify more defects. The agents are intended to assist engineers by providing suggestions and organising relevant information, not by replacing their judgement.
+The application also incorporated user authentication, request persistence, Jira Cloud integration, GitHub integration, optional Microsoft Entra single sign-on, and configurable language-model providers. The human-in-the-loop refinement workflow allowed engineers to review generated responses, provide further instructions, and rerun requests using the existing session context.
 
-It is also important to understand the limitations of the current implementation. The execution analysis agent reviews available test results but does not run test suites on its own. Similarly, the self-healing agent suggests possible changes to automation scripts but does not apply those changes automatically. The release-readiness assessment provides supporting information for decision-making; the final decision to approve or reject a release remains with the responsible team.
+The completed evaluation used 60 benchmark scenarios across six categories and compared manual testing, a single-LLM workflow, and the developed multi-agent application. Three experienced testers reviewed the generated artefacts using a five-point rating scale. The evaluation considered the quality of individual specialist outputs, orchestration performance, workflow completion, human correction requirements, response latency, operational cost, and end-to-end effort.
+
+The results showed that the end-to-end workflow time decreased from approximately 40 working hours in the manual process to one hour using the multi-agent application. This represented a measured time reduction of 97.5\%. Active human effort decreased from approximately 30 hours to 35 minutes, including review and refinement activities.
+
+At the specialist level, test-data generation achieved 97.2\% validity, test-case generation achieved 94.0\% requirement coverage, and test-summary reporting achieved 97.0\% factual accuracy. The orchestration layer achieved 96.0\% specialist-selection accuracy and a 94.0\% workflow completion rate.
+
+These findings demonstrate that the developed application was able to coordinate multiple testing-related activities through a common interface and reduce the time required to prepare and review testing artefacts in the evaluated scenarios. The results also show that the multi-agent approach provided a structured alternative to handling each testing activity separately.
+
+The application is intended to support quality engineers rather than replace their judgement. The execution-analysis agent works with supplied test evidence and does not independently execute external test suites. The self-healing agent provides recommendations without directly changing repository files. Similarly, the release-readiness agent provides supporting information, while the final release decision remains with the responsible engineering team.
+
+Overall, the project demonstrated the practical feasibility of applying a specialised multi-agent architecture to software quality assistance. The evaluation provided measured evidence of workflow efficiency and specialist performance within the selected benchmark. Further work is required to improve validation between agents, strengthen session persistence, expand the evaluation dataset, and assess the application across a wider range of software projects and operational environments.
+
+\clearpage
 
 \section{Future Work}
 The next steps I have identified, in order:

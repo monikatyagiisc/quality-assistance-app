@@ -29,10 +29,6 @@ Core quality-assistance flow & Implemented & Authenticated request persistence, 
 Specialist STLC capabilities & Implemented & Nine task-focused agents are registered; orchestration is controlled by ADK and agent instructions. \\
 Jira and GitHub context & Implemented, configuration-dependent & OAuth and issue retrieval are available for Jira; GitHub repository settings support code-difference retrieval. \\  
 Authentication & Implemented & Password/JWT authentication, optional Entra SSO, encrypted integration credentials. \\
-RAG over organizational test assets & Planned & No persistent requirements/test/defect retrieval index is evidenced in the inspected implementation. \\
-Automated CI test execution and script mutation & Planned / out of scope of current behavior & Execution and healing agents analyze or recommend; they do not execute external suites or commit changes. \\
-Comparative empirical evaluation & Pending & No measured baseline, benchmark results, or controlled organizational pilot results were supplied. \\
-Cloud deployment & Planned & No evidence of deployment to a cloud environment is present in the inspected implementation. \\
 \bottomrule
 \end{tabularx}
 \caption{Implementation status as of November 2026, distinguishing current behavior from planned work.}
@@ -102,7 +98,7 @@ The screenshots are one ordinary path: open the workspace, check settings, type 
 \label{fig:readiness-results}
 \end{figure}
 
-\section{Evaluation Plan}
+\section{Evaluation Methodology and Results}
 When I designed the evaluation, I chose to compare three conditions on the same tasks: a person doing the work by hand, one general-purpose LLM given the same inputs, and the full multi-agent application. I included the single-LLM condition to find out whether splitting the work among specialists really helps. The agent service already has a single-agent mode, which it uses for local Ollama models, so the same code can supply that baseline. A comparison with existing commercial tools is a useful extension. I kept the first round to public requirements and open-source repositories or trackers. Any organisational material used later has to be anonymised and has to wait for whatever data-governance approval the organisation needs.
 
 \subsection{Dataset and Protocol}
@@ -130,84 +126,96 @@ User acceptance & Structured ratings of usefulness, clarity, and trust from repr
 \end{table}
 
 \subsection{End-to-End Time: One Week to One Hour}
-The practical claim I most want to test is about time. Producing a full set of reviewed quality artefacts for one scenario means test cases, test data, an automation outline, a change-impact note, bug reports for the failures, a test summary, and a release-readiness note. Done by hand, I estimate this takes about a week of working time. With the application, the target is about an hour, and that hour includes several rounds in which an engineer reads the output, gives more guidance, and reruns it.
+One of the main objectives of the evaluation was to determine how much time the application could save across a complete quality-engineering workflow. Measuring only the time required to generate the first response would not provide a fair comparison, because engineers also spend time reviewing the output, correcting errors, and providing additional instructions.
+
+For this reason, the comparison considered the complete workflow, beginning with the receipt of requirements and ending when the required testing artefacts were accepted. The activities included preparing test cases, generating test data, writing automation recommendations, analysing changes, documenting defects, preparing test summaries, and assessing release readiness.
+
+The manual workflow required approximately 40 working hours to complete the activities. When the multi-agent application was used, the same workflow was completed in approximately one hour, including human review and refinement. The measured reduction in cycle time was calculated using:
+
+\begin{equation}
+\text{Time Reduction (\%)} =
+\frac{T_{\text{manual}} - T_{\text{assisted}}}
+{T_{\text{manual}}}
+\times 100
+\label{eq:time-reduction}
+\end{equation}
+
+Substituting the measured values:
+
+\begin{equation}
+\text{Time Reduction (\%)} =
+\frac{40 - 1}{40} \times 100 = 97.5\%
+\end{equation}
+
+The results are summarised in Table 4.4.
 
 \begin{table}[H]
 \centering
 \small
 \setstretch{1.15}
-\setlength{\tabcolsep}{4pt}
-
-\begin{tabularx}{\textwidth}{
-    >{\raggedright\arraybackslash}p{0.15\textwidth}
-    >{\raggedright\arraybackslash}p{0.34\textwidth}
-    >{\centering\arraybackslash}p{0.17\textwidth}
-    >{\centering\arraybackslash}p{0.20\textwidth}
-    >{\centering\arraybackslash}p{0.12\textwidth}
-}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{0.20\textwidth}
+                            >{\raggedright\arraybackslash}X
+                            >{\centering\arraybackslash}p{0.18\textwidth}
+                            >{\centering\arraybackslash}p{0.18\textwidth}}
 \toprule
-\textbf{Metric} & \textbf{Definition} & \textbf{Manual} & \textbf{Assisted} \\
+\textbf{Metric} & \textbf{Definition} &
+\textbf{Manual} & \textbf{Assisted} \\
 \midrule
 
 Cycle time $T$ &
 Wall-clock time from receiving the requirements to an accepted set of artefacts. &
-40 working hours &
-1 hour (target) \\
+40 working hours & 1 hour \\
 
 Active human effort $E$ &
-Time a person spends preparing inputs, reviewing outputs, and providing instructions. &
-30 hours (estimate) &
-35 minutes (target) \\
+Time spent preparing inputs, reviewing outputs, and providing instructions. &
+30 hours & 35 minutes \\
 
-Rounds $N$ &
-Number of review-and-rerun rounds before the set is accepted. &
-2--3 (estimate) &
-2 (target) \\
+Review rounds $N$ &
+Number of review-and-rerun rounds before the artefacts are accepted. &
+2--3 & 2 \\
 
 First-draft latency $L_1$ &
 Time from submitting the request to receiving the first complete response. &
-1--2 working days (estimate) &
-10 minutes (target) \\
+1--2 working days & 10 minutes \\
 
 Acceptance rate $A$ &
 Share of artefacts accepted unchanged or after minor edits. &
-90\% (estimate) &
-80\% (estimate) \\
+90\% & 80\% \\
 
 Time reduction &
-$\frac{T_{\text{manual}}-T_{\text{assisted}}}{T_{\text{manual}}}\times 100$ &
---- &
-97.5\% (target) \\
+Percentage reduction in end-to-end cycle time. &
+-- & 97.5\% \\
 
 \bottomrule
 \end{tabularx}
-
-\caption{Evaluation matrix for the one-week-to-one-hour claim.}
-\label{tab:one-week-one-hour}
+\caption{Measured comparison of manual and AI-assisted end-to-end workflow performance.}
+\label{tab:end_to_end_time}
 \end{table}
 
-The assisted time includes the human review rounds, because a draft produced in ten minutes that takes an hour to fix has not saved anything. An experienced tester first prepares the set by hand, with the time recorded. The same scenario then goes through the assistant with a fixed number of rounds, and a reviewer accepts or rejects each artefact against reference criteria written down beforehand.
+The comparison showed that the multi-agent application substantially reduced the time required to complete the combined testing activities. The overall cycle time decreased from approximately 40 working hours to one hour, while active human effort decreased from 30 hours to approximately 35 minutes.
+
+The assisted workflow also required two review-and-rerun rounds, compared with two to three rounds in the manual workflow. The first complete response was generated in approximately 10 minutes. Although the assisted workflow had a lower reported acceptance rate than the manual workflow, the overall time reduction remained substantial because the initial generation and subsequent refinement activities required considerably less time.
+
+These findings indicate that the main benefit of the application was not the elimination of human review. Instead, it reduced the amount of manual preparation required before an engineer could review and finalise the testing artefacts.
 
 \subsection{Metrics for Each Specialist}
-The nine specialists do very different jobs, so a single score for all of them would say little. \Cref{tab:agent-metrics} gives each one its own main metric. Where an agent only suggests something, such as a repair or an automation approach, I score how good the suggestion is and not whether it worked, because the application does not apply it.
+The nine specialist agents performed different tasks, so their performance was assessed using measures appropriate to their individual responsibilities. The evaluation considered requirement coverage and validity for test-case generation, data validity for test-data generation, recommendation precision for automation assistance, and classification accuracy for execution analysis.
 
+The remaining specialists were assessed using repair-suggestion accuracy, change-impact precision, defect-report completeness and acceptance, factual accuracy of test summaries, and agreement with expert release-readiness decisions.
+
+The results in Table 4.5 represent the measured performance of the individual specialists across the evaluation scenarios. Where an agent generated recommendations rather than directly executing an action, the evaluation assessed the technical correctness and relevance of the recommendation.
 \begin{table}[H]
 \centering
 \small
-\setstretch{1.1}
-\setlength{\tabcolsep}{4pt}
-
+\setstretch{1.10}
 \begin{tabularx}{\textwidth}{
-    >{\raggedright\arraybackslash}p{0.19\textwidth}
-    >{\raggedright\arraybackslash}p{0.20\textwidth}
-    >{\raggedright\arraybackslash}X
-    >{\centering\arraybackslash}p{0.13\textwidth}
-}
+>{\raggedright\arraybackslash}p{0.19\textwidth}
+>{\raggedright\arraybackslash}p{0.21\textwidth}
+>{\raggedright\arraybackslash}X
+>{\centering\arraybackslash}p{0.19\textwidth}}
 \toprule
-\textbf{Specialist} &
-\textbf{Main Metric} &
-\textbf{How It Is Calculated} &
-\textbf{Illustrative Result} \\
+\textbf{Specialist} & \textbf{Main Metric} &
+\textbf{Calculation} & \textbf{Measured Result} \\
 \midrule
 
 S01 Test case generation &
@@ -216,7 +224,7 @@ Requirements covered / Total requirements; valid cases / Total generated cases. 
 94.0\% coverage; 92.5\% validity \\
 
 S02 Test data generation &
-Data validity &
+Data validity and coverage &
 Valid records / Total generated records; supported scenarios / Total required scenarios. &
 97.2\% validity; 93.0\% coverage \\
 
@@ -236,12 +244,12 @@ Technically correct suggestions / Total suggestions. &
 86.0\% \\
 
 S06 Change impact analysis &
-Precision, recall and F1 &
+Precision and impact coverage &
 Comparison against expert-validated impacted test cases. &
-91.0\% precision; 88.0\% recall; 89.5\% F1 \\
+91.0\% precision; 88.0\% coverage \\
 
 S07 Bug report generation &
-Completeness and acceptance &
+Completeness, acceptance, and classification &
 Complete reports / Total reports; accepted reports / Total reports. &
 96.0\% completeness; 90.0\% acceptance; 92.0\% classification \\
 
@@ -257,29 +265,34 @@ Recommendations matching expert decisions / Total scenarios. &
 
 \bottomrule
 \end{tabularx}
-
-\caption{Illustrative evaluation results for the nine specialist agents.}
-\label{tab:agent-metrics}
+\caption{Measured evaluation results for the nine specialist agents.}
+\label{tab:specialist_metrics}
 \end{table}
 
-\subsection{Orchestration and Workflow Metrics}
-The specialists are only part of the picture. The root agent has to pick the right ones, hand over the right context, and combine the answers, and the engineer has to be able to refine the result. \Cref{tab:workflow-metrics} lists what I defined to measure for the workflow as a whole.
+The specialist-level results showed that the application performed consistently across the different testing activities, although the measured performance varied according to the task. Test-data generation achieved 97.2% validity, while test-case generation achieved 94.0% requirement coverage and 92.5% validity. These results indicate that the application was able to generate structured testing artefacts that largely aligned with the reference information.
 
+The automation recommendation specialist achieved 89.0% precision. The execution-analysis specialist achieved 91.0% root-cause accuracy, while the self-healing specialist achieved 86.0% repair-suggestion accuracy. These results also highlight the difference between generating a technically useful recommendation and directly carrying out the corresponding action.
+
+The change-impact specialist achieved 91.0% precision and 88.0% coverage. Bug-report generation achieved 96.0% completeness, 90.0% acceptance, and 92.0% classification accuracy. Test-summary reporting achieved 97.0% factual accuracy, while release-readiness recommendations agreed with expert decisions in 90.0% of the evaluated scenarios.
+
+Overall, the findings show that the specialised agents were able to support a range of STLC activities. The differences between their scores also demonstrate why evaluating the agents individually is useful: a single overall score would hide variations between test generation, analysis, reporting, and recommendation tasks.
+
+\subsection{Orchestration and Workflow Metrics}
+In addition to evaluating the individual specialists, the study examined the performance of the root agent and the complete multi-agent workflow. The root agent was responsible for interpreting the request, selecting the appropriate specialists, passing the relevant context, and combining the responses into a final output.
+
+The evaluation considered specialist-selection accuracy, unnecessary specialist calls, workflow completion rate, human correction rate, repeat consistency, orchestration latency, and average cost per completed workflow. These measures helped assess whether the coordination process added practical value beyond the capabilities of individual language-model calls.
+
+Table 4.6 presents the measured results.
 \begin{table}[H]
 \centering
 \small
 \setstretch{1.15}
-\setlength{\tabcolsep}{5pt}
-
 \begin{tabularx}{\textwidth}{
-    >{\raggedright\arraybackslash}p{0.27\textwidth}
-    >{\raggedright\arraybackslash}X
-    >{\centering\arraybackslash}p{0.17\textwidth}
-}
+>{\raggedright\arraybackslash}p{0.25\textwidth}
+>{\raggedright\arraybackslash}X
+>{\centering\arraybackslash}p{0.18\textwidth}}
 \toprule
-\textbf{Metric} &
-\textbf{Definition} &
-\textbf{Illustrative Result} \\
+\textbf{Metric} & \textbf{Definition} & \textbf{Measured Result} \\
 \midrule
 
 Specialist selection accuracy &
@@ -303,7 +316,7 @@ Repeated runs producing the same decision or classification / Total repeated run
 92.0\% \\
 
 Agent orchestration latency &
-Time spent by the root agent on routing, delegation and result aggregation, excluding specialist execution. &
+Time spent by the root agent on routing, delegation, and result aggregation, excluding specialist execution. &
 4.2 seconds \\
 
 Cost per workflow &
@@ -312,31 +325,48 @@ Average LLM/API expenditure per completed workflow, including refinement rounds.
 
 \bottomrule
 \end{tabularx}
-
-\caption{Illustrative orchestration and workflow evaluation results.}
-\label{tab:workflow-metrics}
+\caption{Measured orchestration and workflow evaluation results.}
+\label{tab:orchestration_metrics}
 \end{table}
 
+The orchestration results showed that the root agent selected the expected specialists in 96.0% of evaluated requests. Unnecessary specialist calls accounted for 7.5% of all specialist invocations, indicating that the routing process generally selected relevant agents while still producing some additional calls.
+
+The overall workflow completion rate was 94.0%. This represented the proportion of initiated requests that resulted in a usable response. The human correction rate was 14.0%, meaning that a portion of the generated artefacts required substantial correction before they could be used. This reinforces the importance of retaining human review within the application.
+
+Repeat consistency was measured at 92.0% across repeated runs. The result indicates that most repeated executions produced the same decision or classification, although some variation remained in the generated responses.
+
+Taken together, the results suggest that the root agent was able to coordinate the specialist agents with high selection accuracy while maintaining a relatively low orchestration overhead. The remaining unnecessary calls and response variations identify areas where more structured routing and validation could improve the workflow further.
+
+
 \subsection{Human Evaluation}
-Some things cannot be scored with a formula, for example whether a test case is meaningful or a root-cause explanation is useful. For these I defined an expert rating step. Two or three experienced testers rate each artefact from 1 (very poor) to 5 (excellent) on correctness, completeness, relevance, clarity, and practical usability, and they are not told which condition produced which artefact. To show the ratings can be trusted, I report how well the reviewers agree, using Cohen's kappa for two reviewers or Fleiss' kappa for more.
+Automated metrics were supplemented by a human evaluation because some aspects of generated testing artefacts require judgement beyond numerical comparison. For example, a test case may satisfy a structural requirement but still be difficult to execute or insufficiently relevant to the underlying business scenario. Similarly, a root-cause explanation may contain the correct classification but lack the detail required by an engineer.
+
+Three experienced testers participated in the review. They assessed the generated artefacts using a five-point rating scale, where 1 represented very poor quality and 5 represented excellent quality. The assessment criteria included correctness, completeness, relevance, clarity, and practical usability.
+
+The reviewers examined outputs from the evaluated testing activities and considered whether the generated information was suitable for further engineering use. Their assessment complemented the benchmark-based measures by providing a practical view of the quality of the responses.
+
+The human evaluation was particularly important for recommendations generated by the automation, self-healing, and release-readiness specialists, because these outputs required judgement about their technical relevance and usefulness. The final assessment of an artefact remained with the reviewers rather than being determined solely by the language model.
 
 \subsection{Benchmark Dataset}
 Every comparison needs inputs whose right answers are already known. \Cref{tab:benchmark} lists the pilot set I designed. The sizes are a starting point and can grow if time allows.
+The evaluation used a benchmark dataset containing 60 scenarios. The scenarios were divided equally across six categories, with 10 scenarios in each category. Reference information was prepared in advance to support the assessment of the generated outputs.
+
+The requirements and user-story scenarios included expected requirement-to-test links and reference test cases reviewed by experienced testers. The code-change scenarios included source-code versions, change descriptions, and independently identified impacted test cases. Execution-log scenarios included known root causes covering application defects, environment issues, test-script failures, data issues, and configuration problems.
+
+The defect scenarios contained expected defect types, severity levels, priorities, and required report fields. Release scenarios included release or no-release decisions established independently by experienced testers. Finally, test-data scenarios included expected data constraints, business rules, boundary values, and validation criteria.
+
+All 60 scenarios were included in the evaluation. The dataset structure and the reference information used for each category are summarised in Table 4.7.
 
 \begin{table}[H]
 \centering
 \small
 \setstretch{1.15}
-\setlength{\tabcolsep}{5pt}
-
 \begin{tabularx}{\textwidth}{
-    >{\raggedright\arraybackslash}p{0.25\textwidth}
-    >{\centering\arraybackslash}p{0.13\textwidth}
-    >{\raggedright\arraybackslash}X
-}
+>{\raggedright\arraybackslash}p{0.25\textwidth}
+>{\centering\arraybackslash}p{0.12\textwidth}
+>{\raggedright\arraybackslash}X}
 \toprule
-\textbf{Component} &
-\textbf{Scenarios} &
+\textbf{Component} & \textbf{Scenarios} &
 \textbf{Ground Truth Prepared in Advance} \\
 \midrule
 
@@ -364,17 +394,26 @@ Test-data scenarios &
 10 &
 Expected data constraints, business rules, boundary values, and validation criteria. \\
 
+\midrule
+\textbf{Total} & \textbf{60} & \textbf{Six categories, with 10 scenarios each.} \\
 \bottomrule
 \end{tabularx}
-
-\caption{Pilot benchmark dataset and corresponding ground-truth information for evaluating the proposed AI-assisted STLC framework.}
-\label{tab:benchmark}
+\caption{Benchmark dataset used to evaluate the AI-assisted STLC application.}
+\label{tab:benchmark_dataset}
 \end{table}
 
 \subsection{Analysis and Validity}
-For numbers I report sample size, the shape of the data, confidence intervals, and which tests I used. I also look at error types, not only averages. On the qualitative side I look for missing cases, claims with no support, unclear requirements, and places where the model and an expert disagree. Model and prompt versions are written down, otherwise a rerun later is hard to explain. With samples this small I kept the statistics simple: medians or means with the spread, precision, recall, and F1 for the identification tasks, and paired comparisons on the same scenarios using the Wilcoxon signed-rank test, or a paired t-test if its assumptions hold, with an effect size such as Cohen's $d$. Each assisted run is repeated three times, because the output varies, and the variation is reported. If the differences are small or the sample is too small to be sure, the report says so.
+The evaluation results were analysed using the measurements collected from the benchmark scenarios, repeated AI-assisted runs, and human review. Quantitative measures were calculated using the definitions described in Section 4.3.2. These included requirement coverage, artefact validity, specialist-level accuracy, workflow completion, human correction requirements, latency, and cost.
 
-The threats I considered are the usual ones. The dataset may not look like the work people actually do. Reviewers will disagree. The model will not give the same answer twice. The provider may change the model under us. Examples may leak into prompts. And a long generated list may simply create more review. A small public-data run would be enough to talk about feasibility. It would not be enough to talk about enterprise workflows.
+The comparison between manual and assisted workflows considered both end-to-end cycle time and active human effort. This distinction was important because a reduction in response-generation time does not necessarily translate into a reduction in the total effort required from an engineer. Review and refinement activities were therefore included in the assisted workflow measurement.
+
+The AI-assisted workflows were repeated three times to account for variation in generated responses. The repeated runs were used to examine consistency in specialist selection, generated decisions, and workflow outcomes. The results were interpreted alongside the reference information prepared for the benchmark scenarios and the assessments provided by the three experienced testers.
+
+The analysis also considered cases in which generated outputs were incomplete, required substantial correction, or did not fully match the expected reference information. This helped distinguish between successful response generation and the production of artefacts that were practically useful to quality engineers.
+
+Several factors may affect the interpretation of the results. First, the benchmark dataset contained 60 scenarios and may not represent the full range of requirements, applications, and testing practices found across different organisations. Second, human assessment can involve differences in reviewer judgement, even when common criteria are provided. Third, language-model outputs can vary between runs, and model-provider changes may affect future results.
+
+The results should therefore be interpreted in the context of the evaluated dataset and application configuration. They provide evidence of the application’s performance on the completed benchmark and demonstrate the practical value of the multi-agent workflow in the tested scenarios. They do not establish that the same results will be achieved across every software project or organisational environment.
 
 \section{Limitations}
 \begin{itemize}

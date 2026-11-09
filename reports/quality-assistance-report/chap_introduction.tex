@@ -27,30 +27,35 @@ The project is guided by the following research questions:
 \section{Objectives}
 The main objectives of this project are to:
 \begin{itemize}
-  \item Design and develop a full-stack application where users can submit software-testing information and review the results generated with AI assistance.
-  \item Build a central agent that can understand user requests and delegate tasks to specialised agents covering different activities of the STLC.
-  \item Provide secure, authenticated access to the application and maintain user-specific records of submitted requests and their results.
-  \item Integrate with engineering tools such as Jira for accessing user stories and GitHub for retrieving source-code changes.
-  \item Allow users to configure different AI model providers and application deployment settings.
-  \item Support human-in-the-loop refinement, so that a user can review a generated result, add further instructions, and rerun it until it is acceptable.
-  \item Establish a practical and reproducible evaluation approach in which the generated results are reviewed by humans, without making claims about improvements that have not yet been measured.
+  \item Design and develop a full-stack application through which users can submit software-testing information and review AI-generated quality artefacts.
+  \item Develop a central orchestration agent capable of interpreting user requests and delegating tasks to specialised agents covering different activities of the Software Testing Life Cycle.
+  \item Implement nine specialised agents for test-case generation, test-data generation, test automation assistance, test execution analysis, self-healing recommendations, change impact analysis, defect reporting, test summary generation, and release readiness assessment.
+  \item Provide authenticated access to the application and maintain user-specific records of submitted requests, generated responses, and related session information.
+  \item Integrate with engineering tools such as Jira Cloud and GitHub to retrieve user stories, pull-request information, and source-code changes.
+  \item Support configurable language-model providers and deployment settings so that the application can operate with different model backends.
+  \item Implement a human-in-the-loop refinement process that allows users to review generated results, provide additional instructions, and rerun the workflow.
+  \item Evaluate the developed application using a benchmark dataset, comparative workflows, specialist-level performance measures, orchestration metrics, and expert review.
+  \item Measure the effect of AI assistance on end-to-end workflow time, human effort, artefact quality, response latency, and operational cost.
 \end{itemize}
 
 \section{Scope and Contributions}
-This report deals with the code of the project repository \cite{qaapprepo} as of November 2026. It should be noted that what is submitted here is a prototype. In no way am I proposing a new theory of agents. The browser interface, the API and the agent service work together. Users are able to copy and paste requirements and stories, attach git code differences or the link to the GitHub pull request with the changes, add the test log, continue the conversation in a later turn and export the response. If Jira Cloud and GitHub are set up, issue text and pull-request or branch code differences can be fetched instead of typed. The root agent then works with nine STLC specialists.
+This report presents the design, implementation, and evaluation of the Quality Assistance application developed as part of this project. The work covers the application source code and implemented functionality \cite{qaapprepo} as of November 2026. The system combines a browser-based interface, backend APIs, persistent storage, and an AI agent service to support multiple activities within the Software Testing Life Cycle.
+
+Users can submit requirements, user stories, code differences, and test execution information through a common interface. Where integrations are configured, Jira Cloud can provide issue details and GitHub can provide pull-request or branch comparison information. The root agent processes the submitted context and delegates the request to the relevant specialised agents. The generated response is presented to the user and can be refined through additional instructions and subsequent runs.
 
 Compared with the existing practices in \Cref{chap:literature_review}, the contributions of this work are:
 \begin{itemize}
-  \item One orchestrated workflow, in which a root agent routes a request to nine STLC specialists and combines what they return into a single response.
-  \item Shared context across activities, since requirements, stories, code differences, and test results are handled together and a session identifier lets later turns build on earlier answers.
-  \item Connections to the engineers' own tools, with Jira Cloud for user stories and GitHub for code differences.
-  \item Human-in-the-loop operation, where the user can refine a result with further guidance or send a request to one specialist only, while every decision stays with the engineer.
-  \item A configurable design with several model providers, authentication, and records kept per user.
-  \item An evaluation protocol with effort-based measures for the assisted workflow.
+  \item \textbf{Multi-agent STLC architecture:} A root agent coordinates nine specialised agents and consolidates their responses into a common quality-assistance workflow.
+  \item \textbf{Shared context across testing activities:} Requirements, user stories, code differences, and execution information can be submitted through one application, allowing related testing activities to be considered together.
+  \item \textbf{Engineering tool integration:} Jira Cloud and GitHub integrations provide access to user stories and source-code changes, reducing the need to enter all information manually.
+  \item \textbf{Human-in-the-loop refinement:} Users can review generated artefacts, provide additional instructions, focus a request on a particular specialist, and rerun the workflow.
+  \item \textbf{Configurable application architecture:} The application supports authentication, user-specific records, configurable model providers, and separate frontend, backend, database, and agent services.
+  \item \textbf{Empirical evaluation:} The application was evaluated using 60 benchmark scenarios, three experienced reviewers, and comparisons between manual testing, a single-LLM workflow, and the multi-agent workflow.
+  \item \textbf{Performance and effort analysis:} The evaluation measured specialist-level results, orchestration performance, workflow completion, human correction requirements, latency, cost, and end-to-end time.
 \end{itemize}
-These are engineering contributions. The report does not claim a new algorithm or a measured improvement.
+The contributions are primarily engineering and application-oriented. The project does not propose a new language model or a new underlying agent algorithm. Instead, it demonstrates how an orchestrated group of specialised agents can support several related quality-engineering activities within one application.
 
-There are, of course, limitations that I do not wish to omit. The prototype will not execute the tests of another software suite. It will not transform scripts in a git repository. It cannot confirm that the tests produced are exhaustive, nor can it sign off on the release. Execution, self-healing, and readiness responses are only suggestions based on the text received. I also did not incorporate retrieval from a test repository, CI/CD execution, output schema enforcement, or a comparative study; these remain future work.
+The scope also includes certain boundaries. The application analyses supplied test execution information but does not independently execute an external software test suite. Similarly, the self-healing agent provides recommendations rather than directly modifying repository files. Release readiness is presented as decision-support information; the final approval or rejection remains the responsibility of the engineering team.
 
 \section{Report Organization}
 \Cref{chap:literature_review} is the reading I used: STLC, LLMs in testing, agent setups, and the validation issues. \Cref{chap:methodology} is how I built the prototype, including architecture and security. \Cref{chap:experiments_and_results} is what I can actually show, plus the evaluation I still need for the research questions. \Cref{chap:conclusion} is the wrap-up and the list of next steps.

@@ -247,10 +247,10 @@
 
 \renewcommand{\appendix}{%
   \par
-%  \setcounter{section}{0}%
-  \setcounter{app}{1}
-  \renewcommand{\thesection}{\thechapter.\Alph{app}}%
-%  \addtocounter{app}{1}
+  \setcounter{chapter}{0}%
+  \setcounter{section}{0}%
+  \gdef\@chapapp{\appendixname}%
+  \gdef\thechapter{\@Alph\c@chapter}%
 }
 
 % From titlepage.sty  27 Jan 85
@@ -332,4 +332,3 @@
   \renewcommand{\thepage}{\roman{page}}}
 {\newpage\renewcommand{\thepage}{\arabic{page}}}
 %{\newpage\renewcommand{\thepage}{\arabic{page}}\setcounter{page}{1}}
-

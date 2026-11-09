@@ -91,7 +91,7 @@ Configuration & Environment variables (\texttt{.env}) & Provider selection, cred
 \section{System Architecture}
 There are four pieces: the browser UI, the API, the database, and the agent process. The React and TypeScript frontend calls the FastAPI backend. After the user is authenticated, the backend stores the request, builds the agent message, and later stores the reply. A separate service runs the root agent and the specialists through Google ADK. PostgreSQL holds users, requests, and the integration records.
 
-Figure~\ref{fig:system-architecture-deployment} describes the high-level design of the web application on AWS.
+\Cref{fig:system-architecture-deployment} describes the high-level design of the web application on AWS.
 
 \begin{figure}[H]
 \centering

@@ -13,21 +13,8 @@ What I have at this point is a running full-stack application. It is more than w
 \midrule
 Problem analysis and architecture & Implemented & Research framing is documented in the proposal and presentation; current services are separated into frontend, backend, and agent. \\
 Core quality-assistance flow & Implemented & Authenticated request persistence, prompt construction, agent call, and response persistence are present. \\
-\bottomrule
-\end{tabularx}
-\caption{Implementation status as of November 2026, distinguishing current behavior from planned work.}
-\label{tab:implementation-status}
-\end{table}
-
-\begin{table}[htbp]
-\centering
-\small
-\begin{tabularx}{\textwidth}{p{0.30\textwidth}p{0.20\textwidth}X}
-\toprule
-\textbf{Project area} & \textbf{Status in inspected repository} & \textbf{Evidence or qualification} \\
-\midrule
 Specialist STLC capabilities & Implemented & Nine task-focused agents are registered; orchestration is controlled by ADK and agent instructions. \\
-Jira and GitHub context & Implemented, configuration-dependent & OAuth and issue retrieval are available for Jira; GitHub repository settings support code-difference retrieval. \\  
+Jira and GitHub context & Implemented, configuration-dependent & OAuth and issue retrieval are available for Jira; GitHub repository settings support code-difference retrieval. \\
 Authentication & Implemented & Password/JWT authentication, optional Entra SSO, encrypted integration credentials. \\
 \bottomrule
 \end{tabularx}
@@ -105,6 +92,7 @@ When I designed the evaluation, I chose to compare three conditions on the same 
 In the protocol I defined, each project gets a small, closed set of requirements, stories, code changes, and any test-run or defect records that already exist. Expected requirement-to-test links and expert-reviewed reference outputs are written down before the assistant is run. The model, model version, prompt revision, and app configuration stay fixed for a comparison. Because the model does not always give the same answer, each task is repeated where possible, and both the raw output and the review decision are kept. Where practical, the person scoring the artifacts is not told which workflow produced them.
 
 \subsection{Measures}
+\label{subsec:evaluation-measures}
 \begin{table}[htbp]
 \centering
 \small
@@ -147,7 +135,7 @@ Substituting the measured values:
 \frac{40 - 1}{40} \times 100 = 97.5\%
 \end{equation}
 
-The results are summarised in Table 4.4.
+The results are summarised in \Cref{tab:end_to_end_time}.
 
 \begin{table}[H]
 \centering
@@ -203,7 +191,7 @@ The nine specialist agents performed different tasks, so their performance was a
 
 The remaining specialists were assessed using repair-suggestion accuracy, change-impact precision, defect-report completeness and acceptance, factual accuracy of test summaries, and agreement with expert release-readiness decisions.
 
-The results in Table 4.5 represent the measured performance of the individual specialists across the evaluation scenarios. Where an agent generated recommendations rather than directly executing an action, the evaluation assessed the technical correctness and relevance of the recommendation.
+The results in \Cref{tab:specialist_metrics} represent the measured performance of the individual specialists across the evaluation scenarios. Where an agent generated recommendations rather than directly executing an action, the evaluation assessed the technical correctness and relevance of the recommendation.
 \begin{table}[H]
 \centering
 \small
@@ -269,11 +257,11 @@ Recommendations matching expert decisions / Total scenarios. &
 \label{tab:specialist_metrics}
 \end{table}
 
-The specialist-level results showed that the application performed consistently across the different testing activities, although the measured performance varied according to the task. Test-data generation achieved 97.2% validity, while test-case generation achieved 94.0% requirement coverage and 92.5% validity. These results indicate that the application was able to generate structured testing artefacts that largely aligned with the reference information.
+The specialist-level results showed that the application performed consistently across the different testing activities, although the measured performance varied according to the task. Test-data generation achieved 97.2\% validity, while test-case generation achieved 94.0\% requirement coverage and 92.5\% validity. These results indicate that the application was able to generate structured testing artefacts that largely aligned with the reference information.
 
-The automation recommendation specialist achieved 89.0% precision. The execution-analysis specialist achieved 91.0% root-cause accuracy, while the self-healing specialist achieved 86.0% repair-suggestion accuracy. These results also highlight the difference between generating a technically useful recommendation and directly carrying out the corresponding action.
+The automation recommendation specialist achieved 89.0\% precision. The execution-analysis specialist achieved 91.0\% root-cause accuracy, while the self-healing specialist achieved 86.0\% repair-suggestion accuracy. These results also highlight the difference between generating a technically useful recommendation and directly carrying out the corresponding action.
 
-The change-impact specialist achieved 91.0% precision and 88.0% coverage. Bug-report generation achieved 96.0% completeness, 90.0% acceptance, and 92.0% classification accuracy. Test-summary reporting achieved 97.0% factual accuracy, while release-readiness recommendations agreed with expert decisions in 90.0% of the evaluated scenarios.
+The change-impact specialist achieved 91.0\% precision and 88.0\% coverage. Bug-report generation achieved 96.0\% completeness, 90.0\% acceptance, and 92.0\% classification accuracy. Test-summary reporting achieved 97.0\% factual accuracy, while release-readiness recommendations agreed with expert decisions in 90.0\% of the evaluated scenarios.
 
 Overall, the findings show that the specialised agents were able to support a range of STLC activities. The differences between their scores also demonstrate why evaluating the agents individually is useful: a single overall score would hide variations between test generation, analysis, reporting, and recommendation tasks.
 
@@ -282,7 +270,7 @@ In addition to evaluating the individual specialists, the study examined the per
 
 The evaluation considered specialist-selection accuracy, unnecessary specialist calls, workflow completion rate, human correction rate, repeat consistency, orchestration latency, and average cost per completed workflow. These measures helped assess whether the coordination process added practical value beyond the capabilities of individual language-model calls.
 
-Table 4.6 presents the measured results.
+\Cref{tab:orchestration_metrics} presents the measured results.
 \begin{table}[H]
 \centering
 \small
@@ -329,11 +317,11 @@ Average LLM/API expenditure per completed workflow, including refinement rounds.
 \label{tab:orchestration_metrics}
 \end{table}
 
-The orchestration results showed that the root agent selected the expected specialists in 96.0% of evaluated requests. Unnecessary specialist calls accounted for 7.5% of all specialist invocations, indicating that the routing process generally selected relevant agents while still producing some additional calls.
+The orchestration results showed that the root agent selected the expected specialists in 96.0\% of evaluated requests. Unnecessary specialist calls accounted for 7.5\% of all specialist invocations, indicating that the routing process generally selected relevant agents while still producing some additional calls.
 
-The overall workflow completion rate was 94.0%. This represented the proportion of initiated requests that resulted in a usable response. The human correction rate was 14.0%, meaning that a portion of the generated artefacts required substantial correction before they could be used. This reinforces the importance of retaining human review within the application.
+The overall workflow completion rate was 94.0\%. This represented the proportion of initiated requests that resulted in a usable response. The human correction rate was 14.0\%, meaning that a portion of the generated artefacts required substantial correction before they could be used. This reinforces the importance of retaining human review within the application.
 
-Repeat consistency was measured at 92.0% across repeated runs. The result indicates that most repeated executions produced the same decision or classification, although some variation remained in the generated responses.
+Repeat consistency was measured at 92.0\% across repeated runs. The result indicates that most repeated executions produced the same decision or classification, although some variation remained in the generated responses.
 
 Taken together, the results suggest that the root agent was able to coordinate the specialist agents with high selection accuracy while maintaining a relatively low orchestration overhead. The remaining unnecessary calls and response variations identify areas where more structured routing and validation could improve the workflow further.
 
@@ -348,14 +336,14 @@ The reviewers examined outputs from the evaluated testing activities and conside
 The human evaluation was particularly important for recommendations generated by the automation, self-healing, and release-readiness specialists, because these outputs required judgement about their technical relevance and usefulness. The final assessment of an artefact remained with the reviewers rather than being determined solely by the language model.
 
 \subsection{Benchmark Dataset}
-Every comparison needs inputs whose right answers are already known. \Cref{tab:benchmark} lists the pilot set I designed. The sizes are a starting point and can grow if time allows.
+Every comparison needs inputs whose right answers are already known. \Cref{tab:benchmark_dataset} lists the pilot set I designed. The sizes are a starting point and can grow if time allows.
 The evaluation used a benchmark dataset containing 60 scenarios. The scenarios were divided equally across six categories, with 10 scenarios in each category. Reference information was prepared in advance to support the assessment of the generated outputs.
 
 The requirements and user-story scenarios included expected requirement-to-test links and reference test cases reviewed by experienced testers. The code-change scenarios included source-code versions, change descriptions, and independently identified impacted test cases. Execution-log scenarios included known root causes covering application defects, environment issues, test-script failures, data issues, and configuration problems.
 
 The defect scenarios contained expected defect types, severity levels, priorities, and required report fields. Release scenarios included release or no-release decisions established independently by experienced testers. Finally, test-data scenarios included expected data constraints, business rules, boundary values, and validation criteria.
 
-All 60 scenarios were included in the evaluation. The dataset structure and the reference information used for each category are summarised in Table 4.7.
+All 60 scenarios were included in the evaluation. The dataset structure and the reference information used for each category are summarised in \Cref{tab:benchmark_dataset}.
 
 \begin{table}[H]
 \centering
@@ -403,7 +391,7 @@ Expected data constraints, business rules, boundary values, and validation crite
 \end{table}
 
 \subsection{Analysis and Validity}
-The evaluation results were analysed using the measurements collected from the benchmark scenarios, repeated AI-assisted runs, and human review. Quantitative measures were calculated using the definitions described in Section 4.3.2. These included requirement coverage, artefact validity, specialist-level accuracy, workflow completion, human correction requirements, latency, and cost.
+The evaluation results were analysed using the measurements collected from the benchmark scenarios, repeated AI-assisted runs, and human review. Quantitative measures were calculated using the definitions described in \Cref{subsec:evaluation-measures}. These included requirement coverage, artefact validity, specialist-level accuracy, workflow completion, human correction requirements, latency, and cost.
 
 The comparison between manual and assisted workflows considered both end-to-end cycle time and active human effort. This distinction was important because a reduction in response-generation time does not necessarily translate into a reduction in the total effort required from an engineer. Review and refinement activities were therefore included in the assisted workflow measurement.
 

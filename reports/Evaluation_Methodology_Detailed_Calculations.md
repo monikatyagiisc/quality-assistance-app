@@ -4,10 +4,6 @@ This guide explains the calculations and reported results in the final
 project report for the AI-Driven Quality Assistance Application for STLC
 Automation.
 
-> **Evidence note:** The report gives metric definitions and final
-> results, but not every raw numerator, denominator, reviewer score,
-> token count, or cost ledger. Numerical examples below are illustrative
-> only; they are not actual experimental counts.
 
 ## 1. Evaluation dataset and protocol
 
@@ -54,13 +50,19 @@ assessment, review, and refinement.
 
 Formula:
 
-\[ `\text{Time Reduction (\%)}`{=tex} =
-`\frac{T_{\text{manual}}-T_{\text{assisted}}}{T_{\text{manual}}}`{=tex}`\times100`{=tex}
-\]
+
+
+**Time Reduction (%) = (T_manual-T_assisted) / (T_manual) × 100**
+
+
 
 Calculation:
 
-\[ `\frac{40-1}{40}`{=tex}`\times100`{=tex}=`\boxed{97.5\%}`{=tex} \]
+
+
+**(40-1) / (40) × 100=97.5%**
+
+
 
 **Meaning:** End-to-end cycle time decreased by 97.5%. The assisted
 measurement includes review and refinement, not just the first model
@@ -72,19 +74,28 @@ Reported values: manual = 30 hours; assisted = 35 minutes.
 
 Convert 35 minutes to hours:
 
-\[ 35/60=0.5833`\text{ hours}`{=tex} \]
+
+
+**35/60=0.5833hours**
+
+
 
 Formula:
 
-\[ `\text{Effort Reduction (\%)}`{=tex} =
-`\frac{E_{\text{manual}}-E_{\text{assisted}}}{E_{\text{manual}}}`{=tex}`\times100`{=tex}
-\]
+
+
+**Effort Reduction (%) = (E_manual-E_assisted) / (E_manual) × 100**
+
+
 
 Calculation:
 
-\[
-`\frac{30-0.5833}{30}`{=tex}`\times100`{=tex}=`\boxed{98.06\%\text{ approximately}}`{=tex}
-\]
+
+
+
+**(30-0.5833) / (30) × 100=98.06%approximately**
+
+
 
 Active effort includes preparing inputs, reviewing outputs, providing
 instructions, and correcting/refining outputs. It is different from
@@ -120,9 +131,11 @@ and refinement may still be required.
 
 Formula:
 
-\[ `\text{Acceptance Rate}`{=tex} =
-`\frac{\text{Artefacts accepted unchanged or with minor edits}}{\text{Total artefacts assessed}}`{=tex}`\times100`{=tex}
-\]
+
+
+**Acceptance Rate = (Artefacts accepted unchanged or with minor edits) / (Total artefacts assessed) × 100**
+
+
 
 Illustrative example only: if 80 of 100 artefacts are accepted unchanged
 or with minor edits, the rate is 80%. The report does not provide the
@@ -143,17 +156,23 @@ task-appropriate measures.
 
 Requirement coverage:
 
-\[
-`\frac{\text{Requirements covered by reviewer-accepted test cases}}{\text{Total in-scope requirements}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Requirements covered by reviewer-accepted test cases) / (Total in-scope requirements) × 100**
+
+
 
 Illustration: 94 of 100 requirements covered = 94%.
 
 Test-case validity:
 
-\[
-`\frac{\text{Valid generated test cases}}{\text{Total generated test cases}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Valid generated test cases) / (Total generated test cases) × 100**
+
+
 
 Illustration: 185 of 200 valid test cases = 92.5%.
 
@@ -166,9 +185,12 @@ measures whether the generated test cases are correct and usable.
 
 Data validity:
 
-\[
-`\frac{\text{Valid generated records}}{\text{Total generated records}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Valid generated records) / (Total generated records) × 100**
+
+
 
 Illustration: 243 of 250 valid records = 97.2%. Validity can be checked
 against data types, mandatory fields, business rules, boundaries, and
@@ -176,9 +198,12 @@ constraints.
 
 Scenario coverage:
 
-\[
-`\frac{\text{Required scenarios supported}}{\text{Total required scenarios}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Required scenarios supported) / (Total required scenarios) × 100**
+
+
 
 Illustration: 93 of 100 supported scenarios = 93%.
 
@@ -186,9 +211,12 @@ Illustration: 93 of 100 supported scenarios = 93%.
 
 **Reported:** 89.0% recommendation precision.
 
-\[
-`\frac{\text{Appropriate recommendations}}{\text{Total recommendations}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Appropriate recommendations) / (Total recommendations) × 100**
+
+
 
 Illustration: 89 of 100 appropriate recommendations = 89%. This measures
 recommendation quality; the agent does not directly execute or modify
@@ -198,9 +226,12 @@ scripts.
 
 **Reported:** 91.0% root-cause accuracy.
 
-\[
-`\frac{\text{Correctly classified failures}}{\text{Total failures with known causes}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Correctly classified failures) / (Total failures with known causes) × 100**
+
+
 
 Illustration: 91 of 100 correctly classified failures = 91%. Reference
 categories include application defects, environment issues, test-script
@@ -212,9 +243,12 @@ execute external test suites.
 
 **Reported:** 86.0% repair-suggestion accuracy.
 
-\[
-`\frac{\text{Technically correct repair suggestions}}{\text{Total suggestions}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Technically correct repair suggestions) / (Total suggestions) × 100**
+
+
 
 Illustration: 86 of 100 technically correct suggestions = 86%. This is
 recommendation quality, not an automatic script-repair success rate.
@@ -225,17 +259,23 @@ recommendation quality, not an automatic script-repair success rate.
 
 Precision:
 
-\[
-`\frac{\text{Correctly identified impacted test cases}}{\text{Total test cases identified as impacted}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Correctly identified impacted test cases) / (Total test cases identified as impacted) × 100**
+
+
 
 Illustration: 91 correct out of 100 identified = 91%.
 
 Impact coverage:
 
-\[
-`\frac{\text{Correctly identified impacted test cases}}{\text{Total expert-identified impacted test cases}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Correctly identified impacted test cases) / (Total expert-identified impacted test cases) × 100**
+
+
 
 Illustration: 88 found out of 100 expert-identified impacted cases =
 88%.
@@ -251,9 +291,12 @@ accuracy.
 
 Completeness:
 
-\[
-`\frac{\text{Complete bug reports}}{\text{Total generated bug reports}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Complete bug reports) / (Total generated bug reports) × 100**
+
+
 
 Illustration: 96 complete reports out of 100 = 96%. Required fields may
 include title, description, reproduction steps, expected result, actual
@@ -261,17 +304,23 @@ result, severity, and priority.
 
 Acceptance:
 
-\[
-`\frac{\text{Accepted bug reports}}{\text{Total generated bug reports}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Accepted bug reports) / (Total generated bug reports) × 100**
+
+
 
 Illustration: 90 accepted out of 100 = 90%.
 
 Classification accuracy:
 
-\[
-`\frac{\text{Correctly classified defects}}{\text{Total classified defects}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Correctly classified defects) / (Total classified defects) × 100**
+
+
 
 Illustration: 92 correctly classified out of 100 = 92%.
 
@@ -279,9 +328,12 @@ Illustration: 92 correctly classified out of 100 = 92%.
 
 **Reported:** 97.0% factual accuracy.
 
-\[
-`\frac{\text{Statements matching execution data}}{\text{Total verifiable statements}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Statements matching execution data) / (Total verifiable statements) × 100**
+
+
 
 Illustration: 97 matching statements out of 100 = 97%. A summary's pass,
 fail, and skip counts must match the underlying execution data.
@@ -290,9 +342,12 @@ fail, and skip counts must match the underlying execution data.
 
 **Reported:** 90.0% decision agreement.
 
-\[
-`\frac{\text{Recommendations matching expert decisions}}{\text{Total release scenarios}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Recommendations matching expert decisions) / (Total release scenarios) × 100**
+
+
 
 Illustration: 9 matching recommendations out of 10 scenarios = 90%. This
 measures agreement with experts; it does not mean the agent
@@ -307,9 +362,12 @@ and aggregates responses.
 
 **Reported:** 96.0%.
 
-\[
-`\frac{\text{Requests where expected specialists are invoked}}{\text{Total evaluated requests}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Requests where expected specialists are invoked) / (Total evaluated requests) × 100**
+
+
 
 Illustration: expected specialists invoked for 96 of 100 requests = 96%.
 
@@ -317,9 +375,12 @@ Illustration: expected specialists invoked for 96 of 100 requests = 96%.
 
 **Reported:** 7.5%.
 
-\[
-`\frac{\text{Unnecessary specialist invocations}}{\text{Total specialist invocations}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Unnecessary specialist invocations) / (Total specialist invocations) × 100**
+
+
 
 Illustration: 15 unnecessary calls out of 200 total specialist
 invocations = 7.5%. The denominator is invocations, not user requests.
@@ -328,9 +389,12 @@ invocations = 7.5%. The denominator is invocations, not user requests.
 
 **Reported:** 94.0%.
 
-\[
-`\frac{\text{Requests resulting in a usable response}}{\text{Total requests initiated}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Requests resulting in a usable response) / (Total requests initiated) × 100**
+
+
 
 Illustration: 94 usable responses out of 100 initiated requests = 94%.
 Merely generating a response is not enough; it must be usable.
@@ -339,9 +403,12 @@ Merely generating a response is not enough; it must be usable.
 
 **Reported:** 14.0%.
 
-\[
-`\frac{\text{Artefacts requiring major corrections}}{\text{Total artefacts produced}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Artefacts requiring major corrections) / (Total artefacts produced) × 100**
+
+
 
 Illustration: 14 artefacts requiring major correction out of 100 = 14%.
 This differs from acceptance rate: minor edits may still count as
@@ -351,9 +418,12 @@ acceptance.
 
 **Reported:** 92.0%.
 
-\[
-`\frac{\text{Repeated runs producing the same decision or classification}}{\text{Total repeated-run comparisons}}`{=tex}`\times100`{=tex}
-\]
+
+
+
+**(Repeated runs producing the same decision or classification) / (Total repeated-run comparisons) × 100**
+
+
 
 Illustration: 92 consistent comparisons out of 100 = 92%. The report
 says AI-assisted workflows were repeated three times. This measures
@@ -366,9 +436,12 @@ decision/classification consistency, not identical wording.
 The report defines this as root-agent time spent on routing, delegation,
 and result aggregation, excluding specialist execution.
 
-\[
-T\_{`\text{orchestration}`{=tex}}=T\_{`\text{routing}`{=tex}}+T\_{`\text{delegation}`{=tex}}+T\_{`\text{aggregation}`{=tex}}
-\]
+
+
+
+**T_orchestration=T_routing+T_delegation+T_aggregation**
+
+
 
 Illustrative breakdown only:
 
@@ -387,9 +460,12 @@ execution is excluded.
 
 **Reported:** \$0.18.
 
-\[
-`\text{Average Cost}`{=tex}=`\frac{\text{Total LLM/API expenditure}}{\text{Number of completed workflows}}`{=tex}
-\]
+
+
+
+**Average Cost=(Total LLM/API expenditure) / (Number of completed workflows)**
+
+
 
 Illustration: \$18 total expenditure across 100 completed workflows =
 \$0.18 per workflow.
@@ -513,8 +589,4 @@ engineering team.
 5.  **Repeat consistency:** repeated-run comparisons with the same
     decision/classification divided by all comparisons = 92%.
 
-**Viva tip:** Explain the formula, identify the numerator and
-denominator, give a clearly labelled illustrative example, and then
-explain what the metric tells us. If the original raw evaluation records
-are unavailable, be transparent rather than inventing exact sample
-counts.
+

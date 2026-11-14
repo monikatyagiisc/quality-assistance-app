@@ -1,0 +1,806 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=25mm]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs,longtable,array,tabularx}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{microtype}
+
+\definecolor{Navy}{HTML}{17365D}
+\definecolor{LightBlue}{HTML}{EAF1F8}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=Navy,
+  urlcolor=Navy,
+  pdftitle={Evaluation Methodology -- Detailed Calculations},
+  pdfauthor={Monika Tyagi}
+}
+\setlength{\parskip}{5pt}
+\setlength{\parindent}{0pt}
+\setlist[itemize]{leftmargin=1.5em,itemsep=2pt,topsep=3pt}
+\setlist[enumerate]{leftmargin=1.7em,itemsep=3pt,topsep=3pt}
+\renewcommand{\arraystretch}{1.2}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\small Evaluation Methodology -- Detailed Calculations}
+\rhead{\small Viva Preparation}
+\cfoot{\thepage}
+
+\title{\color{Navy}\bfseries Evaluation Methodology and Detailed Calculations}
+\author{Prepared from the project evaluation results}
+\date{}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\newpage
+
+\section{Evaluation Methodology: What Was Tested?}
+
+The evaluation used 60 benchmark scenarios, divided equally into six categories.
+
+\begin{center}
+\begin{tabularx}{0.9\textwidth}{Xr}
+\toprule
+\textbf{Scenario category} & \textbf{Number of scenarios}\\
+\midrule
+Requirements and user stories & 10\\
+Code changes & 10\\
+Test execution logs & 10\\
+Defect scenarios & 10\\
+Release scenarios & 10\\
+Test-data scenarios & 10\\
+\midrule
+\textbf{Total} & \textbf{60}\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+For each scenario, reference information was prepared in advance. Examples include:
+\begin{itemize}
+  \item \textbf{Requirements:} expected requirement-to-test-case links.
+  \item \textbf{Code changes:} independently identified impacted test cases.
+  \item \textbf{Execution logs:} known root causes.
+  \item \textbf{Defects:} expected defect type, severity and priority.
+  \item \textbf{Release:} independently established release/no-release decisions.
+  \item \textbf{Test data:} expected constraints and validation rules.
+\end{itemize}
+
+The evaluation compared three approaches:
+\begin{enumerate}
+  \item Manual testing workflow.
+  \item Single-LLM workflow.
+  \item Proposed multi-agent application.
+\end{enumerate}
+
+Three experienced testers reviewed the generated artefacts using a five-point scale.
+
+\begin{center}
+\begin{tabular}{cl}
+\toprule
+\textbf{Score} & \textbf{Meaning}\\
+\midrule
+1 & Very poor\\
+2 & Poor\\
+3 & Average\\
+4 & Good\\
+5 & Excellent\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The criteria included correctness, completeness, relevance, clarity and practical usability. The AI-assisted workflows were repeated three times to examine variation and consistency.
+
+\section{Measured Outcome: End-to-End Time and Human Effort}
+
+This section measures two different things:
+\begin{itemize}
+  \item \textbf{Cycle time:} how long the entire workflow takes.
+  \item \textbf{Active human effort:} how much actual time an engineer spends working.
+\end{itemize}
+These are not the same.
+
+\subsection{A. End-to-End Cycle Time}
+
+The report records:
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+\textbf{Workflow} & \textbf{Time}\\
+\midrule
+Manual workflow & 40 working hours\\
+Multi-agent workflow & 1 hour\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The formula is:
+\[
+\text{Time Reduction (\%)} =
+\frac{T_{\text{manual}}-T_{\text{assisted}}}
+     {T_{\text{manual}}}\times 100
+\]
+
+Substituting the values:
+\[
+\begin{aligned}
+&= \frac{40-1}{40}\times 100\\
+&= \frac{39}{40}\times 100\\
+&= \boxed{97.5\%}
+\end{aligned}
+\]
+
+\textbf{Interpretation:} The complete workflow took approximately 97.5\% less time with the multi-agent application.
+
+The report describes the workflow as starting when requirements are received and ending when the required testing artefacts are accepted. Activities included:
+\begin{enumerate}
+  \item Preparing test cases.
+  \item Generating test data.
+  \item Preparing automation recommendations.
+  \item Analysing code changes.
+  \item Documenting defects.
+  \item Preparing test summaries.
+  \item Assessing release readiness.
+  \item Reviewing and refining the generated artefacts.
+\end{enumerate}
+
+The one-hour measurement includes human review and refinement, not just the time taken by the LLM to generate an answer.
+
+\textbf{Suggested explanation to the professor:}
+
+\begin{quote}
+We measured the complete workflow rather than just the model's response time. The measurement started when the requirements were received and ended when the testing artefacts were accepted. The manual workflow took approximately 40 working hours, whereas the multi-agent workflow took approximately one hour, including human review and refinement. This resulted in a 97.5\% reduction in cycle time.
+\end{quote}
+
+\subsection{B. Active Human Effort}
+
+The report records:
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+\textbf{Workflow} & \textbf{Active human effort}\\
+\midrule
+Manual & 30 hours\\
+Multi-agent & 35 minutes\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+First, convert 35 minutes into hours:
+\[
+\frac{35}{60}=0.5833\text{ hours}
+\]
+
+The formula is:
+\[
+\text{Effort Reduction (\%)} =
+\frac{E_{\text{manual}}-E_{\text{assisted}}}
+     {E_{\text{manual}}}\times 100
+\]
+
+Substituting:
+\[
+\begin{aligned}
+&= \frac{30-0.5833}{30}\times 100\\
+&= \boxed{98.06\%}
+\end{aligned}
+\]
+
+\textbf{Interpretation:} Active human effort decreased by approximately 98.06\%.
+
+Active human effort includes:
+\begin{itemize}
+  \item Preparing inputs.
+  \item Reviewing generated outputs.
+  \item Providing additional instructions.
+  \item Correcting or refining outputs.
+\end{itemize}
+
+It does not mean the engineer was working continuously for the entire 40-hour cycle.
+
+\begin{center}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Measurement} & \textbf{Manual} & \textbf{Multi-agent}\\
+\midrule
+Total elapsed time & 40 hours & 1 hour\\
+Actual human effort & 30 hours & 35 minutes\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Possible professor question: Why is human effort 35 minutes when the complete workflow takes one hour?}
+
+\begin{quote}
+Cycle time includes the total elapsed duration of the workflow, whereas active human effort only counts the time during which the engineer is actively preparing, reviewing or refining the artefacts. The remaining time can include AI processing and other workflow delays.
+\end{quote}
+
+\subsection{C. Review Rounds}
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+\textbf{Workflow} & \textbf{Review rounds}\\
+\midrule
+Manual & 2--3\\
+Multi-agent & 2\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+This is a direct comparison of the number of review-and-refinement cycles required before accepting the artefacts. For the AI-assisted workflow, a review round could involve:
+\begin{enumerate}
+  \item Reviewing the generated output.
+  \item Identifying missing or incorrect information.
+  \item Providing additional instructions.
+  \item Running the workflow again.
+  \item Reviewing the refined result.
+\end{enumerate}
+The report records two rounds for the assisted workflow.
+
+\subsection{D. First-Draft Latency}
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+\textbf{Workflow} & \textbf{First complete response}\\
+\midrule
+Manual & 1--2 working days\\
+Multi-agent & 10 minutes\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+This measures the time from submitting the request to receiving the first complete response. It is different from end-to-end cycle time because the first response may still require review and refinement.
+
+\subsection{E. Acceptance Rate}
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+\textbf{Workflow} & \textbf{Acceptance rate}\\
+\midrule
+Manual & 90\%\\
+Multi-agent & 80\%\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The report defines acceptance rate as:
+\[
+\text{Acceptance Rate} =
+\frac{\text{Artefacts accepted unchanged or with minor edits}}
+     {\text{Total artefacts assessed}}\times 100
+\]
+
+For example, suppose 100 artefacts were assessed:
+\begin{itemize}
+  \item 80 were accepted unchanged or with minor edits.
+  \item 20 required major corrections or were rejected.
+\end{itemize}
+Then:
+\[
+\frac{80}{100}\times 100=80\%
+\]
+
+This is an illustrative calculation, not the actual raw count from the evaluation.
+
+\textbf{Important observation:} The AI-assisted workflow achieved a lower acceptance rate than the manual workflow (80\% versus 90\%). This means the application reduced preparation time substantially, but human review remained important.
+
+\section{Specialist-Level Evaluation Results}
+
+There are nine specialist agents. Each agent performs a different task, so each was evaluated using a metric appropriate to its responsibility. The following definitions and results are the values reported in Table 4.4.
+
+\subsection{S01. Test-Case Generation}
+
+\textbf{Measured results:}
+\begin{itemize}
+  \item Requirement coverage: 94\%.
+  \item Test-case validity: 92.5\%.
+\end{itemize}
+
+\textbf{A. Requirement coverage}
+
+\[
+\text{Requirement Coverage} =
+\frac{\text{Requirements covered by accepted test cases}}
+     {\text{Total requirements}}\times 100
+\]
+
+Example: suppose the benchmark contains 100 requirements. If 94 requirements have at least one reviewer-accepted test case and 6 have no accepted test coverage:
+\[
+\frac{94}{100}\times 100=94\%
+\]
+
+This measures whether the generated test cases cover the requirements.
+
+\textbf{B. Test-case validity}
+
+\[
+\text{Validity} =
+\frac{\text{Valid generated test cases}}
+     {\text{Total generated test cases}}\times 100
+\]
+
+Example: suppose the system generates 200 test cases. If 185 are considered valid and 15 are incorrect, incomplete or unusable:
+\[
+\frac{185}{200}\times 100=92.5\%
+\]
+
+\textbf{Difference:} Coverage measures whether requirements are covered. Validity measures whether the generated test cases themselves are correct and usable.
+
+\subsection{S02. Test-Data Generation}
+
+\textbf{Measured results:}
+\begin{itemize}
+  \item Data validity: 97.2\%.
+  \item Scenario coverage: 93\%.
+\end{itemize}
+
+\textbf{A. Data validity}
+
+\[
+\text{Data Validity} =
+\frac{\text{Valid generated records}}
+     {\text{Total generated records}}\times 100
+\]
+
+Example: if 250 records are generated and 243 satisfy the expected constraints:
+\[
+\frac{243}{250}\times 100=97.2\%
+\]
+
+Validity can be assessed against data types, mandatory fields, business rules, boundary conditions and expected constraints.
+
+\textbf{B. Scenario coverage}
+
+\[
+\text{Scenario Coverage} =
+\frac{\text{Required scenarios supported}}
+     {\text{Total required scenarios}}\times 100
+\]
+
+Example: if 100 required data scenarios exist and 93 are supported:
+\[
+\frac{93}{100}\times 100=93\%
+\]
+
+\subsection{S03. Test-Script Automation Assistance}
+
+\textbf{Measured result:} 89\% recommendation precision.
+
+The agent provides automation recommendations rather than directly modifying or executing scripts.
+
+\[
+\text{Precision} =
+\frac{\text{Appropriate recommendations}}
+     {\text{Total recommendations}}\times 100
+\]
+
+Example: suppose the agent generates 100 automation recommendations. If 89 are technically appropriate and 11 are irrelevant or technically incorrect:
+\[
+\frac{89}{100}\times 100=89\%
+\]
+
+The metric measures the quality of recommendations, not successful automated test execution.
+
+\subsection{S04. Test Execution Analysis}
+
+\textbf{Measured result:} 91\% root-cause accuracy.
+
+\[
+\text{Root Cause Accuracy} =
+\frac{\text{Correctly classified failures}}
+     {\text{Total failures with known causes}}\times 100
+\]
+
+Example: suppose there are 100 test failures with independently known causes. If 91 are correctly classified and 9 are incorrectly classified:
+\[
+\frac{91}{100}\times 100=91\%
+\]
+
+Expected categories include application defects, environment issues, test-script failures, test-data issues and configuration problems. The agent analyses supplied execution information; it does not independently execute an external test suite.
+
+\subsection{S05. Self-Healing Recommendations}
+
+\textbf{Measured result:} 86\% repair-suggestion accuracy.
+
+\[
+\text{Suggestion Accuracy} =
+\frac{\text{Technically correct repair suggestions}}
+     {\text{Total suggestions}}\times 100
+\]
+
+Example: suppose the agent generates 100 repair suggestions. If 86 are technically correct and relevant and 14 are incorrect or unsuitable:
+\[
+\frac{86}{100}\times 100=86\%
+\]
+
+This is a recommendation-quality metric. It does not mean 86\% of test scripts were automatically repaired.
+
+\subsection{S06. Change-Impact Analysis}
+
+\textbf{Measured results:}
+\begin{itemize}
+  \item Precision: 91\%.
+  \item Coverage: 88\%.
+\end{itemize}
+
+The agent identifies test cases that may be affected by code changes.
+
+\textbf{A. Precision}
+\[
+\text{Precision} =
+\frac{\text{Correctly identified impacted test cases}}
+     {\text{Total test cases identified as impacted}}\times 100
+\]
+
+Example: the agent identifies 100 test cases as potentially impacted. If 91 are actually impacted according to the expert reference and 9 are false positives:
+\[
+\frac{91}{100}\times 100=91\%
+\]
+
+\textbf{B. Impact coverage}
+\[
+\text{Coverage} =
+\frac{\text{Correctly identified impacted test cases}}
+     {\text{Total expert-identified impacted test cases}}\times 100
+\]
+
+Example: experts identify 100 impacted test cases. If the agent identifies 88 correctly and misses 12:
+\[
+\frac{88}{100}\times 100=88\%
+\]
+
+\textbf{Difference:} Precision measures how many predictions were correct. Coverage measures how many of the actual impacted test cases were found.
+
+\subsection{S07. Bug-Report Generation}
+
+\textbf{Measured results:}
+\begin{itemize}
+  \item Completeness: 96\%.
+  \item Acceptance: 90\%.
+  \item Classification accuracy: 92\%.
+\end{itemize}
+
+\textbf{A. Completeness}
+\[
+\text{Completeness} =
+\frac{\text{Complete bug reports}}
+     {\text{Total generated bug reports}}\times 100
+\]
+
+Example: if 100 bug reports are generated and 96 contain all required information:
+\[
+\frac{96}{100}\times 100=96\%
+\]
+
+Required information may include defect title, description, reproduction steps, expected result, actual result, severity and priority.
+
+\textbf{B. Acceptance}
+\[
+\text{Acceptance} =
+\frac{\text{Accepted bug reports}}
+     {\text{Total generated bug reports}}\times 100
+\]
+
+Example: if reviewers accept 90 out of 100 generated reports:
+\[
+\frac{90}{100}\times 100=90\%
+\]
+
+\textbf{C. Classification accuracy}
+\[
+\text{Classification Accuracy} =
+\frac{\text{Correctly classified defects}}
+     {\text{Total classified defects}}\times 100
+\]
+
+Example: if 92 out of 100 defects are assigned the correct classification:
+\[
+\frac{92}{100}\times 100=92\%
+\]
+
+\subsection{S08. Test-Summary Reporting}
+
+\textbf{Measured result:} 97\% factual accuracy.
+
+\[
+\text{Factual Accuracy} =
+\frac{\text{Statements matching execution data}}
+     {\text{Total verifiable statements}}\times 100
+\]
+
+Example: suppose the generated summary contains 100 verifiable statements. If 97 match the underlying execution information and 3 contain incorrect or unsupported information:
+\[
+\frac{97}{100}\times 100=97\%
+\]
+
+For example, a summary might state that 85 tests passed, 10 tests failed and 5 tests were skipped. These figures must match the underlying execution data.
+
+\subsection{S09. Release-Readiness Assessment}
+
+\textbf{Measured result:} 90\% decision agreement.
+
+\[
+\text{Decision Agreement} =
+\frac{\text{Recommendations matching expert decisions}}
+     {\text{Total release scenarios}}\times 100
+\]
+
+Example: suppose there are 10 release scenarios. If in 9 scenarios the agent's recommendation matches the expert decision and in 1 it differs:
+\[
+\frac{9}{10}\times 100=90\%
+\]
+
+This measures agreement with expert decisions. It does not establish that the agent can independently approve a software release.
+
+All nine specialist results are taken from Table 4.4 of the report.
+
+\section{Orchestration and Operational Metrics}
+
+This section evaluates the root agent and the complete multi-agent workflow, rather than the individual specialist agents.
+
+The root agent is responsible for understanding the user request, identifying the required specialist agents, delegating the task, passing relevant context, collecting specialist responses and producing the final response.
+
+The report provides seven operational metrics.
+
+\subsection{A. Specialist Selection Accuracy -- 96\%}
+
+Definition: percentage of requests for which the root agent invokes the expected specialists.
+
+\[
+\text{Selection Accuracy} =
+\frac{\text{Requests with expected specialists invoked}}
+     {\text{Total evaluated requests}}\times 100
+\]
+
+Example: suppose 100 requests are evaluated. If 96 requests invoke the expected specialist or specialists and 4 have incorrect specialist selection:
+\[
+\frac{96}{100}\times 100=96\%
+\]
+
+Interpretation: The root agent selected the expected specialist agents for 96\% of evaluated requests.
+
+\subsection{B. Unnecessary Specialist Calls -- 7.5\%}
+
+Definition: percentage of unnecessary specialist invocations out of all specialist invocations.
+
+\[
+\text{Unnecessary Calls} =
+\frac{\text{Unnecessary specialist invocations}}
+     {\text{Total specialist invocations}}\times 100
+\]
+
+Example: suppose the root agent makes 200 specialist invocations. If 15 are unnecessary and 185 are relevant:
+\[
+\frac{15}{200}\times 100=7.5\%
+\]
+
+The denominator is the total number of specialist invocations, not the total number of user requests.
+
+\subsection{C. Workflow Completion Rate -- 94\%}
+
+Definition: percentage of initiated requests that result in a usable response.
+
+\[
+\text{Completion Rate} =
+\frac{\text{Requests resulting in usable responses}}
+     {\text{Total initiated requests}}\times 100
+\]
+
+Example: suppose 100 requests are submitted. If 94 result in usable responses and 6 fail or do not produce a usable response:
+\[
+\frac{94}{100}\times 100=94\%
+\]
+
+A response being generated is not automatically sufficient; it must be usable.
+
+\subsection{D. Human Correction Rate -- 14\%}
+
+Definition: percentage of generated artefacts requiring major corrections.
+
+\[
+\text{Human Correction Rate} =
+\frac{\text{Artefacts requiring major corrections}}
+     {\text{Total artefacts produced}}\times 100
+\]
+
+Example: suppose 100 artefacts are generated. If 14 require major corrections and 86 do not:
+\[
+\frac{14}{100}\times 100=14\%
+\]
+
+This is not the same as the acceptance rate. Minor edits may still count as accepted, while major corrections are counted in the human correction metric.
+
+\subsection{E. Repeat Consistency -- 92\%}
+
+Definition: percentage of repeated runs producing the same decision or classification.
+
+\[
+\text{Repeat Consistency} =
+\frac{\text{Repeated runs producing the same decision or classification}}
+     {\text{Total repeated runs}}\times 100
+\]
+
+Example: suppose 100 repeated-run comparisons are made. If 92 produce the same decision or classification and 8 produce a different decision or classification:
+\[
+\frac{92}{100}\times 100=92\%
+\]
+
+The report states that the AI-assisted workflows were repeated three times to examine consistency. This metric measures consistency of the decision or classification, not necessarily identical wording or identical generated text.
+
+\subsection{F. Agent Orchestration Latency -- 4.2 Seconds}
+
+This is a time measurement rather than a percentage.
+
+The report defines it as the time spent by the root agent on routing, delegation and result aggregation, excluding specialist execution.
+
+Conceptually:
+\[
+T_{\text{orchestration}} =
+T_{\text{routing}}+T_{\text{delegation}}+T_{\text{aggregation}}
+\]
+
+An illustrative breakdown is:
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+\textbf{Activity} & \textbf{Illustrative time}\\
+\midrule
+Interpret request and select specialists & 1.0 sec\\
+Prepare and delegate tasks & 1.2 sec\\
+Aggregate specialist responses & 2.0 sec\\
+\midrule
+\textbf{Total} & \textbf{4.2 sec}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+These component times are only an illustration of the calculation. The report provides the total measured latency of 4.2 seconds, not this individual breakdown.
+
+This is not the total time required to execute the complete AI workflow. Specialist execution time is excluded.
+
+\subsection{G. Average Cost per Completed Workflow -- \$0.18}
+
+The report defines this as the average LLM/API expenditure per completed workflow, including refinement rounds.
+
+\[
+\text{Average Cost} =
+\frac{\text{Total LLM/API expenditure}}
+     {\text{Number of completed workflows}}
+\]
+
+Example: suppose the total model/API expenditure for 100 completed workflows is \$18:
+\[
+\frac{\$18}{100}=\boxed{\$0.18}
+\]
+
+This cost should account for the model/API usage associated with the workflow, including refinement rounds.
+
+An illustrative component breakdown is:
+
+\begin{center}
+\begin{tabular}{lr}
+\toprule
+\textbf{Component} & \textbf{Illustrative cost}\\
+\midrule
+Root-agent model calls & \$0.03\\
+Specialist-agent calls & \$0.10\\
+Refinement calls & \$0.05\\
+\midrule
+\textbf{Total} & \textbf{\$0.18}\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+These component costs are illustrative, not the actual breakdown from the report. All seven operational results are from Table 4.5.
+
+\section{Consolidated Results for the Presentation}
+
+This table is a quick reference for explaining the evaluation slide.
+
+\small
+\begin{longtable}{p{0.20\textwidth}p{0.53\textwidth}p{0.20\textwidth}}
+\toprule
+\textbf{Evaluation category} & \textbf{Metric} & \textbf{Result}\\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Evaluation category} & \textbf{Metric} & \textbf{Result}\\
+\midrule
+\endhead
+End-to-end & Cycle-time reduction & 97.5\%\\
+End-to-end & Active human effort & 30 hours $\rightarrow$ 35 minutes\\
+End-to-end & Review rounds & 2--3 $\rightarrow$ 2\\
+End-to-end & First-draft latency & 1--2 days $\rightarrow$ 10 minutes\\
+End-to-end & Acceptance rate & 90\% $\rightarrow$ 80\%\\
+S01 & Test-case coverage & 94\%\\
+S01 & Test-case validity & 92.5\%\\
+S02 & Test-data validity & 97.2\%\\
+S02 & Scenario coverage & 93\%\\
+S03 & Automation recommendation precision & 89\%\\
+S04 & Root-cause accuracy & 91\%\\
+S05 & Self-healing suggestion accuracy & 86\%\\
+S06 & Change-impact precision & 91\%\\
+S06 & Change-impact coverage & 88\%\\
+S07 & Bug-report completeness & 96\%\\
+S07 & Bug-report acceptance & 90\%\\
+S07 & Classification accuracy & 92\%\\
+S08 & Test-summary factual accuracy & 97\%\\
+S09 & Release decision agreement & 90\%\\
+Orchestration & Specialist selection accuracy & 96\%\\
+Orchestration & Unnecessary calls & 7.5\%\\
+Orchestration & Workflow completion & 94\%\\
+Orchestration & Human correction rate & 14\%\\
+Orchestration & Repeat consistency & 92\%\\
+Operational & Orchestration latency & 4.2 seconds\\
+Operational & Average cost per workflow & \$0.18\\
+\bottomrule
+\end{longtable}
+\normalsize
+
+\section{Important: Questions the Professor May Ask About the Calculations}
+
+There is an important distinction between a metric's mathematical definition and the evidence needed to reproduce its reported value.
+
+The report gives the definitions and final percentages, but it does not provide all the underlying raw counts for every metric.
+
+For example, it reports 96\% specialist selection accuracy, but does not provide the exact number of correct selections and total evaluated requests used to produce that percentage.
+
+Similarly, it gives \$0.18 average cost but does not provide the total token usage, input/output token prices, number of completed workflows or provider-wise cost breakdown.
+
+\begin{center}
+\begin{tabularx}{\textwidth}{p{0.43\textwidth}X}
+\toprule
+\textbf{Possible question} & \textbf{What you should explain}\\
+\midrule
+How did you get 97.5\%? & Formula using 40 hours manual and 1 hour assisted.\\
+How did you measure human effort? & Active preparation, review and refinement time.\\
+How did you calculate 94\% workflow completion? & Usable responses divided by total initiated requests.\\
+How did you calculate 96\% specialist selection accuracy? & Correct specialist selections divided by evaluated requests.\\
+How did you calculate 92\% consistency? & Consistent decisions divided by repeated-run comparisons.\\
+How did you calculate \$0.18? & Total LLM/API expenditure divided by completed workflows.\\
+Did the application execute actual test suites? & No. It analysed supplied execution evidence and generated recommendations.\\
+Did the self-healing agent automatically modify scripts? & No. It provided repair recommendations.\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\subsection{Three Methodological Limitations Worth Acknowledging}
+
+\begin{enumerate}
+  \item \textbf{Raw calculation evidence.} The report provides final metric values and formulas, but not the complete raw numerator and denominator for every specialist and orchestration metric. Therefore, the examples above explain how the calculations work; they should not be presented as the actual underlying counts.
+
+  \item \textbf{Single-LLM comparison.} The methodology describes a comparison between manual, single-LLM and multi-agent approaches. However, the reported results do not provide a complete numerical results table for all three conditions. Avoid claiming that the multi-agent architecture quantitatively outperformed the single-LLM baseline unless you have additional measured results.
+
+  \item \textbf{Benchmark size.} The evaluation uses 60 scenarios and three experienced reviewers. This provides an initial evaluation of the application, but the results should not be presented as universal performance guarantees across all software projects.
+\end{enumerate}
+
+These limitations are consistent with the report's own discussion of evaluation validity.
+
+\section{Recommendation for the Viva}
+
+Be especially comfortable explaining these five calculations without looking at your slides:
+
+\begin{enumerate}
+  \item \textbf{97.5\% cycle-time reduction:} 40 hours to 1 hour.
+  \item \textbf{98.06\% human-effort reduction:} 30 hours to 35 minutes.
+  \item \textbf{94\% workflow completion:} usable responses divided by total initiated requests.
+  \item \textbf{96\% specialist selection accuracy:} correct specialist selections divided by evaluated requests.
+  \item \textbf{92\% repeat consistency:} consistent decisions divided by repeated-run comparisons.
+\end{enumerate}
+
+Keep the raw evaluation records, reviewer scoring sheets and cost/token-usage records available if you have them. They will make your explanation much stronger than formulas alone. If those records were not retained, be transparent about that rather than inventing exact sample counts.
+
+\end{document}
